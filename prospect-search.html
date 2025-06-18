@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Simplified - Prospect Discovery</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for icons and animations */
+        .icon {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            stroke-width: 2;
+            stroke: currentColor;
+            fill: none;
+        }
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .modal-backdrop {
+            backdrop-filter: blur(4px);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-4">
+                    <a href="index.html" class="flex items-center space-x-3">
+                        <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                            <span class="text-white font-bold text-sm">SS</span>
+                        </div>
+                        <h1 class="text-2xl font-bold text-blue-600">Sales Simplified</h1>
+                    </a>
+                    <span class="text-gray-400">|</span>
+                    <span class="text-gray-600">Prospect Discovery</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <nav class="hidden md:flex space-x-6">
+                        <a href="index.html" class="text-gray-600 hover:text-blue-600">Home</a>
+                        <a href="contact-finder.html" class="text-gray-600 hover:text-blue-600">Contact Finder</a>
+                        <a href="workflow.html" class="text-gray-600 hover:text-blue-600">Platform</a>
+                    </nav>
+                    <button id="searchTab" class="px-4 py-2 rounded bg-blue-600 text-white">
+                        Search (<span id="searchCount">5</span>)
+                    </button>
+                    <button id="savedTab" class="px-4 py-2 rounded text-gray-600 hover:bg-gray-100">
+                        ⭐ Saved (<span id="savedCount">0</span>)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Search View -->
+        <div id="searchView">
+            <!-- Search Bar -->
+            <div class="mb-6">
+                <div class="flex items-center space-x-4">
+                    <div class="flex-1 relative">
+                        <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">🔍</span>
+                        <input
+                            type="text"
+                            id="searchInput"
+                            placeholder="Search prospects by name, company, or title..."
+                            class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                    </div>
+                    <button id="filterToggle" class="flex items-center space-x-2 px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50">
+                        <span>🔧</span>
+                        <span>Filters</span>
+                    </button>
+                    <button class="flex items-center space-x-2 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                        <span>📥</span>
+                        <span>Export</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div id="filtersPanel" class="mb-6 p-4 bg-white border border-gray-200 rounded-lg hidden">
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Industry</label>
+                        <select id="industryFilter" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
+                            <option value="">All Industries</option>
+                            <option value="Software">Software</option>
+                            <option value="Data & Analytics">Data & Analytics</option>
+                            <option value="Biotechnology">Biotechnology</option>
+                            <option value="Cloud Computing">Cloud Computing</option>
+                            <option value="Retail Technology">Retail Technology</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Title</label>
+                        <select id="titleFilter" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
+                            <option value="">All Titles</option>
+                            <option value="VP">VP</option>
+                            <option value="Director">Director</option>
+                            <option value="CTO">CTO</option>
+                            <option value="Head">Head</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Location</label>
+                        <select id="locationFilter" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
+                            <option value="">All Locations</option>
+                            <option value="San Francisco">San Francisco, CA</option>
+                            <option value="Austin">Austin, TX</option>
+                            <option value="Boston">Boston, MA</option>
+                            <option value="Seattle">Seattle, WA</option>
+                            <option value="Chicago">Chicago, IL</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Company Size</label>
+                        <select id="companySizeFilter" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
+                            <option value="">All Sizes</option>
+                            <option value="1-10">1-10</option>
+                            <option value="11-50">11-50</option>
+                            <option value="51-200">51-200</option>
+                            <option value="201-500">201-500</option>
+                            <option value="501-1000">501-1000</option>
+                        </select>
+                    </div>
+                    <div class="flex items-end">
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" id="verifiedEmailFilter" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                            <span class="text-sm text-gray-700">Verified Email Only</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results -->
+            <div id="prospectsGrid" class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                <!-- Prospects will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Saved View -->
+        <div id="savedView" class="hidden">
+            <div id="savedGrid" class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                <!-- Saved prospects will be populated by JavaScript -->
+            </div>
+            <div id="noSavedMessage" class="text-center py-12">
+                <div class="text-6xl mb-4">⭐</div>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">No saved prospects</h3>
+                <p class="text-gray-600">Prospects you save will appear here</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Prospect Detail Modal -->
+    <div id="prospectModal" class="fixed inset-0 bg-black bg-opacity-50 modal-backdrop hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg max-w-2xl w-full mx-4 max-h-screen overflow-y-auto">
+            <div class="p-6" id="modalContent">
+                <!-- Modal content will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mock data
+        const mockProspects = [
+            {
+                id: 1,
+                name: "Sarah Chen",
+                title: "VP of Sales",
+                company: "TechFlow Solutions",
+                industry: "Software",
+                location: "San Francisco, CA",
+                email: "s.chen@techflow.com",
+                phone: "+1 (555) 123-4567",
+                linkedin: "linkedin.com/in/sarahchen",
+                company_website: "techflow.com",
+                employee_count: "201-500",
+                revenue: "$10M-50M",
+                technologies: ["Salesforce", "HubSpot", "Slack"],
+                last_job_change: "6 months ago",
+                verified_email: true,
+                confidence_score: 95,
+                avatar: "SC",
+                company_logo: "TF"
+            },
+            {
+                id: 2,
+                name: "Michael Rodriguez",
+                title: "Director of Marketing",
+                company: "DataCorp Analytics",
+                industry: "Data & Analytics",
+                location: "Austin, TX",
+                email: "m.rodriguez@datacorp.com",
+                phone: "+1 (555) 234-5678",
+                linkedin: "linkedin.com/in/mrodriguez",
+                company_website: "datacorp.com",
+                employee_count: "51-200",
+                revenue: "$5M-10M",
+                technologies: ["Marketo", "Tableau", "AWS"],
+                last_job_change: "2 years ago",
+                verified_email: true,
+                confidence_score: 88,
+                avatar: "MR",
+                company_logo: "DC"
+            },
+            {
+                id: 3,
+                name: "Jennifer Thompson",
+                title: "Chief Technology Officer",
+                company: "InnovateLabs",
+                industry: "Biotechnology",
+                location: "Boston, MA",
+                email: "j.thompson@innovatelabs.com",
+                phone: "+1 (555) 345-6789",
+                linkedin: "linkedin.com/in/jenniferthompson",
+                company_website: "innovatelabs.com",
+                employee_count: "11-50",
+                revenue: "$1M-5M",
+                technologies: ["Azure", "Python", "Docker"],
+                last_job_change: "1 year ago",
+                verified_email: false,
+                confidence_score: 72,
+                avatar: "JT",
+                company_logo: "IL"
+            },
+            {
+                id: 4,
+                name: "David Park",
+                title: "Head of Business Development",
+                company: "CloudScale Systems",
+                industry: "Cloud Computing",
+                location: "Seattle, WA",
+                email: "d.park@cloudscale.com",
+                phone: "+1 (555) 456-7890",
+                linkedin: "linkedin.com/in/davidpark",
+                company_website: "cloudscale.com",
+                employee_count: "501-1000",
+                revenue: "$50M-100M",
+                technologies: ["AWS", "Google Cloud", "Kubernetes"],
+                last_job_change: "3 months ago",
+                verified_email: true,
+                confidence_score: 92,
+                avatar: "DP",
+                company_logo: "CS"
+            },
+            {
+                id: 5,
+                name: "Lisa Martinez",
+                title: "VP of Operations",
+                company: "RetailTech Pro",
+                industry: "Retail Technology",
+                location: "Chicago, IL",
+                email: "l.martinez@retailtech.com",
+                phone: "+1 (555) 567-8901",
+                linkedin: "linkedin.com/in/lisamartinez",
+                company_website: "retailtech.com",
+                employee_count: "201-500",
+                revenue: "$25M-50M",
+                technologies: ["Shopify", "SAP", "Oracle"],
+                last_job_change: "8 months ago",
+                verified_email: true,
+                confidence_score: 85,
+                avatar: "LM",
+                company_logo: "RT"
+            }
+        ];
+
+        // State management
+        let filteredProspects = [...mockProspects];
+        let savedProspects = [];
+        let currentView = 'search';
+
+        // DOM elements
+        const searchInput = document.getElementById('searchInput');
+        const filterToggle = document.getElementById('filterToggle');
+        const filtersPanel = document.getElementById('filtersPanel');
+        const prospectsGrid = document.getElementById('prospectsGrid');
+        const savedGrid = document.getElementById('savedGrid');
+        const searchView = document.getElementById('searchView');
+        const savedView = document.getElementById('savedView');
+        const searchTab = document.getElementById('searchTab');
+        const savedTab = document.getElementById('savedTab');
+        const prospectModal = document.getElementById('prospectModal');
+        const modalContent = document.getElementById('modalContent');
+        const searchCount = document.getElementById('searchCount');
+        const savedCount = document.getElementById('savedCount');
+        const noSavedMessage = document.getElementById('noSavedMessage');
+
+        // Filter elements
+        const industryFilter = document.getElementById('industryFilter');
+        const titleFilter = document.getElementById('titleFilter');
+        const locationFilter = document.getElementById('locationFilter');
+        const companySizeFilter = document.getElementById('companySizeFilter');
+        const verifiedEmailFilter = document.getElementById('verifiedEmailFilter');
+
+        // Event listeners
+        searchInput.addEventListener('input', applyFilters);
+        filterToggle.addEventListener('click', () => {
+            filtersPanel.classList.toggle('hidden');
+        });
+
+        // Filter listeners
+        [industryFilter, titleFilter, locationFilter, companySizeFilter, verifiedEmailFilter].forEach(filter => {
+            filter.addEventListener('change', applyFilters);
+        });
+
+        // Tab listeners
+        searchTab.addEventListener('click', () => switchView('search'));
+        savedTab.addEventListener('click', () => switchView('saved'));
+
+        // Modal close listener
+        prospectModal.addEventListener('click', (e) => {
+            if (e.target === prospectModal) {
+                closeModal();
+            }
+        });
+
+        // Functions
+        function applyFilters() {
+            const searchQuery = searchInput.value.toLowerCase();
+            const industry = industryFilter.value;
+            const title = titleFilter.value;
+            const location = locationFilter.value;
+            const companySize = companySizeFilter.value;
+            const verifiedOnly = verifiedEmailFilter.checked;
+
+            filteredProspects = mockProspects.filter(prospect => {
+                const matchesSearch = !searchQuery || 
+                    prospect.name.toLowerCase().includes(searchQuery) ||
+                    prospect.company.toLowerCase().includes(searchQuery) ||
+                    prospect.title.toLowerCase().includes(searchQuery);
+
+                const matchesIndustry = !industry || prospect.industry === industry;
+                const matchesTitle = !title || prospect.title.includes(title);
+                const matchesLocation = !location || prospect.location.includes(location);
+                const matchesSize = !companySize || prospect.employee_count === companySize;
+                const matchesVerified = !verifiedOnly || prospect.verified_email;
+
+                return matchesSearch && matchesIndustry && matchesTitle && 
+                       matchesLocation && matchesSize && matchesVerified;
+            });
+
+            updateSearchCount();
+            renderProspects();
+        }
+
+        function updateSearchCount() {
+            searchCount.textContent = filteredProspects.length;
+        }
+
+        function updateSavedCount() {
+            savedCount.textContent = savedProspects.length;
+        }
+
+        function switchView(view) {
+            currentView = view;
+            if (view === 'search') {
+                searchView.classList.remove('hidden');
+                savedView.classList.add('hidden');
+                searchTab.className = 'px-4 py-2 rounded bg-blue-600 text-white';
+                savedTab.className = 'px-4 py-2 rounded text-gray-600 hover:bg-gray-100';
+            } else {
+                searchView.classList.add('hidden');
+                savedView.classList.remove('hidden');
+                searchTab.className = 'px-4 py-2 rounded text-gray-600 hover:bg-gray-100';
+                savedTab.className = 'px-4 py-2 rounded bg-blue-600 text-white';
+                renderSavedProspects();
+            }
+        }
+
+        function createProspectCard(prospect, isSaved = false) {
+            const confidenceClass = prospect.confidence_score >= 90 ? 'bg-green-100 text-green-800' : 
+                                   prospect.confidence_score >= 80 ? 'bg-yellow-100 text-yellow-800' : 
+                                   'bg-red-100 text-red-800';
+
+            return `
+                <div class="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow fade-in">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
+                                ${prospect.avatar}
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-gray-900">${prospect.name}</h3>
+                                <p class="text-gray-600">${prospect.title}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <div class="px-2 py-1 rounded-full text-xs ${confidenceClass}">
+                                ${prospect.confidence_score}% match
+                            </div>
+                            ${prospect.verified_email ? '<div class="flex items-center text-green-600">✓</div>' : ''}
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-4 mb-4">
+                        <div class="flex items-center space-x-1 text-gray-600">
+                            <span>🏢</span>
+                            <span class="text-sm">${prospect.company}</span>
+                        </div>
+                        <div class="flex items-center space-x-1 text-gray-600">
+                            <span>📍</span>
+                            <span class="text-sm">${prospect.location}</span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 mb-4 text-sm">
+                        <div>
+                            <span class="text-gray-500">Industry:</span>
+                            <span class="ml-2 text-gray-900">${prospect.industry}</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-500">Company Size:</span>
+                            <span class="ml-2 text-gray-900">${prospect.employee_count}</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-500">Revenue:</span>
+                            <span class="ml-2 text-gray-900">${prospect.revenue}</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-500">Last Change:</span>
+                            <span class="ml-2 text-gray-900">${prospect.last_job_change}</span>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        ${prospect.technologies.map(tech => 
+                            `<span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">${tech}</span>`
+                        ).join('')}
+                    </div>
+
+                    <div class="flex justify-between items-center pt-4 border-t border-gray-100">
+                        <div class="flex space-x-3">
+                            <button onclick="openModal(${prospect.id})" class="flex items-center space-x-1 text-blue-600 hover:text-blue-800">
+                                <span>👁️</span>
+                

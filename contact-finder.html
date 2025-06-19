@@ -379,7 +379,7 @@ updateFusionStatus('fusion', 'searching', 'AI Fusion Engine: Merging datasets...
 setTimeout(() => {
 const fusedData = fuseDataSources(hunterResults, apolloResults, domain);
 
-if (fusedData.contacts.length === 0) {
+if (fusedData.length === 0) {
 throw new Error('No contacts found across any data sources for this domain.');
 }
 

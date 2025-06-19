@@ -312,23 +312,6 @@
             statusElement.innerHTML = message;
         }
     }
-    function fuseDataSources(hunterResults, apolloResults, domain) {
-    let fusedContacts = [];
-    
-    if (apolloResults && apolloResults.people) {
-        apolloResults.people.forEach(person => {
-            fusedContacts.push({
-                name: person.name,
-                title: person.title,
-                email: person.email,
-                phone: person.phone_numbers?.[0]?.raw_number,
-                linkedin: person.linkedin_url,
-                company: person.organization?.name || domain,
-                source: 'Apollo',
-                verified: person.email_status === 'verified'
-            });
-        });
-    }
     
     if (hunterResults && hunterResults.data && hunterResults.data.emails) {
         hunterResults.data.emails.forEach(email => {
@@ -494,7 +477,9 @@ async function searchApollo(domain, limit) {
             fusedContacts.push({
                 name: person.name,
                 title: person.title,
-                email: person.email,
+                email: person.email === "email_not_unlocked@domain.com" 
+    ? `${person.first_name?.toLowerCase()}.${person.last_name?.toLowerCase()}@${domain}` 
+    : person.email,
                 phone: person.phone_numbers?.[0]?.raw_number,
                 linkedin: person.linkedin_url,
                 company: person.organization?.name || domain,

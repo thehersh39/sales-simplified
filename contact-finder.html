@@ -312,23 +312,6 @@
             statusElement.innerHTML = message;
         }
     }
-    
-    if (hunterResults && hunterResults.data && hunterResults.data.emails) {
-        hunterResults.data.emails.forEach(email => {
-            fusedContacts.push({
-                name: `${email.first_name} ${email.last_name}`,
-                title: email.position,
-                email: email.value,
-                phone: email.phone_number,
-                linkedin: email.linkedin,
-                company: hunterResults.data.domain || domain,
-                source: 'Hunter',
-                verified: email.confidence > 80
-            });
-        });
-    }
-    
-    return fusedContacts;
 }
     // Initialize Lucide icons immediately
     document.addEventListener('DOMContentLoaded', function() {

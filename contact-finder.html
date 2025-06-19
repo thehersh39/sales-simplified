@@ -307,18 +307,16 @@ document.getElementById('loading-grid').classList.add('hidden');
 }
 
 function updateFusionStatus(message) {
-const statusElement = document.getElementById('fusion-status');
-if (statusElement) {
-statusElement.innerHTML = message;
+    const statusElement = document.getElementById('fusion-status');
+    if (statusElement) {
+        statusElement.innerHTML = message;
+    }
 }
-}
-}
-
 // Initialize Lucide icons immediately
 document.addEventListener('DOMContentLoaded', function() {
-if (typeof lucide !== 'undefined') {
-lucide.createIcons();
-}
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
 });
 
 lucide.createIcons();

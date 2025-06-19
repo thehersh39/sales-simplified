@@ -435,7 +435,7 @@ async function searchApollo(domain, limit) {
         console.error('Apollo API call failed:', error.message);
         throw error;
     }
-} // ← This closing bracket was missing!
+}
 
         function fuseDataSources(hunterResults, apolloResults, domain) {
             const contacts = new Map();

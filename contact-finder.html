@@ -534,64 +534,6 @@ async function searchApollo(domain, limit) {
     };
 }
 
-            // Process Apollo results
-            if (apolloResults.status === 'fulfilled' && apolloResults.value) {
-                const apolloData = apolloResults.value;
-                
-                // Handle different Apollo response formats
-                const people = apolloData.people || apolloData.contacts || [];
-                
-                people.forEach(person => {
-                    const email = person.email || person.email_address;
-                    if (!email) return;
-
-                    const existingContact = contacts.get(email);
-                    const apolloContact = {
-                        id: email,
-                        name: `${person.first_name || ''} ${person.last_name || ''}`.trim() || 
-                               person.name || person.full_name || 'Name not available',
-                        title: person.title || person.job_title || person.position || 'Position not available',
-                        department: person.functions?.join(', ') || 
-                                   person.department || 
-                                   categorizeByTitle(person.title || person.job_title),
-                        seniority: person.seniority || 
-                                  categorizeSeniority(person.title || person.job_title),
-                        email: email,
-                        verified: person.email_status === 'verified' || 
-                                 person.verified === true || 
-                                 person.email_confidence === 'high',
-                        confidence: person.email_status === 'verified' ? 95 : 
-                                   person.email_confidence === 'high' ? 90 : 75,
-                        linkedin: person.linkedin_url || person.linkedin || null,
-                        phone: person.sanitized_phone || person.phone || person.phone_number || null,
-                        sources: existingContact ? [...existingContact.sources, 'Premium DB 2'] : ['Premium DB 2']
-                    };
-
-                    if (existingContact) {
-                        // Merge data, preferring verified info and non-empty values
-                        contacts.set(email, {
-                            ...existingContact,
-                            name: apolloContact.name !== 'Name not available' ? apolloContact.name : existingContact.name,
-                            title: apolloContact.title !== 'Position not available' ? apolloContact.title : existingContact.title,
-                            linkedin: apolloContact.linkedin || existingContact.linkedin,
-                            phone: apolloContact.phone || existingContact.phone,
-                            verified: apolloContact.verified || existingContact.verified,
-                            confidence: Math.max(apolloContact.confidence, existingContact.confidence),
-                            sources: apolloContact.sources,
-                            department: apolloContact.department !== 'Other' ? apolloContact.department : existingContact.department
-                        });
-                    } else {
-                        contacts.set(email, apolloContact);
-                    }
-                });
-            }
-
-            return {
-                contacts: Array.from(contacts.values()),
-                companyInfo: companyInfo
-            };
-        }
-
         function categorizeByTitle(position) {
             if (!position) return 'Other';
             const pos = position.toLowerCase();

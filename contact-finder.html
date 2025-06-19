@@ -451,9 +451,8 @@
         }
 
 async function searchApollo(domain, limit) {
-    async function searchApollo(domain, limit) {
     const requestBody = {
-        api_key: APOLLO_API_KEY, // This will be ignored but kept for compatibility
+        api_key: APOLLO_API_KEY,
         q_organization_domains: domain,
         page: 1,
         per_page: Math.min(limit, 100),
@@ -461,20 +460,16 @@ async function searchApollo(domain, limit) {
         sort_by_field: 'person_seniority',
         sort_ascending: false,
         
-        // ⭐ NEW EMAIL QUALITY PARAMETERS (ADD THESE LINES)
-        email_status: ['verified'],              // Only verified emails
-        q_person_emails: true,                   // Must have email address
-        include_emails: true,                    // Include emails in response
+        email_status: ['verified'],
+        q_person_emails: true,
+        include_emails: true,
         
-        // 🎯 CPG-SPECIFIC IMPROVEMENTS
         q_keywords: ['consumer goods', 'cpg', 'food', 'beverage', 'retail', 'brand'],
         
-        // 📊 QUALITY FILTERS
-        organization_num_employees_ranges: ['11,50', '51,200', '201,500'], // Skip tiny companies
-        q_person_locations: ['United States', 'Canada']                   // Geographic focus
+        organization_num_employees_ranges: ['11,50', '51,200', '201,500'],
+        q_person_locations: ['United States', 'Canada']
     };
 
-    // ADD THIS MISSING PART:
     try {
         const response = await fetch('/.netlify/functions/apollo-proxy', {
             method: 'POST',

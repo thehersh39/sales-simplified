@@ -393,38 +393,26 @@
 
 async function searchApollo(domain, limit) {
     const requestBody = {
-        api_key: APOLLO_API_KEY, // This will be ignored but kept for compatibility
-        q_organization_domains: domain,
-        page: 1,
-        per_page: Math.min(limit, 100),
-        q_person_seniorities: ['senior', 'manager', 'director', 'vp', 'c_level'],
-        sort_by_field: 'person_seniority',
-        sort_ascending: false
-    };
-
-    try {
-        // Use YOUR Netlify function instead of external proxies
-        const response = await fetch('/.netlify/functions/apollo-proxy', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(requestBody)
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(`Apollo API error: ${response.status} - ${errorData.error || 'Unknown error'}`);
-        }
-
-        const data = await response.json();
-        return data;
-        
-    } catch (error) {
-        console.error('Apollo API call failed:', error.message);
-        throw error;
-    }
-}
+    api_key: APOLLO_API_KEY, // This will be ignored but kept for compatibility
+    q_organization_domains: domain,
+    page: 1,
+    per_page: Math.min(limit, 100),
+    q_person_seniorities: ['manager', 'director', 'vp', 'c_level'],
+    sort_by_field: 'person_seniority',
+    sort_ascending: false,
+    
+    // ⭐ NEW EMAIL QUALITY PARAMETERS (ADD THESE LINES)
+    email_status: ['verified'],              // Only verified emails
+    q_person_emails: true,                   // Must have email address
+    include_emails: true,                    // Include emails in response
+    
+    // 🎯 CPG-SPECIFIC IMPROVEMENTS
+    q_keywords: ['consumer goods', 'cpg', 'food', 'beverage', 'retail', 'brand'],
+    
+    // 📊 QUALITY FILTERS
+    organization_num_employees_ranges: ['11,50', '51,200', '201,500'], // Skip tiny companies
+    q_person_locations: ['United States', 'Canada']                   // Geographic focus
+};
 
         function fuseDataSources(hunterResults, apolloResults, domain) {
             const contacts = new Map();

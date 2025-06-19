@@ -308,7 +308,34 @@
                 lucide.createIcons();
             }
         });
+    <script>
+// UI Functions - Define at the very top of script
+function showFusionProgress() {
+    document.getElementById('fusion-status').classList.remove('hidden');
+}
+function showLoading() {
+    document.getElementById('loading-grid').classList.remove('hidden');
+    document.getElementById('contacts-section').classList.add('hidden');
+}
+function hideResults() {
+    document.getElementById('contacts-section').classList.add('hidden');
+    document.getElementById('pattern-results').classList.add('hidden');
+    document.getElementById('company-info').classList.add('hidden');
+    document.getElementById('fusion-status').classList.add('hidden');
+}
+function hideError() {
+    document.getElementById('error-section').classList.add('hidden');
+}
 
+function updateFusionStatus(message) {
+    const statusElement = document.getElementById('fusion-status');
+    if (statusElement) {
+        statusElement.innerHTML = message;
+    }
+}
+function hideLoading() {
+    document.getElementById('loading-grid').classList.add('hidden');
+}
         lucide.createIcons();
 
         // API Configuration

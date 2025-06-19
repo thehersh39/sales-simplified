@@ -497,36 +497,47 @@ async function searchApollo(domain, limit) {
 }
 
         function fuseDataSources(hunterResults, apolloResults, domain) {
-            const contacts = new Map();
-            let companyInfo = {
-                domain: domain,
-                organization: domain.split('.')[0],
-                pattern: null
-            };
-
-            // Process Hunter.io results
-            if (hunterResults.status === 'fulfilled' && hunterResults.value) {
-                const hunterData = hunterResults.value;
-                companyInfo.organization = hunterData.organization || companyInfo.organization;
-                companyInfo.pattern = hunterData.pattern;
-
-                hunterData.emails?.forEach(email => {
-                    const contact = {
-                        id: email.value,
-                        name: `${email.first_name || ''} ${email.last_name || ''}`.trim() || 'Name not available',
-                        title: email.position || 'Position not available',
-                        department: email.department || categorizeByTitle(email.position),
-                        seniority: categorizeSeniority(email.position),
-                        email: email.value,
-                        verified: email.verification?.result === 'deliverable',
-                        confidence: email.confidence || 0,
-                        linkedin: email.linkedin_url || null,
-                        phone: email.phone_number || null,
-                        sources: ['Premium DB 1']
-                    };
-                    contacts.set(email.value, contact);
-                });
-            }
+    let fusedContacts = [];
+    
+    if (apolloResults && apolloResults.people) {
+        apolloResults.people.forEach(person => {
+            fusedContacts.push({
+                name: person.name,
+                title: person.title,
+                email: person.email,
+                phone: person.phone_numbers?.[0]?.raw_number,
+                linkedin: person.linkedin_url,
+                company: person.organization?.name || domain,
+                source: 'Apollo',
+                verified: person.email_status === 'verified'
+            });
+        });
+    }
+    
+    if (hunterResults && hunterResults.data && hunterResults.data.emails) {
+        hunterResults.data.emails.forEach(email => {
+            fusedContacts.push({
+                name: `${email.first_name} ${email.last_name}`,
+                title: email.position,
+                email: email.value,
+                phone: email.phone_number,
+                linkedin: email.linkedin,
+                company: hunterResults.data.domain || domain,
+                source: 'Hunter',
+                verified: email.confidence > 80
+            });
+        });
+    }
+    
+    return {
+        contacts: fusedContacts,
+        companyInfo: {
+            domain: domain,
+            name: domain,
+            totalContacts: fusedContacts.length
+        }
+    };
+}
 
             // Process Apollo results
             if (apolloResults.status === 'fulfilled' && apolloResults.value) {

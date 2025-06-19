@@ -27,22 +27,6 @@
         @keyframes pulse {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.8; }
-    function showFusionProgress() {
-            document.getElementById('fusion-status').classList.remove('hidden');
-        }
-    function showLoading() {
-            document.getElementById('loading-grid').classList.remove('hidden');
-            document.getElementById('contacts-section').classList.add('hidden');
-        }
-    function hideResults() {
-            document.getElementById('contacts-section').classList.add('hidden');
-            document.getElementById('pattern-results').classList.add('hidden');
-            document.getElementById('company-info').classList.add('hidden');
-            document.getElementById('fusion-status').classList.add('hidden');
-        }
-    function hideError() {
-            document.getElementById('error-section').classList.add('hidden');
-        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -302,6 +286,22 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
+    function showFusionProgress() {
+            document.getElementById('fusion-status').classList.remove('hidden');
+        }
+    function showLoading() {
+            document.getElementById('loading-grid').classList.remove('hidden');
+            document.getElementById('contacts-section').classList.add('hidden');
+        }
+    function hideResults() {
+            document.getElementById('contacts-section').classList.add('hidden');
+            document.getElementById('pattern-results').classList.add('hidden');
+            document.getElementById('company-info').classList.add('hidden');
+            document.getElementById('fusion-status').classList.add('hidden');
+        }
+    function hideError() {
+            document.getElementById('error-section').classList.add('hidden');
+        }
         // Initialize Lucide icons immediately
         document.addEventListener('DOMContentLoaded', function() {
             if (typeof lucide !== 'undefined') {

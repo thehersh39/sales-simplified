@@ -27,6 +27,22 @@
         @keyframes pulse {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.8; }
+    function showFusionProgress() {
+            document.getElementById('fusion-status').classList.remove('hidden');
+        }
+    function showLoading() {
+            document.getElementById('loading-grid').classList.remove('hidden');
+            document.getElementById('contacts-section').classList.add('hidden');
+        }
+    function hideResults() {
+            document.getElementById('contacts-section').classList.add('hidden');
+            document.getElementById('pattern-results').classList.add('hidden');
+            document.getElementById('company-info').classList.add('hidden');
+            document.getElementById('fusion-status').classList.add('hidden');
+        }
+    function hideError() {
+            document.getElementById('error-section').classList.add('hidden');
+        }
         }
     </style>
 </head>
@@ -687,10 +703,6 @@ async function searchApollo(domain, limit) {
             document.getElementById('confidence-score').textContent = avgConfidence + '%';
         }
 
-        function showFusionProgress() {
-            document.getElementById('fusion-status').classList.remove('hidden');
-        }
-
         function updateFusionStatus(sourceId, status, message) {
             const element = document.getElementById(`status-${sourceId}`);
             const dot = element.querySelector('.w-2');
@@ -711,11 +723,6 @@ async function searchApollo(domain, limit) {
             }
         }
 
-        function showLoading() {
-            document.getElementById('loading-grid').classList.remove('hidden');
-            document.getElementById('contacts-section').classList.add('hidden');
-        }
-
         function hideLoading() {
             document.getElementById('loading-grid').classList.add('hidden');
         }
@@ -725,20 +732,9 @@ async function searchApollo(domain, limit) {
             document.getElementById('error-section').classList.add('hidden');
         }
 
-        function hideResults() {
-            document.getElementById('contacts-section').classList.add('hidden');
-            document.getElementById('pattern-results').classList.add('hidden');
-            document.getElementById('company-info').classList.add('hidden');
-            document.getElementById('fusion-status').classList.add('hidden');
-        }
-
         function showError(message) {
             document.getElementById('error-message').textContent = message;
             document.getElementById('error-section').classList.remove('hidden');
-        }
-
-        function hideError() {
-            document.getElementById('error-section').classList.add('hidden');
         }
 
         function toggleContact(index) {

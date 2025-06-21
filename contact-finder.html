@@ -455,7 +455,17 @@ function fuseDataSources(hunterResults, apolloResults, domain) {
 let fusedContacts = [];
 
 if (apolloResults && apolloResults.people) {
-apolloResults.people.forEach(person => {
+    console.log('Processing Apollo people:', apolloResults.people.length);
+    apolloResults.people.forEach(person => {
+        const processedEmail = person.email === "email_not_unlocked@domain.com" 
+            ? `${person.first_name?.toLowerCase()}.${person.last_name?.toLowerCase()}@${domain}` 
+            : person.email;
+        console.log('Processing person:', person.name, 'Email:', processedEmail);
+        
+        fusedContacts.push({
+            name: person.name,
+            title: person.title,
+            email: processedEmail,  // Use the processed email here
 fusedContacts.push({
 name: person.name,
 title: person.title,

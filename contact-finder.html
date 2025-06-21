@@ -452,47 +452,47 @@ throw error;
 }
 
 function fuseDataSources(hunterResults, apolloResults, domain) {
-let fusedContacts = [];
-
-if (apolloResults && apolloResults.people) {
-    console.log('Processing Apollo people:', apolloResults.people.length);
-    apolloResults.people.forEach(person => {
-        const processedEmail = person.email === "email_not_unlocked@domain.com" 
-            ? `${person.first_name?.toLowerCase()}.${person.last_name?.toLowerCase()}@${domain}` 
-            : person.email;
-        console.log('Processing person:', person.name, 'Email:', processedEmail);
-        
-        fusedContacts.push({
-            name: person.name,
-            title: person.title,
-            email: processedEmail,  // Use the processed email here
-name: person.name,
-title: person.title,
-email: person.email === "email_not_unlocked@domain.com" 
-? `${person.first_name?.toLowerCase()}.${person.last_name?.toLowerCase()}@${domain}` 
-: person.email,
-phone: person.phone_numbers?.[0]?.raw_number,
-linkedin: person.linkedin_url,
-company: person.organization?.name || domain,
-source: 'Apollo',
-verified: person.email_status === 'verified'
-});
-});
-}
-
-if (hunterResults && hunterResults.data && hunterResults.data.emails) {
-hunterResults.data.emails.forEach(email => {
-fusedContacts.push({
-name: `${email.first_name} ${email.last_name}`,
-title: email.position,
-email: email.value,
-phone: email.phone_number,
-linkedin: email.linkedin,
-company: hunterResults.data.domain || domain,
-source: 'Hunter',
-verified: email.confidence > 80
-});
-});
+    let fusedContacts = [];
+    
+    // Process Apollo results
+    if (apolloResults && apolloResults.people) {
+        console.log('Processing Apollo people:', apolloResults.people.length);
+        apolloResults.people.forEach(person => {
+            const processedEmail = person.email === "email_not_unlocked@domain.com" 
+                ? `${person.first_name?.toLowerCase()}.${person.last_name?.toLowerCase()}@${domain}` 
+                : person.email;
+            console.log('Processing person:', person.name, 'Email:', processedEmail);
+            
+            fusedContacts.push({
+                name: person.name,
+                title: person.title,
+                email: processedEmail,
+                phone: person.phone_numbers?.[0]?.raw_number,
+                linkedin: person.linkedin_url,
+                company: person.organization?.name || domain,
+                source: 'Apollo',
+                verified: person.email_status === 'verified'
+            });
+        });
+    }
+    
+    // Process Hunter results
+    if (hunterResults && hunterResults.data && hunterResults.data.emails) {
+        hunterResults.data.emails.forEach(email => {
+            fusedContacts.push({
+                name: `${email.first_name} ${email.last_name}`,
+                title: email.position,
+                email: email.value,
+                phone: email.phone_number,
+                linkedin: email.linkedin,
+                company: hunterResults.data.domain || domain,
+                source: 'Hunter',
+                verified: email.confidence > 80
+            });
+        });
+    }
+    
+    return fusedContacts;
 }
 
 return {

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Finder Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 p-8">
+    <div class="max-w-2xl mx-auto">
+        <h1 class="text-3xl font-bold mb-6">Contact Finder Test</h1>
+        
+        <div class="bg-white p-6 rounded-lg shadow mb-6">
+            <input type="text" 
+                   id="domain-input" 
+                   placeholder="Enter domain (e.g., salesforce.com)" 
+                   class="w-full p-3 border rounded mb-4">
+            <button onclick="testSearch()" 
+                    class="bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700">
+                Test Search
+            </button>
+        </div>
+        
+        <div id="results" class="bg-white p-6 rounded-lg shadow hidden">
+            <h2 class="text-xl font-bold mb-4">Results:</h2>
+            <div id="contact-list"></div>
+        </div>
+    </div>
+
+    <script>
+        // API Configuration
+        const APOLLO_API_KEY = 'cgAc0fBksS1tJePYf0n4DA';
+        
+        // Apollo API Function
+        async function searchApollo(domain, limit) {
+            const requestBody = {
+                api_key: APOLLO_API_KEY,
+                q_organization_domains: domain,
+                page: 1,
+                per_page: Math.min(limit, 100),
+                q_person_seniorities: ['manager', 'director', 'vp', 'c_level'],
+                sort_by_field: 'person_seniority',
+                sort_ascending: false,
+                email_status: ['verified'],
+                q_person_emails: true,
+                include_emails: true
+            };
+
+            try {
+                const response = await fetch('/.netlify/functions/apollo-proxy', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Apollo API error: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Apollo API call failed:', error.message);
+                throw error;
+            }
+        }
+
+        // Data Processing Function
+        function processApolloData(apolloResults, domain) {
+            const contacts = [];
+            
+            if (apolloResults && apolloResults.people) {
+                console.log('Processing Apollo people:', apolloResults.people.length);
+                
+                apolloResults.people.forEach(person => {
+                    const processedEmail = person.email === "email_not_unlocked@domain.com" 
+                        ? `${person.first_name?.toLowerCase() || 'contact'}.${person.last_name?.toLowerCase() || 'person'}@${domain}` 
+                        : person.email;
+                    
+                    console.log('Processing person:', person.name, 'Email:', processedEmail);
+                    
+                    contacts.push({
+                        name: person.name || `${person.first_name} ${person.last_name}`,
+                        title: person.title,
+                        email: processedEmail,
+                        phone: person.phone_numbers?.[0]?.raw_number,
+                        linkedin: person.linkedin_url,
+                        company: person.organization?.name || domain,
+                        source: 'Apollo',
+                        verified: person.email_status === 'verified' ? 'Yes' : 'No'
+                    });
+                });
+            }
+            
+            console.log('Final contacts array:', contacts);
+            return contacts;
+        }
+
+        // Test Search Function
+        async function testSearch() {
+            const domain = document.getElementById('domain-input').value.trim();
+            if (!domain) {
+                alert('Please enter a domain');
+                return;
+            }
+            
+            console.log('Starting search for:', domain);
+            
+            try {
+                // Test Apollo
+                const apolloData = await searchApollo(domain, 10);
+                console.log('Apollo raw response:', apolloData);
+                
+                // Process data
+                const contacts = processApolloData(apolloData, domain);
+                console.log('Processed contacts:', contacts);
+                
+                // Display results
+                displayResults(contacts);
+                
+            } catch (error) {
+                console.error('Search failed:', error);
+                alert('Search failed: ' + error.message);
+            }
+        }
+
+        // Display Results Function
+        function displayResults(contacts) {
+            const resultsDiv = document.getElementById('results');
+            const contactList = document.getElementById('contact-list');
+            
+            if (contacts.length === 0) {
+                contactList.innerHTML = '<p class="text-red-600">No contacts found</p>';
+            } else {
+                contactList.innerHTML = contacts.map(contact => `
+                    <div class="border-b py-4">
+                        <h3 class="font-semibold">${contact.name}</h3>
+                        <p class="text-gray-600">${contact.title}</p>
+                        <p class="text-blue-600">${contact.email}</p>
+                        <p class="text-sm text-gray-500">Source: ${contact.source} | Verified: ${contact.verified}</p>
+                    </div>
+                `).join('');
+            }
+            
+            resultsDiv.classList.remove('hidden');
+        }
+
+        // Enter key support
+        document.getElementById('domain-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                testSearch();
+            }
+        });
+    </script>
+</body>
+</html>

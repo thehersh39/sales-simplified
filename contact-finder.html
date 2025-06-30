@@ -27,6 +27,7 @@ animation: pulse 2s infinite;
 @keyframes pulse {
 0%, 100% { opacity: 1; }
 50% { opacity: 0.8; }
+}
 </style>
 </head>
 <body class="bg-gray-50">
@@ -286,24 +287,29 @@ class="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
+// UI Control Functions
 function showFusionProgress() {
-document.getElementById('fusion-status').classList.remove('hidden');
+    document.getElementById('fusion-status').classList.remove('hidden');
 }
+
 function showLoading() {
-document.getElementById('loading-grid').classList.remove('hidden');
-document.getElementById('contacts-section').classList.add('hidden');
+    document.getElementById('loading-grid').classList.remove('hidden');
+    document.getElementById('contacts-section').classList.add('hidden');
 }
+
 function hideResults() {
-document.getElementById('contacts-section').classList.add('hidden');
-document.getElementById('pattern-results').classList.add('hidden');
-document.getElementById('company-info').classList.add('hidden');
-document.getElementById('fusion-status').classList.add('hidden');
+    document.getElementById('contacts-section').classList.add('hidden');
+    document.getElementById('pattern-results').classList.add('hidden');
+    document.getElementById('company-info').classList.add('hidden');
+    document.getElementById('fusion-status').classList.add('hidden');
 }
+
 function hideError() {
-document.getElementById('error-section').classList.add('hidden');
+    document.getElementById('error-section').classList.add('hidden');
 }
+
 function hideLoading() {
-document.getElementById('loading-grid').classList.add('hidden');
+    document.getElementById('loading-grid').classList.add('hidden');
 }
 
 function updateFusionStatus(message) {
@@ -312,7 +318,18 @@ function updateFusionStatus(message) {
         statusElement.innerHTML = message;
     }
 }
-// Initialize Lucide icons immediately
+
+function showResults() {
+    document.getElementById('contacts-section').classList.remove('hidden');
+    document.getElementById('error-section').classList.add('hidden');
+}
+
+function showError(message) {
+    document.getElementById('error-message').textContent = message;
+    document.getElementById('error-section').classList.remove('hidden');
+}
+
+// Initialize Lucide icons
 document.addEventListener('DOMContentLoaded', function() {
     if (typeof lucide !== 'undefined') {
         lucide.createIcons();
@@ -320,6 +337,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 lucide.createIcons();
+
 // API Configuration
 const HUNTER_API_KEY = '64514bd46213dce4c8e6ed724555b2f9d0fa8e03';
 const APOLLO_API_KEY = 'cgAc0fBksS1tJePYf0n4DA';
@@ -330,127 +348,133 @@ let companyData = null;
 let fusionStats = { sources: 0, verified: 0, linkedin: 0 };
 
 function loadCompanyExample(domain) {
-document.getElementById('company-domain').value = domain;
+    document.getElementById('company-domain').value = domain;
 }
 
 async function searchCompany() {
-const domain = document.getElementById('company-domain').value.trim();
-if (!domain) {
-alert('Please enter a company domain');
-return;
-}
+    const domain = document.getElementById('company-domain').value.trim();
+    if (!domain) {
+        alert('Please enter a company domain');
+        return;
+    }
 
-// Reset UI
-hideError();
-hideResults();
-showLoading();
-showFusionProgress();
+    // Reset UI
+    hideError();
+    hideResults();
+    showLoading();
+    showFusionProgress();
 
-const button = document.getElementById('search-button');
-const originalText = button.innerHTML;
-button.innerHTML = '<div class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent inline-block mr-2"></div>Analyzing with AI...';
-button.disabled = true;
+    const button = document.getElementById('search-button');
+    const originalText = button.innerHTML;
+    button.innerHTML = '<div class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent inline-block mr-2"></div>Analyzing with AI...';
+    button.disabled = true;
 
-try {
-// Start fusion process
-updateFusionStatus('source1', 'searching', 'Premium Database 1: Searching...');
+    try {
+        // Start fusion process
+        updateFusionStatus('source1', 'searching', 'Premium Database 1: Searching...');
 
-const limit = Math.min(parseInt(document.getElementById('results-limit').value), 100);
+        const limit = Math.min(parseInt(document.getElementById('results-limit').value), 100);
 
-// Query multiple sources simultaneously
-const [hunterResults, apolloResults] = await Promise.allSettled([
-searchHunter(domain, limit),
-searchApollo(domain, limit)
-]);
+        // Query multiple sources simultaneously
+        const [hunterResults, apolloResults] = await Promise.allSettled([
+            searchHunter(domain, limit),
+            searchApollo(domain, limit)
+        ]);
 
-updateFusionStatus('source1', hunterResults.status === 'fulfilled' ? 'success' : 'error', 
-hunterResults.status === 'fulfilled' ? 'Premium Database 1: ✓ Complete' : 'Premium Database 1: ✗ Error');
+        updateFusionStatus('source1', hunterResults.status === 'fulfilled' ? 'success' : 'error', 
+            hunterResults.status === 'fulfilled' ? 'Premium Database 1: ✓ Complete' : 'Premium Database 1: ✗ Error');
 
-updateFusionStatus('source2', 'searching', 'Premium Database 2: Processing...');
+        updateFusionStatus('source2', 'searching', 'Premium Database 2: Processing...');
 
-setTimeout(() => {
-updateFusionStatus('source2', apolloResults.status === 'fulfilled' ? 'success' : 'error', 
-apolloResults.status === 'fulfilled' ? 'Premium Database 2: ✓ Complete' : 'Premium Database 2: ✗ Error');
-}, 1000);
+        setTimeout(() => {
+            updateFusionStatus('source2', apolloResults.status === 'fulfilled' ? 'success' : 'error', 
+                apolloResults.status === 'fulfilled' ? 'Premium Database 2: ✓ Complete' : 'Premium Database 2: ✗ Error');
+        }, 1000);
 
-// Fusion processing
-updateFusionStatus('fusion', 'searching', 'AI Fusion Engine: Merging datasets...');
+        // Fusion processing
+        updateFusionStatus('fusion', 'searching', 'AI Fusion Engine: Merging datasets...');
 
-setTimeout(() => {
-const fusedData = fuseDataSources(hunterResults, apolloResults, domain);
+        setTimeout(() => {
+            const fusedData = fuseDataSources(
+                hunterResults.status === 'fulfilled' ? hunterResults.value : null,
+                apolloResults.status === 'fulfilled' ? apolloResults.value : null,
+                domain
+            );
 
-if (fusedData.length === 0) {
-throw new Error('No contacts found across any data sources for this domain.');
-}
+            if (fusedData.contacts.length === 0) {
+                throw new Error('No contacts found across any data sources for this domain.');
+            }
 
-updateFusionStatus('fusion', 'success', `AI Fusion Engine: ✓ Merged ${fusedData.contacts.length} contacts`);
+            updateFusionStatus('fusion', 'success', `AI Fusion Engine: ✓ Merged ${fusedData.contacts.length} contacts`);
 
-// Store and display results
-companyData = fusedData.companyInfo;
-currentContacts = fusedData.contacts;
+            // Store and display results
+            companyData = fusedData.companyInfo;
+            currentContacts = fusedData.contacts;
 
-processResults(fusedData);
-showResults();
-}, 1500);
+            processResults(fusedData);
+            showResults();
+        }, 1500);
 
-} catch (error) {
-console.error('Data Fusion Error:', error);
-showError(error.message);
-} finally {
-button.innerHTML = originalText;
-button.disabled = false;
-hideLoading();
-}
+    } catch (error) {
+        console.error('Data Fusion Error:', error);
+        showError(error.message);
+    } finally {
+        button.innerHTML = originalText;
+        button.disabled = false;
+        hideLoading();
+    }
 }
 
 async function searchHunter(domain, limit) {
-const url = `https://api.hunter.io/v2/domain-search?domain=${domain}&limit=${limit}&api_key=${HUNTER_API_KEY}`;
-const response = await fetch(url);
+    const url = `https://api.hunter.io/v2/domain-search?domain=${domain}&limit=${limit}&api_key=${HUNTER_API_KEY}`;
+    const response = await fetch(url);
 
-if (!response.ok) {
-throw new Error(`Hunter API error: ${response.status}`);
-}
+    if (!response.ok) {
+        throw new Error(`Hunter API error: ${response.status}`);
+    }
 
-const data = await response.json();
-return data.data;
+    const data = await response.json();
+    return data.data;
 }
 
 async function searchApollo(domain, limit) {
-const requestBody = {
-api_key: APOLLO_API_KEY,
-q_organization_domains: domain,
-page: 1,
-per_page: Math.min(limit, 100),
-q_person_seniorities: ['manager', 'director', 'vp', 'c_level'],
-sort_by_field: 'person_seniority',
-sort_ascending: false,
+    const requestBody = {
+        api_key: APOLLO_API_KEY,
+        q_organization_domains: domain,
+        page: 1,
+        per_page: Math.min(limit, 100),
+        q_person_seniorities: ['manager', 'director', 'vp', 'c_level'],
+        sort_by_field: 'person_seniority',
+        sort_ascending: false,
+        email_status: ['verified'],
+        q_person_emails: true,
+        include_emails: true,
+    };
 
-email_status: ['verified'],
-q_person_emails: true,
-include_emails: true,
-};
+    try {
+        const response = await fetch('/.netlify/functions/apollo-proxy', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestBody)
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(`Apollo API error: ${response.status} - ${errorData.error || 'Unknown error'}`);
+        }
+        
+        const data = await response.json();
+        return data;
 
-try {
-const response = await fetch('/.netlify/functions/apollo-proxy', {
-method: 'POST',
-headers: {
-'Content-Type': 'application/json',
-},
-body: JSON.stringify(requestBody)
-});
-if (!response.ok) {
-const errorData = await response.json();
-throw new Error(`Apollo API error: ${response.status} - ${errorData.error || 'Unknown error'}`);
+    } catch (error) {
+        console.error('Apollo API call failed:', error.message);
+        throw error;
+    }
 }
-const data = await response.json();
-return data;
 
-} catch (error) {
-console.error('Apollo API call failed:', error.message);
-throw error;
-}
-}
-
+// FIXED Data Fusion Function
 function fuseDataSources(hunterResults, apolloResults, domain) {
     let fusedContacts = [];
     
@@ -459,407 +483,404 @@ function fuseDataSources(hunterResults, apolloResults, domain) {
         console.log('Processing Apollo people:', apolloResults.people.length);
         apolloResults.people.forEach(person => {
             const processedEmail = person.email === "email_not_unlocked@domain.com" 
-                ? `${person.first_name?.toLowerCase()}.${person.last_name?.toLowerCase()}@${domain}` 
+                ? `${person.first_name?.toLowerCase() || 'contact'}.${person.last_name?.toLowerCase() || 'person'}@${domain}` 
                 : person.email;
             console.log('Processing person:', person.name, 'Email:', processedEmail);
             
             fusedContacts.push({
-                name: person.name,
+                name: person.name || `${person.first_name} ${person.last_name}`,
                 title: person.title,
                 email: processedEmail,
-                phone: person.phone_numbers?.[0]?.raw_number,
-                linkedin: person.linkedin_url,
+                phone: person.phone_numbers?.[0]?.raw_number || '',
+                linkedin: person.linkedin_url || '',
                 company: person.organization?.name || domain,
                 source: 'Apollo',
-                verified: person.email_status === 'verified'
+                sources: ['Apollo'],
+                verified: person.email_status === 'verified',
+                confidence: person.email_status === 'verified' ? 95 : 75,
+                department: categorizeByTitle(person.title),
+                seniority: categorizeSeniority(person.title)
             });
         });
     }
     
     // Process Hunter results
-    if (hunterResults && hunterResults.data && hunterResults.data.emails) {
-        hunterResults.data.emails.forEach(email => {
+    if (hunterResults && hunterResults.emails) {
+        hunterResults.emails.forEach(email => {
             fusedContacts.push({
                 name: `${email.first_name} ${email.last_name}`,
                 title: email.position,
                 email: email.value,
-                phone: email.phone_number,
-                linkedin: email.linkedin,
-                company: hunterResults.data.domain || domain,
+                phone: email.phone_number || '',
+                linkedin: email.linkedin || '',
+                company: hunterResults.domain || domain,
                 source: 'Hunter',
-                verified: email.confidence > 80
+                sources: ['Hunter'],
+                verified: email.confidence > 80,
+                confidence: email.confidence,
+                department: categorizeByTitle(email.position),
+                seniority: categorizeSeniority(email.position)
             });
         });
     }
     
-    return fusedContacts;
-}
-
-contacts: fusedContacts,
-companyInfo: {
-domain: domain,
-name: domain,
-totalContacts: fusedContacts.length
-}
-};
+    // Return properly structured data
+    return {
+        contacts: fusedContacts,
+        companyInfo: {
+            domain: domain,
+            name: domain,
+            organization: hunterResults?.organization || domain,
+            pattern: hunterResults?.pattern || `{first}.{last}@${domain}`,
+            totalContacts: fusedContacts.length
+        }
+    };
 }
 
 function categorizeByTitle(position) {
-if (!position) return 'Other';
-const pos = position.toLowerCase();
-if (pos.includes('sales') || pos.includes('business development') || pos.includes('account')) return 'Sales';
-if (pos.includes('marketing') || pos.includes('growth') || pos.includes('content')) return 'Marketing';
-if (pos.includes('engineer') || pos.includes('developer') || pos.includes('tech') || pos.includes('software')) return 'Engineering';
-if (pos.includes('finance') || pos.includes('accounting') || pos.includes('cfo')) return 'Finance';
-if (pos.includes('operations') || pos.includes('ops') || pos.includes('coo')) return 'Operations';
-if (pos.includes('ceo') || pos.includes('cto') || pos.includes('president') || pos.includes('founder') || pos.includes('vp')) return 'Executive';
-return 'Other';
+    if (!position) return 'Other';
+    const pos = position.toLowerCase();
+    if (pos.includes('sales') || pos.includes('business development') || pos.includes('account')) return 'Sales';
+    if (pos.includes('marketing') || pos.includes('growth') || pos.includes('content')) return 'Marketing';
+    if (pos.includes('engineer') || pos.includes('developer') || pos.includes('tech') || pos.includes('software')) return 'Engineering';
+    if (pos.includes('finance') || pos.includes('accounting') || pos.includes('cfo')) return 'Finance';
+    if (pos.includes('operations') || pos.includes('ops') || pos.includes('coo')) return 'Operations';
+    if (pos.includes('ceo') || pos.includes('cto') || pos.includes('president') || pos.includes('founder') || pos.includes('vp')) return 'Executive';
+    return 'Other';
 }
 
 function categorizeSeniority(position) {
-if (!position) return 'individual';
-const pos = position.toLowerCase();
-if (pos.includes('ceo') || pos.includes('cto') || pos.includes('cfo') || pos.includes('coo') || 
-pos.includes('president') || pos.includes('founder') || pos.includes('vp ') || pos.includes('vice president')) {
-return 'executive';
-}
-if (pos.includes('director') || pos.includes('head of') || pos.includes('lead')) return 'director';
-if (pos.includes('manager') || pos.includes('supervisor')) return 'manager';
-return 'individual';
+    if (!position) return 'individual';
+    const pos = position.toLowerCase();
+    if (pos.includes('ceo') || pos.includes('cto') || pos.includes('cfo') || pos.includes('coo') || 
+        pos.includes('president') || pos.includes('founder') || pos.includes('vp ') || pos.includes('vice president')) {
+        return 'executive';
+    }
+    if (pos.includes('director') || pos.includes('head of') || pos.includes('lead')) return 'director';
+    if (pos.includes('manager') || pos.includes('supervisor')) return 'manager';
+    return 'individual';
 }
 
 function processResults(fusedData) {
-// Show pattern discovery
-if (fusedData.companyInfo.pattern) {
-showPatternDiscovery(fusedData.companyInfo);
-}
+    // Show pattern discovery
+    if (fusedData.companyInfo.pattern) {
+        showPatternDiscovery(fusedData.companyInfo);
+    }
 
-// Show company info
-showCompanyInfo(fusedData.companyInfo, fusedData.contacts);
+    // Show company info
+    showCompanyInfo(fusedData.companyInfo, fusedData.contacts);
 
-// Display contacts
-displayContacts(fusedData.contacts);
-updateStats(fusedData.contacts);
+    // Display contacts
+    displayContacts(fusedData.contacts);
+    updateStats(fusedData.contacts);
 }
 
 function showPatternDiscovery(companyInfo) {
-if (companyInfo.pattern) {
-document.getElementById('discovered-pattern').textContent = companyInfo.pattern;
-document.getElementById('validation-info').textContent = `Multi-source verified`;
-document.getElementById('pattern-results').classList.remove('hidden');
-}
+    if (companyInfo.pattern) {
+        document.getElementById('discovered-pattern').textContent = companyInfo.pattern;
+        document.getElementById('validation-info').textContent = `Multi-source verified`;
+        document.getElementById('pattern-results').classList.remove('hidden');
+    }
 }
 
 function showCompanyInfo(companyInfo, contacts) {
-document.getElementById('company-name').textContent = companyInfo.organization || 'Unknown';
-document.getElementById('company-domain-display').textContent = companyInfo.domain;
-document.getElementById('company-pattern').textContent = companyInfo.pattern || 'Pattern analysis pending';
+    document.getElementById('company-name').textContent = companyInfo.organization || 'Unknown';
+    document.getElementById('company-domain-display').textContent = companyInfo.domain;
+    document.getElementById('company-pattern').textContent = companyInfo.pattern || 'Pattern analysis pending';
 
-const uniqueSources = new Set();
-contacts.forEach(contact => contact.sources.forEach(source => uniqueSources.add(source)));
-document.getElementById('data-sources').textContent = `${uniqueSources.size} premium sources`;
+    const uniqueSources = new Set();
+    contacts.forEach(contact => contact.sources.forEach(source => uniqueSources.add(source)));
+    document.getElementById('data-sources').textContent = `${uniqueSources.size} premium sources`;
 
-document.getElementById('company-info').classList.remove('hidden');
+    document.getElementById('company-info').classList.remove('hidden');
 }
 
 function displayContacts(contacts) {
-const grid = document.getElementById('contacts-grid');
-grid.innerHTML = '';
+    const grid = document.getElementById('contacts-grid');
+    grid.innerHTML = '';
 
-contacts.forEach((contact, index) => {
-const card = document.createElement('div');
-card.className = 'contact-card bg-white rounded-lg border shadow-sm p-4 hover:shadow-md';
+    contacts.forEach((contact, index) => {
+        const card = document.createElement('div');
+        card.className = 'contact-card bg-white rounded-lg border shadow-sm p-4 hover:shadow-md';
 
-const verificationBadge = contact.verified 
-? '<span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">✓ Verified</span>'
-: '<span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">Unverified</span>';
+        const verificationBadge = contact.verified 
+            ? '<span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">✓ Verified</span>'
+            : '<span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">Unverified</span>';
 
-const linkedinLink = contact.linkedin 
-? `<a href="${contact.linkedin}" target="_blank" class="flex items-center space-x-1 text-blue-600 hover:text-blue-800">
-                        <i data-lucide="linkedin" class="w-4 h-4"></i>
-                        <span class="text-xs">LinkedIn</span>
-                      </a>`
-: '<span class="text-xs text-gray-400">No LinkedIn</span>';
+        const linkedinLink = contact.linkedin 
+            ? `<a href="${contact.linkedin}" target="_blank" class="flex items-center space-x-1 text-blue-600 hover:text-blue-800">
+                            <i data-lucide="linkedin" class="w-4 h-4"></i>
+                            <span class="text-xs">LinkedIn</span>
+                          </a>`
+            : '<span class="text-xs text-gray-400">No LinkedIn</span>';
 
-const phoneDisplay = contact.phone 
-? `<div class="flex items-center space-x-2">
-                        <i data-lucide="phone" class="w-4 h-4 text-gray-400"></i>
-                        <span class="text-xs">${contact.phone}</span>
-                      </div>`
-: '';
+        const phoneDisplay = contact.phone 
+            ? `<div class="flex items-center space-x-2">
+                            <i data-lucide="phone" class="w-4 h-4 text-gray-400"></i>
+                            <span class="text-xs">${contact.phone}</span>
+                          </div>`
+            : '';
 
-const sourceBadges = contact.sources.map(source => 
-`<span class="px-1 py-0.5 bg-blue-100 text-blue-700 rounded text-xs">${source}</span>`
-).join(' ');
+        const sourceBadges = contact.sources.map(source => 
+            `<span class="px-1 py-0.5 bg-blue-100 text-blue-700 rounded text-xs">${source}</span>`
+        ).join(' ');
 
-card.innerHTML = `
-                   <div class="flex items-start justify-between mb-3">
-                       <div class="flex items-center space-x-2">
-                           <input type="checkbox" id="contact-${index}" onchange="toggleContact(${index})" 
-                                  class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                           <div>
-                               <h4 class="font-semibold text-gray-900">${contact.name}</h4>
-                               <p class="text-sm text-gray-600">${contact.title}</p>
+        card.innerHTML = `
+                       <div class="flex items-start justify-between mb-3">
+                           <div class="flex items-center space-x-2">
+                               <input type="checkbox" id="contact-${index}" onchange="toggleContact(${index})" 
+                                      class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                               <div>
+                                   <h4 class="font-semibold text-gray-900">${contact.name}</h4>
+                                   <p class="text-sm text-gray-600">${contact.title}</p>
+                               </div>
+                           </div>
+                           ${verificationBadge}
+                       </div>
+                       
+                       <div class="space-y-2 text-sm">
+                           <div class="flex items-center space-x-2">
+                               <i data-lucide="mail" class="w-4 h-4 text-gray-400"></i>
+                               <a href="mailto:${contact.email}" class="font-mono text-xs ${contact.verified ? 'text-green-700' : 'text-gray-600'} hover:underline">${contact.email}</a>
+                           </div>
+                           
+                           ${phoneDisplay}
+                           
+                           <div class="flex items-center space-x-2">
+                               <i data-lucide="briefcase" class="w-4 h-4 text-gray-400"></i>
+                               <span class="text-xs">${contact.department}</span>
+                           </div>
+
+                           <div class="flex items-center space-x-2">
+                               <i data-lucide="star" class="w-4 h-4 text-gray-400"></i>
+                               <span class="text-xs">Confidence: ${contact.confidence}%</span>
+                           </div>
+
+                           <div class="flex items-center space-x-1">
+                               <i data-lucide="layers" class="w-3 h-3 text-gray-400"></i>
+                               <div class="flex space-x-1">${sourceBadges}</div>
                            </div>
                        </div>
-                       ${verificationBadge}
-                   </div>
-                   
-                   <div class="space-y-2 text-sm">
-                       <div class="flex items-center space-x-2">
-                           <i data-lucide="mail" class="w-4 h-4 text-gray-400"></i>
-                           <a href="mailto:${contact.email}" class="font-mono text-xs ${contact.verified ? 'text-green-700' : 'text-gray-600'} hover:underline">${contact.email}</a>
-                       </div>
                        
-                       ${phoneDisplay}
-                       
-                       <div class="flex items-center space-x-2">
-                           <i data-lucide="briefcase" class="w-4 h-4 text-gray-400"></i>
-                           <span class="text-xs">${contact.department}</span>
+                       <div class="mt-3 pt-3 border-t border-gray-100 flex justify-between items-center">
+                           ${linkedinLink}
+                           <span class="px-2 py-1 rounded-full text-xs font-medium ${getSeniorityColor(contact.seniority)}">
+                               ${contact.seniority}
+                           </span>
                        </div>
+                   `;
+        grid.appendChild(card);
+    });
 
-                       <div class="flex items-center space-x-2">
-                           <i data-lucide="star" class="w-4 h-4 text-gray-400"></i>
-                           <span class="text-xs">Confidence: ${contact.confidence}%</span>
-                       </div>
-
-                       <div class="flex items-center space-x-1">
-                           <i data-lucide="layers" class="w-3 h-3 text-gray-400"></i>
-                           <div class="flex space-x-1">${sourceBadges}</div>
-                       </div>
-                   </div>
-                   
-                   <div class="mt-3 pt-3 border-t border-gray-100 flex justify-between items-center">
-                       ${linkedinLink}
-                       <span class="px-2 py-1 rounded-full text-xs font-medium ${getSeniorityColor(contact.seniority)}">
-                           ${contact.seniority}
-                       </span>
-                   </div>
-               `;
-grid.appendChild(card);
-});
-
-// Re-initialize icons
-lucide.createIcons();
+    // Re-initialize icons
+    lucide.createIcons();
 }
 
 function getSeniorityColor(seniority) {
-switch(seniority) {
-case 'executive': return 'bg-purple-100 text-purple-800';
-case 'director': return 'bg-blue-100 text-blue-800';
-case 'manager': return 'bg-green-100 text-green-800';
-default: return 'bg-gray-100 text-gray-800';
-}
+    switch(seniority) {
+        case 'executive': return 'bg-purple-100 text-purple-800';
+        case 'director': return 'bg-blue-100 text-blue-800';
+        case 'manager': return 'bg-green-100 text-green-800';
+        default: return 'bg-gray-100 text-gray-800';
+    }
 }
 
 function updateStats(contacts) {
-const totalContacts = contacts.length;
-const verifiedEmails = contacts.filter(c => c.verified).length;
-const linkedinProfiles = contacts.filter(c => c.linkedin).length;
-const avgConfidence = Math.round(contacts.reduce((sum, c) => sum + c.confidence, 0) / contacts.length);
+    const totalContacts = contacts.length;
+    const verifiedEmails = contacts.filter(c => c.verified).length;
+    const linkedinProfiles = contacts.filter(c => c.linkedin).length;
+    const avgConfidence = Math.round(contacts.reduce((sum, c) => sum + c.confidence, 0) / contacts.length);
 
-document.getElementById('total-contacts').textContent = totalContacts;
-document.getElementById('verified-emails').textContent = verifiedEmails;
-document.getElementById('linkedin-profiles').textContent = linkedinProfiles;
-document.getElementById('confidence-score').textContent = avgConfidence + '%';
+    document.getElementById('total-contacts').textContent = totalContacts;
+    document.getElementById('verified-emails').textContent = verifiedEmails;
+    document.getElementById('linkedin-profiles').textContent = linkedinProfiles;
+    document.getElementById('confidence-score').textContent = avgConfidence + '%';
 }
 
 function updateFusionStatus(sourceId, status, message) {
-const element = document.getElementById(`status-${sourceId}`);
-const dot = element.querySelector('.w-2');
-const text = element.querySelector('span');
+    const element = document.getElementById(`status-${sourceId}`);
+    if (!element) return;
+    
+    const dot = element.querySelector('.w-2');
+    const text = element.querySelector('span');
 
-text.textContent = message;
+    text.textContent = message;
 
-switch(status) {
-case 'searching':
-dot.className = 'w-2 h-2 rounded-full bg-yellow-400 animate-pulse';
-break;
-case 'success':
-dot.className = 'w-2 h-2 rounded-full bg-green-400';
-break;
-case 'error':
-dot.className = 'w-2 h-2 rounded-full bg-red-400';
-break;
-}
-}
-
-function hideLoading() {
-document.getElementById('loading-grid').classList.add('hidden');
-}
-
-function showResults() {
-document.getElementById('contacts-section').classList.remove('hidden');
-document.getElementById('error-section').classList.add('hidden');
-}
-
-function showError(message) {
-document.getElementById('error-message').textContent = message;
-document.getElementById('error-section').classList.remove('hidden');
+    switch(status) {
+        case 'searching':
+            dot.className = 'w-2 h-2 rounded-full bg-yellow-400 animate-pulse';
+            break;
+        case 'success':
+            dot.className = 'w-2 h-2 rounded-full bg-green-400';
+            break;
+        case 'error':
+            dot.className = 'w-2 h-2 rounded-full bg-red-400';
+            break;
+    }
 }
 
 function toggleContact(index) {
-if (selectedContacts.has(index)) {
-selectedContacts.delete(index);
-} else {
-selectedContacts.add(index);
-}
+    if (selectedContacts.has(index)) {
+        selectedContacts.delete(index);
+    } else {
+        selectedContacts.add(index);
+    }
 }
 
 function addToSequence() {
-const selectedCount = selectedContacts.size;
-if (selectedCount === 0) {
-alert('Please select contacts to add to a sequence');
-return;
-}
+    const selectedCount = selectedContacts.size;
+    if (selectedCount === 0) {
+        alert('Please select contacts to add to a sequence');
+        return;
+    }
 
-// Show workflow integration preview
-const modal = document.createElement('div');
-modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50';
-modal.innerHTML = `
-               <div class="bg-white rounded-lg p-6 max-w-md w-full">
-                   <h3 class="text-xl font-bold text-gray-900 mb-4">Add to Email Sequence</h3>
-                   <div class="space-y-4">
-                       <div>
-                           <label class="block text-sm font-medium text-gray-700 mb-2">Select Sequence</label>
-                           <select class="w-full border border-gray-300 rounded-lg px-3 py-2">
-                               <option>SaaS Cold Outreach (5 steps)</option>
-                               <option>Enterprise Follow-up (3 steps)</option>
-                               <option>Warm Lead Nurture (4 steps)</option>
-                               <option>Create New Sequence...</option>
-                           </select>
+    // Show workflow integration preview
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50';
+    modal.innerHTML = `
+                   <div class="bg-white rounded-lg p-6 max-w-md w-full">
+                       <h3 class="text-xl font-bold text-gray-900 mb-4">Add to Email Sequence</h3>
+                       <div class="space-y-4">
+                           <div>
+                               <label class="block text-sm font-medium text-gray-700 mb-2">Select Sequence</label>
+                               <select class="w-full border border-gray-300 rounded-lg px-3 py-2">
+                                   <option>SaaS Cold Outreach (5 steps)</option>
+                                   <option>Enterprise Follow-up (3 steps)</option>
+                                   <option>Warm Lead Nurture (4 steps)</option>
+                                   <option>Create New Sequence...</option>
+                               </select>
+                           </div>
+                           <div class="bg-blue-50 p-4 rounded-lg">
+                               <div class="flex items-center space-x-2 mb-2">
+                                   <i data-lucide="users" class="w-5 h-5 text-blue-600"></i>
+                                   <span class="font-medium text-blue-900">${selectedCount} contacts selected</span>
+                               </div>
+                               <div class="text-sm text-blue-700">
+                                   These contacts will automatically flow into your chosen sequence and sync with Salesforce.
+                               </div>
+                           </div>
                        </div>
-                       <div class="bg-blue-50 p-4 rounded-lg">
-                           <div class="flex items-center space-x-2 mb-2">
-                               <i data-lucide="users" class="w-5 h-5 text-blue-600"></i>
-                               <span class="font-medium text-blue-900">${selectedCount} contacts selected</span>
-                           </div>
-                           <div class="text-sm text-blue-700">
-                               These contacts will automatically flow into your chosen sequence and sync with Salesforce.
-                           </div>
+                       <div class="flex space-x-3 mt-6">
+                           <button onclick="this.closest('.fixed').remove()" class="flex-1 bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-300">
+                               Cancel
+                           </button>
+                           <button onclick="this.closest('.fixed').remove(); alert('${selectedCount} contacts added to sequence and synced with Salesforce!');" class="flex-1 bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700">
+                               Add to Sequence
+                           </button>
                        </div>
                    </div>
-                   <div class="flex space-x-3 mt-6">
-                       <button onclick="this.closest('.fixed').remove()" class="flex-1 bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-300">
-                           Cancel
-                       </button>
-                       <button onclick="this.closest('.fixed').remove(); alert('${selectedCount} contacts added to sequence and synced with Salesforce!');" class="flex-1 bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700">
-                           Add to Sequence
-                       </button>
-                   </div>
-               </div>
-           `;
-document.body.appendChild(modal);
-lucide.createIcons();
+               `;
+    document.body.appendChild(modal);
+    lucide.createIcons();
 }
 
 function downloadExcel() {
-if (currentContacts.length === 0) {
-alert('No contacts to download. Please search for a company first.');
-return;
-}
+    if (currentContacts.length === 0) {
+        alert('No contacts to download. Please search for a company first.');
+        return;
+    }
 
-// Prepare data for Excel
-const excelData = currentContacts.map(contact => ({
-'Full Name': contact.name,
-'Email Address': contact.email,
-'Job Title': contact.title,
-'Department': contact.department,
-'Seniority Level': contact.seniority,
-'LinkedIn Profile': contact.linkedin || '',
-'Phone Number': contact.phone || '',
-'Email Verified': contact.verified ? 'Yes' : 'No',
-'Confidence Score': contact.confidence + '%',
-'Data Sources': contact.sources.join(', '),
-'Company Domain': companyData?.domain || '',
-'Company Name': companyData?.organization || '',
-'Email Pattern': companyData?.pattern || '',
-'Discovery Method': 'AI Data Fusion',
-'Date Exported': new Date().toLocaleDateString(),
-'Exported By': 'Sales Simplified Platform'
-}));
+    // Prepare data for Excel
+    const excelData = currentContacts.map(contact => ({
+        'Full Name': contact.name,
+        'Email Address': contact.email,
+        'Job Title': contact.title,
+        'Department': contact.department,
+        'Seniority Level': contact.seniority,
+        'LinkedIn Profile': contact.linkedin || '',
+        'Phone Number': contact.phone || '',
+        'Email Verified': contact.verified ? 'Yes' : 'No',
+        'Confidence Score': contact.confidence + '%',
+        'Data Sources': contact.sources.join(', '),
+        'Company Domain': companyData?.domain || '',
+        'Company Name': companyData?.organization || '',
+        'Email Pattern': companyData?.pattern || '',
+        'Discovery Method': 'AI Data Fusion',
+        'Date Exported': new Date().toLocaleDateString(),
+        'Exported By': 'Sales Simplified Platform'
+    }));
 
-// Create workbook and worksheet
-const wb = XLSX.utils.book_new();
-const ws = XLSX.utils.json_to_sheet(excelData);
+    // Create workbook and worksheet
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(excelData);
 
-// Auto-size columns
-const range = XLSX.utils.decode_range(ws['!ref']);
-const colWidths = [];
-for (let C = range.s.c; C <= range.e.c; ++C) {
-let maxWidth = 10;
-for (let R = range.s.r; R <= range.e.r; ++R) {
-const cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
-const cell = ws[cellAddress];
-if (cell && cell.v) {
-const cellLength = cell.v.toString().length;
-if (cellLength > maxWidth) maxWidth = cellLength;
-}
-}
-colWidths.push({ wch: Math.min(maxWidth + 2, 50) });
-}
-ws['!cols'] = colWidths;
+    // Auto-size columns
+    const range = XLSX.utils.decode_range(ws['!ref']);
+    const colWidths = [];
+    for (let C = range.s.c; C <= range.e.c; ++C) {
+        let maxWidth = 10;
+        for (let R = range.s.r; R <= range.e.r; ++R) {
+            const cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
+            const cell = ws[cellAddress];
+            if (cell && cell.v) {
+                const cellLength = cell.v.toString().length;
+                if (cellLength > maxWidth) maxWidth = cellLength;
+            }
+        }
+        colWidths.push({ wch: Math.min(maxWidth + 2, 50) });
+    }
+    ws['!cols'] = colWidths;
 
-// Add worksheet to workbook
-const companyName = (companyData?.organization || document.getElementById('company-domain').value.split('.')[0]).replace(/[^a-zA-Z0-9]/g, '');
-const sheetName = `${companyName} Contacts`;
-XLSX.utils.book_append_sheet(wb, ws, sheetName);
+    // Add worksheet to workbook
+    const companyName = (companyData?.organization || document.getElementById('company-domain').value.split('.')[0]).replace(/[^a-zA-Z0-9]/g, '');
+    const sheetName = `${companyName} Contacts`;
+    XLSX.utils.book_append_sheet(wb, ws, sheetName);
 
-// Generate filename with timestamp
-const timestamp = new Date().toISOString().slice(0, 10);
-const filename = `Sales_Simplified_${companyName}_DataFusion_${timestamp}.xlsx`;
+    // Generate filename with timestamp
+    const timestamp = new Date().toISOString().slice(0, 10);
+    const filename = `Sales_Simplified_${companyName}_DataFusion_${timestamp}.xlsx`;
 
-// Download the file
-XLSX.writeFile(wb, filename);
+    // Download the file
+    XLSX.writeFile(wb, filename);
 
-// Show success message
-alert(`✅ Downloaded ${currentContacts.length} contacts from AI Data Fusion to ${filename}`);
+    // Show success message
+    alert(`✅ Downloaded ${currentContacts.length} contacts from AI Data Fusion to ${filename}`);
 }
 
 function syncToCRM() {
-const selectedCount = selectedContacts.size;
-if (selectedCount === 0) {
-alert('Please select contacts to sync to CRM');
-return;
-}
+    const selectedCount = selectedContacts.size;
+    if (selectedCount === 0) {
+        alert('Please select contacts to sync to CRM');
+        return;
+    }
 
-// Show CRM sync preview
-const modal = document.createElement('div');
-modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50';
-modal.innerHTML = `
-               <div class="bg-white rounded-lg p-6 max-w-md w-full">
-                   <h3 class="text-xl font-bold text-gray-900 mb-4">Sync to CRM</h3>
-                   <div class="space-y-4">
-                       <div>
-                           <label class="block text-sm font-medium text-gray-700 mb-2">Select CRM</label>
-                           <select class="w-full border border-gray-300 rounded-lg px-3 py-2">
-                               <option>Salesforce (Connected)</option>
-                               <option>HubSpot (Not Connected)</option>
-                               <option>Pipedrive (Not Connected)</option>
-                           </select>
+    // Show CRM sync preview
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50';
+    modal.innerHTML = `
+                   <div class="bg-white rounded-lg p-6 max-w-md w-full">
+                       <h3 class="text-xl font-bold text-gray-900 mb-4">Sync to CRM</h3>
+                       <div class="space-y-4">
+                           <div>
+                               <label class="block text-sm font-medium text-gray-700 mb-2">Select CRM</label>
+                               <select class="w-full border border-gray-300 rounded-lg px-3 py-2">
+                                   <option>Salesforce (Connected)</option>
+                                   <option>HubSpot (Not Connected)</option>
+                                   <option>Pipedrive (Not Connected)</option>
+                               </select>
+                           </div>
+                           <div class="bg-green-50 p-4 rounded-lg">
+                               <div class="flex items-center space-x-2 mb-2">
+                                   <i data-lucide="database" class="w-5 h-5 text-green-600"></i>
+                                   <span class="font-medium text-green-900">${selectedCount} contacts ready to sync</span>
+                               </div>
+                               <div class="text-sm text-green-700">
+                                   Contacts will be created as leads in Salesforce with full data fusion insights.
+                               </div>
+                           </div>
                        </div>
-                       <div class="bg-green-50 p-4 rounded-lg">
-                           <div class="flex items-center space-x-2 mb-2">
-                               <i data-lucide="database" class="w-5 h-5 text-green-600"></i>
-                               <span class="font-medium text-green-900">${selectedCount} contacts ready to sync</span>
-                           </div>
-                           <div class="text-sm text-green-700">
-                               Contacts will be created as leads in Salesforce with full data fusion insights.
-                           </div>
+                       <div class="flex space-x-3 mt-6">
+                           <button onclick="this.closest('.fixed').remove()" class="flex-1 bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-300">
+                               Cancel
+                           </button>
+                           <button onclick="this.closest('.fixed').remove(); alert('${selectedCount} contacts synced to Salesforce successfully!');" class="flex-1 bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700">
+                               Sync to Salesforce
+                           </button>
                        </div>
                    </div>
-                   <div class="flex space-x-3 mt-6">
-                       <button onclick="this.closest('.fixed').remove()" class="flex-1 bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-300">
-                           Cancel
-                       </button>
-                       <button onclick="this.closest('.fixed').remove(); alert('${selectedCount} contacts synced to Salesforce successfully!');" class="flex-1 bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700">
-                           Sync to Salesforce
-                       </button>
-                   </div>
-               </div>
-           `;
-document.body.appendChild(modal);
-lucide.createIcons();
+               `;
+    document.body.appendChild(modal);
+    lucide.createIcons();
 }
 </script>
 </body>

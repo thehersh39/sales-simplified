@@ -710,7 +710,7 @@
             }
 
             container.innerHTML = lists.slice(0, 3).map(list => `
-                <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer" onclick="viewListFromDashboard('${list.id}')">
                     <div class="flex items-center space-x-3">
                         <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
                             <i data-lucide="briefcase" class="w-4 h-4 text-blue-600"></i>
@@ -818,6 +818,21 @@
             }
         });
 
+        // Fix dashboard search auto-execution
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check URL parameters for auto-search
+            const urlParams = new URLSearchParams(window.location.search);
+            const autoSearchDomain = urlParams.get('domain');
+            
+            if (autoSearchDomain) {
+                showSection('contact-finder');
+                document.getElementById('search-domain').value = autoSearchDomain;
+                setTimeout(() => executeSearch(), 200);
+                // Clean up URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        });
+
         // Navigation Functions
         function showSection(sectionName) {
             // Hide all sections
@@ -859,7 +874,16 @@
             if (domain) {
                 // Store the search for the contact finder tab
                 setStoredData('pendingSearch', { domain: domain });
+                
+                // Switch to contact finder and trigger search immediately
                 showSection('contact-finder');
+                
+                // Wait for section to load, then execute search
+                setTimeout(() => {
+                    document.getElementById('search-domain').value = domain;
+                    executeSearch();
+                    localStorage.removeItem('pendingSearch'); // Clean up
+                }, 100);
             }
         }
 
@@ -868,7 +892,16 @@
             if (domain) {
                 // Store the search for the contact finder tab
                 setStoredData('pendingSearch', { domain: domain });
+                
+                // Switch to contact finder and trigger search immediately
                 showSection('contact-finder');
+                
+                // Wait for section to load, then execute search
+                setTimeout(() => {
+                    document.getElementById('search-domain').value = domain;
+                    executeSearch();
+                    localStorage.removeItem('pendingSearch'); // Clean up
+                }, 100);
             }
         }
 
@@ -1538,12 +1571,44 @@
         }
 
         // Saved List Management Functions
+        function viewListFromDashboard(listId) {
+            // Switch to contact lists tab and highlight the specific list
+            showSection('contact-lists');
+            
+            // Optional: You could scroll to or highlight the specific list
+            setTimeout(() => {
+                const listElement = document.querySelector(`[onclick*="${listId}"]`);
+                if (listElement) {
+                    listElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    listElement.style.backgroundColor = '#dbeafe';
+                    setTimeout(() => {
+                        listElement.style.backgroundColor = '';
+                    }, 2000);
+                }
+            }, 100);
+        }
+
         function viewList(listId) {
             const lists = getStoredData('contactLists', []);
             const list = lists.find(l => l.id === listId);
             if (list) {
-                // You could implement a detailed view modal here
-                alert(`List: ${list.name}\nContacts: ${list.contacts.length}\nCreated: ${new Date(list.created).toLocaleDateString()}`);
+                // Load the list contacts into the contact finder view
+                currentContacts = list.contacts;
+                selectedContacts.clear();
+                
+                // Switch to contact finder and show the list
+                showSection('contact-finder');
+                
+                setTimeout(() => {
+                    displayResults(list.contacts);
+                    showResults();
+                    
+                    // Update the search domain field to show what list this came from
+                    document.getElementById('search-domain').value = `Saved List: ${list.name}`;
+                    
+                    // Update results count
+                    document.getElementById('results-count').textContent = `${list.contacts.length} contacts`;
+                }, 100);
             }
         }
 

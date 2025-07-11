@@ -1228,7 +1228,8 @@
                         confidence: emailConfidence,
                         department: categorizeByTitle(person.title),
                         seniority: categorizeSeniority(person.title),
-                        webVerified: false
+                        webVerified: false,
+                        insights: [] // Initialize insights array
                     };
                     
                     // Apply enhanced confidence scoring
@@ -1255,7 +1256,8 @@
                         confidence: email.confidence,
                         department: categorizeByTitle(email.position),
                         seniority: categorizeSeniority(email.position),
-                        webVerified: false
+                        webVerified: false,
+                        insights: [] // Initialize insights array
                     };
                     
                     // Apply enhanced confidence scoring
@@ -1298,7 +1300,8 @@
                             confidence: predicted?.confidence || 65,
                             department: categorizeByTitle(webContact.title),
                             seniority: categorizeSeniority(webContact.title),
-                            webVerified: true
+                            webVerified: true,
+                            insights: [] // Initialize insights array
                         };
                         
                         fusedContacts.push(contact);

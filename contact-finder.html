@@ -1413,11 +1413,47 @@
             0%, 100% { opacity: 1; }
             50% { opacity: 0.8; }
         }
+        
+        /* Fix layout structure */
+        .main-layout {
+            display: flex;
+            min-h: screen;
+        }
+        
+        .sidebar {
+            width: 256px;
+            flex-shrink: 0;
+            background: white;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 64px;
+            height: calc(100vh - 64px);
+            overflow-y: auto;
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 1.5rem;
+            min-width: 0;
+        }
+        
+        .top-nav {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            width: 100%;
+        }
+        
+        /* Ensure proper spacing */
+        body {
+            margin: 0;
+            padding: 0;
+        }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
     <!-- Top Navigation -->
-    <nav class="gradient-bg text-white shadow-lg sticky top-0 z-50">
+    <nav class="top-nav gradient-bg text-white shadow-lg">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
                 <!-- Logo -->
@@ -1444,9 +1480,9 @@
         </div>
     </nav>
 
-    <div class="flex">
+    <div class="main-layout">
         <!-- Sidebar Navigation -->
-        <div class="w-64 bg-white shadow-lg h-screen sticky top-16">
+        <div class="sidebar">
             <div class="p-6">
                 <nav class="space-y-2">
                     <a href="#" onclick="showSection('dashboard')" class="nav-item active flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium">
@@ -1474,7 +1510,7 @@
         </div>
 
         <!-- Main Content -->
-        <div class="flex-1 p-6">
+        <div class="main-content">
             <!-- Dashboard Section -->
             <div id="dashboard-section" class="section-content">
                 <div class="mb-8">

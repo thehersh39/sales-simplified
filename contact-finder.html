@@ -107,8 +107,9 @@
                         </div>
                     </div>
                 </div>
-            </div>
-        </main>
+                </div>
+            </main>
+        </div>
     </div>
 
     <!-- Error Message -->
@@ -1089,10 +1090,16 @@
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        body {
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            height: 100%;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f9fafb;
         }
         
         .gradient-bg {
@@ -1144,67 +1151,105 @@
             background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
             border: 1px solid #e2e8f0;
         }
+        
+        /* Critical layout fixes */
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .main-layout {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        .sidebar {
+            width: 256px;
+            background: white;
+            border-right: 1px solid #e5e7eb;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+        
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+            background: #f9fafb;
+        }
+        
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
     </style>
 </head>
-<body class="bg-gray-50">
-    <!-- Header -->
-    <header class="gradient-bg text-white shadow-lg">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 brand-gradient rounded-lg flex items-center justify-center">
-                        <i data-lucide="zap" class="w-6 h-6 text-white"></i>
+<<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-16">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 brand-gradient rounded-lg flex items-center justify-center">
+                            <i data-lucide="zap" class="w-6 h-6 text-white"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-xl font-bold">Sales Simplified</h1>
+                            <p class="text-xs text-blue-200">Contact Intelligence Platform</p>
+                        </div>
                     </div>
-                    <div>
-                        <h1 class="text-xl font-bold">Sales Simplified</h1>
-                        <p class="text-xs text-blue-200">Contact Intelligence Platform</p>
-                    </div>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <div class="text-sm text-blue-200">
-                        <span class="font-medium">Bryan's Team</span> • 40 Users
-                    </div>
-                    <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                        <i data-lucide="user" class="w-4 h-4 text-white"></i>
+                    <div class="flex items-center space-x-4">
+                        <div class="text-sm text-blue-200">
+                            <span class="font-medium">Bryan's Team</span> • 40 Users
+                        </div>
+                        <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                            <i data-lucide="user" class="w-4 h-4 text-white"></i>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </header>
+        </header>
 
-    <!-- Main Layout -->
-    <div class="flex h-screen">
-        <!-- Sidebar -->
-        <aside class="w-64 bg-white shadow-lg">
-            <div class="p-6">
-                <nav class="space-y-2">
-                    <a href="#" onclick="showSection('dashboard')" class="nav-item active flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium">
-                        <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
-                        <span>Dashboard</span>
-                    </a>
-                    <a href="#" onclick="showSection('contact-finder')" class="nav-item flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-700">
-                        <i data-lucide="search" class="w-4 h-4"></i>
-                        <span>Contact Finder</span>
-                    </a>
-                    <a href="#" onclick="showSection('contact-lists')" class="nav-item flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-700">
-                        <i data-lucide="users" class="w-4 h-4"></i>
-                        <span>Contact Lists</span>
-                    </a>
-                    <a href="#" onclick="showSection('reports')" class="nav-item flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-700">
-                        <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
-                        <span>Reports</span>
-                    </a>
-                    <a href="#" onclick="showSection('exports')" class="nav-item flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-700">
-                        <i data-lucide="download" class="w-4 h-4"></i>
-                        <span>Exports</span>
-                    </a>
-                </nav>
-            </div>
-        </aside>
+        <!-- Main Layout -->
+        <div class="main-layout">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <div class="p-6">
+                    <nav class="space-y-2">
+                        <a href="#" onclick="showSection('dashboard')" class="nav-item active flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium">
+                            <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                            <span>Dashboard</span>
+                        </a>
+                        <a href="#" onclick="showSection('contact-finder')" class="nav-item flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-700">
+                            <i data-lucide="search" class="w-4 h-4"></i>
+                            <span>Contact Finder</span>
+                        </a>
+                        <a href="#" onclick="showSection('contact-lists')" class="nav-item flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-700">
+                            <i data-lucide="users" class="w-4 h-4"></i>
+                            <span>Contact Lists</span>
+                        </a>
+                        <a href="#" onclick="showSection('reports')" class="nav-item flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-700">
+                            <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+                            <span>Reports</span>
+                        </a>
+                        <a href="#" onclick="showSection('exports')" class="nav-item flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-700">
+                            <i data-lucide="download" class="w-4 h-4"></i>
+                            <span>Exports</span>
+                        </a>
+                    </nav>
+                </div>
+            </aside>
 
-        <!-- Main Content -->
-        <main class="flex-1 overflow-y-auto">
-            <div class="p-6">
+            <!-- Main Content -->
+            <main class="content-area">
+                <div class="p-6">
                 <!-- Dashboard Section -->
                 <div id="dashboard-section" class="section-content">
                     <div class="mb-8">

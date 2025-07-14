@@ -3,580 +3,286 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sales Simplified - Replace Your Sales Tool Stack</title>
+    <title>Sales Simplified - Contact Intelligence Platform</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <style>
-        .gradient-bg {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        .hero-gradient {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
         }
-        .feature-card:hover {
-            transform: translateY(-5px);
-            transition: transform 0.3s ease;
+        .card-glow {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            transition: all 0.3s ease;
         }
-        .demo-container {
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.1);
+        .card-glow:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        .brand-gradient {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 50%, #1e40af 100%);
+        }
+        .stat-card {
+            background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+            border: 1px solid #e2e8f0;
+        }
+        .pulse-glow {
+            animation: pulse-glow 2s infinite;
+        }
+        @keyframes pulse-glow {
+            0%, 100% { 
+                box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+            }
+            50% { 
+                box-shadow: 0 0 30px rgba(59, 130, 246, 0.5);
+            }
+        }
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+        @keyframes floating {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        .shimmer {
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.4),
+                transparent
+            );
+            animation: shimmer 2s infinite;
+        }
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
         }
     </style>
 </head>
-<body class="bg-gray-50">
+<body class="bg-gray-50 min-h-screen">
     <!-- Navigation -->
-    <nav class="bg-white shadow-sm sticky top-0 z-50">
+    <nav class="hero-gradient text-white shadow-2xl sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16">
-                <div class="flex items-center space-x-3">
-                    <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                        <i data-lucide="zap" class="w-5 h-5 text-white"></i>
+            <div class="flex justify-between items-center h-20">
+                <!-- Logo Options - Try different designs -->
+                <div class="flex items-center space-x-4">
+                    <!-- Logo Option 1: Lightning Bolt -->
+                    <div id="logo1" class="w-12 h-12 brand-gradient rounded-xl flex items-center justify-center shadow-lg">
+                        <i data-lucide="zap" class="w-7 h-7 text-white"></i>
                     </div>
-                    <span class="text-xl font-bold text-gray-900">Sales Simplified</span>
+                    
+                    <!-- Logo Option 2: Target/Scope (hidden by default) -->
+                    <div id="logo2" class="w-12 h-12 brand-gradient rounded-xl flex items-center justify-center shadow-lg hidden">
+                        <i data-lucide="target" class="w-7 h-7 text-white"></i>
+                    </div>
+                    
+                    <!-- Logo Option 3: Brain/AI (hidden by default) -->
+                    <div id="logo3" class="w-12 h-12 brand-gradient rounded-xl flex items-center justify-center shadow-lg hidden">
+                        <i data-lucide="brain" class="w-7 h-7 text-white"></i>
+                    </div>
+                    
+                    <!-- Logo Option 4: Radar (hidden by default) -->
+                    <div id="logo4" class="w-12 h-12 brand-gradient rounded-xl flex items-center justify-center shadow-lg hidden">
+                        <i data-lucide="radar" class="w-7 h-7 text-white"></i>
+                    </div>
+                    
+                    <div>
+                        <h1 class="text-2xl font-bold tracking-tight">Sales Simplified</h1>
+                        <p class="text-sm text-blue-200 font-medium">Contact Intelligence Platform</p>
+                    </div>
                 </div>
-                <div class="hidden md:flex space-x-8">
-                    <a href="#features" class="text-gray-600 hover:text-blue-600">Features</a>
-                    <a href="#demo" class="text-gray-600 hover:text-blue-600">Demo</a>
-                    <a href="contact-finder.html" class="text-blue-600 hover:text-blue-800 font-medium">Contact Finder</a>
-                    <a href="workflow.html" class="text-gray-600 hover:text-blue-600">Platform</a>
-                    <a href="#pricing" class="text-gray-600 hover:text-blue-600">Pricing</a>
+
+                <!-- Logo Switcher (for testing) -->
+                <div class="hidden md:flex space-x-2">
+                    <button onclick="switchLogo(1)" class="px-3 py-1 bg-blue-600/20 rounded text-xs hover:bg-blue-600/40">⚡</button>
+                    <button onclick="switchLogo(2)" class="px-3 py-1 bg-blue-600/20 rounded text-xs hover:bg-blue-600/40">🎯</button>
+                    <button onclick="switchLogo(3)" class="px-3 py-1 bg-blue-600/20 rounded text-xs hover:bg-blue-600/40">🧠</button>
+                    <button onclick="switchLogo(4)" class="px-3 py-1 bg-blue-600/20 rounded text-xs hover:bg-blue-600/40">📡</button>
                 </div>
-                <button onclick="scrollToDemo()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-                    Try Demo
+
+                <!-- Login Button -->
+                <button onclick="goToLogin()" class="bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-all duration-200 shadow-lg pulse-glow">
+                    Access Platform
                 </button>
             </div>
         </div>
     </nav>
 
     <!-- Hero Section -->
-    <section class="gradient-bg text-white py-20">
+    <section class="hero-gradient text-white py-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h1 class="text-5xl font-bold mb-6">
-                Simplify Your Entire Sales Stack
-            </h1>
-            <p class="text-xl mb-8 max-w-3xl mx-auto opacity-90">
-                Stop paying $270+ per month for 8 different sales tools that don't talk to each other. 
-                Sales Simplified combines email sequences, contact data, and CRM integration into one powerful platform.
-            </p>
-            <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4 mb-12">
-                <a href="contact-finder.html" class="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
-                    Try Contact Finder
-                </a>
-                <button onclick="showWaitlist()" class="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors">
-                    Join Beta Waitlist
-                </button>
+            <div class="floating">
+                <h1 class="text-5xl md:text-6xl font-bold mb-6 leading-tight">
+                    Contact Intelligence
+                    <span class="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                        Redefined
+                    </span>
+                </h1>
             </div>
-
-            <!-- Social Proof -->
-            <div class="opacity-80">
-                <p class="text-sm mb-4">Validated by sales teams at:</p>
-                <div class="flex justify-center space-x-8 text-lg font-medium">
-                    <span>Numerator</span>
-                    <span>•</span>
-                    <span>TechCorp</span>
-                    <span>•</span>
-                    <span>DataSoft</span>
+            <p class="text-xl md:text-2xl text-blue-100 mb-8 max-w-3xl mx-auto leading-relaxed">
+                Multi-source data fusion technology that delivers 60-80% verified emails 
+                at 67% less cost than traditional platforms
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <button onclick="goToLogin()" class="bg-white text-blue-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-50 transition-all duration-200 shadow-2xl">
+                    Start Finding Contacts
+                    <i data-lucide="arrow-right" class="w-5 h-5 ml-2 inline"></i>
+                </button>
+                <div class="text-sm text-blue-200">
+                    ✅ No per-seat charges • ✅ Unlimited users • ✅ Enterprise-grade data
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Problem Section -->
+    <!-- Stats Section -->
     <section class="py-16 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12">
-                <h2 class="text-3xl font-bold text-gray-900 mb-4">
-                    The Sales Tool Sprawl Problem
-                </h2>
-                <p class="text-gray-600 max-w-2xl mx-auto">
-                    Sales teams are drowning in tools that don't work together, creating inefficiency and frustration.
-                </p>
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">Why Teams Choose Sales Simplified</h2>
+                <p class="text-lg text-gray-600">Real performance metrics that matter to your bottom line</p>
             </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="text-center p-6 bg-red-50 rounded-lg border border-red-100">
-                    <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i data-lucide="x-circle" class="w-6 h-6 text-red-600"></i>
+            
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div class="stat-card rounded-2xl p-8 text-center card-glow">
+                    <div class="w-16 h-16 brand-gradient rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i data-lucide="check-circle" class="w-8 h-8 text-white"></i>
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Tool Overload</h3>
-                    <p class="text-gray-600 text-sm">Average sales rep uses 8+ tools daily. Context switching kills productivity.</p>
+                    <div class="text-4xl font-bold text-gray-900 mb-2">60-80%</div>
+                    <div class="text-sm text-gray-600 font-medium">Email Verification Rate</div>
+                    <div class="text-xs text-green-600 mt-1">vs other platforms' poor accuracy</div>
                 </div>
-
-                <div class="text-center p-6 bg-yellow-50 rounded-lg border border-yellow-100">
-                    <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i data-lucide="alert-triangle" class="w-6 h-6 text-yellow-600"></i>
+                
+                <div class="stat-card rounded-2xl p-8 text-center card-glow">
+                    <div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i data-lucide="dollar-sign" class="w-8 h-8 text-white"></i>
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Bad Data</h3>
-                    <p class="text-gray-600 text-sm">Cognism and others provide majority wrong emails. Bounces hurt sender reputation.</p>
+                    <div class="text-4xl font-bold text-gray-900 mb-2">67%</div>
+                    <div class="text-sm text-gray-600 font-medium">Cost Reduction</div>
+                    <div class="text-xs text-green-600 mt-1">Save $37k+ annually</div>
                 </div>
-
-                <div class="text-center p-6 bg-blue-50 rounded-lg border border-blue-100">
-                    <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i data-lucide="dollar-sign" class="w-6 h-6 text-blue-600"></i>
+                
+                <div class="stat-card rounded-2xl p-8 text-center card-glow">
+                    <div class="w-16 h-16 bg-purple-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i data-lucide="users" class="w-8 h-8 text-white"></i>
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Budget Pressure</h3>
-                    <p class="text-gray-600 text-sm">$270+ per month per rep adds up fast. CFOs demanding consolidation.</p>
+                    <div class="text-4xl font-bold text-gray-900 mb-2">Unlimited</div>
+                    <div class="text-sm text-gray-600 font-medium">Team Members</div>
+                    <div class="text-xs text-purple-600 mt-1">No per-seat pricing</div>
+                </div>
+                
+                <div class="stat-card rounded-2xl p-8 text-center card-glow">
+                    <div class="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i data-lucide="database" class="w-8 h-8 text-white"></i>
+                    </div>
+                    <div class="text-4xl font-bold text-gray-900 mb-2">Multi</div>
+                    <div class="text-sm text-gray-600 font-medium">Data Sources</div>
+                    <div class="text-xs text-orange-600 mt-1">Enhanced AI fusion</div>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Features Section -->
-    <section id="features" class="py-16 bg-gray-50">
+    <section class="py-16 bg-gray-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12">
-                <h2 class="text-3xl font-bold text-gray-900 mb-4">
-                    One Platform. All Your Sales Tools.
-                </h2>
-                <p class="text-gray-600 max-w-2xl mx-auto">
-                    Sales Simplified replaces MixMax, Cognism, and 6 other tools with a single, integrated workflow.
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-gray-900 mb-4">What Makes Us Different</h2>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+                    Built for modern sales teams who demand better data quality and smarter pricing
                 </p>
             </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Email Pattern Discovery -->
-                <div class="feature-card bg-white p-6 rounded-lg shadow-sm border hover:shadow-md">
-                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
-                        <i data-lucide="brain" class="w-6 h-6 text-purple-600"></i>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
+                <div class="text-center">
+                    <div class="w-20 h-20 brand-gradient rounded-2xl flex items-center justify-center mx-auto mb-6 floating">
+                        <i data-lucide="brain" class="w-10 h-10 text-white"></i>
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">AI Email Discovery</h3>
-                    <p class="text-gray-600 text-sm mb-4">Our AI learns company email patterns that Cognism misses. 95% accuracy vs 60% industry average.</p>
-                    <div class="text-xs text-purple-600 font-medium">Replaces: Cognism, ZoomInfo, Apollo</div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Enhanced AI Data Fusion</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        Our proprietary technology combines multiple enterprise databases and web intelligence 
+                        to deliver superior contact accuracy that outperforms single-source platforms.
+                    </p>
                 </div>
-
-                <!-- Simple Sequences -->
-                <div class="feature-card bg-white p-6 rounded-lg shadow-sm border hover:shadow-md">
-                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
-                        <i data-lucide="mail" class="w-6 h-6 text-blue-600"></i>
+                
+                <div class="text-center">
+                    <div class="w-20 h-20 bg-green-500 rounded-2xl flex items-center justify-center mx-auto mb-6 floating" style="animation-delay: 0.5s;">
+                        <i data-lucide="shield-check" class="w-10 h-10 text-white"></i>
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Simple Sequences</h3>
-                    <p class="text-gray-600 text-sm mb-4">Build email sequences in minutes, not hours. No confusing automation - just what works.</p>
-                    <div class="text-xs text-blue-600 font-medium">Replaces: MixMax, Outreach, Salesloft</div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Verified Email Quality</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        Stop wasting time on bounced emails. Our advanced verification delivers 60-80% 
+                        accurate contacts, eliminating the "majority wrong emails" problem of other platforms.
+                    </p>
                 </div>
-
-                <!-- Contact Finder -->
-                <div class="feature-card bg-white p-6 rounded-lg shadow-sm border hover:shadow-md">
-                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-                        <i data-lucide="users" class="w-6 h-6 text-green-600"></i>
+                
+                <div class="text-center">
+                    <div class="w-20 h-20 bg-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-6 floating" style="animation-delay: 1s;">
+                        <i data-lucide="trending-down" class="w-10 h-10 text-white"></i>
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Smart Contact Finder</h3>
-                    <p class="text-gray-600 text-sm mb-4">Find 40+ contacts with verified emails and LinkedIn profiles at any company instantly.</p>
-                    <div class="text-xs text-green-600 font-medium">
-                        <a href="contact-finder.html" class="hover:underline">Try it now →</a>
-                    </div>
-                </div>
-
-                <!-- CRM Integration -->
-                <div class="feature-card bg-white p-6 rounded-lg shadow-sm border hover:shadow-md">
-                    <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mb-4">
-                        <i data-lucide="database" class="w-6 h-6 text-yellow-600"></i>
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">CRM Sync</h3>
-                    <p class="text-gray-600 text-sm mb-4">Native Salesforce and HubSpot integration. All activity syncs automatically.</p>
-                    <div class="text-xs text-yellow-600 font-medium">Replaces: Data entry, manual logging</div>
-                </div>
-
-                <!-- Email Validation -->
-                <div class="feature-card bg-white p-6 rounded-lg shadow-sm border hover:shadow-md">
-                    <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-4">
-                        <i data-lucide="shield-check" class="w-6 h-6 text-red-600"></i>
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Real-time Validation</h3>
-                    <p class="text-gray-600 text-sm mb-4">Verify emails before sending to protect your sender reputation. Reduce bounces by 80%.</p>
-                    <div class="text-xs text-red-600 font-medium">Replaces: NeverBounce, ZeroBounce</div>
-                </div>
-
-                <!-- Smart Workflows -->
-                <div class="feature-card bg-white p-6 rounded-lg shadow-sm border hover:shadow-md">
-                    <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mb-4">
-                        <i data-lucide="workflow" class="w-6 h-6 text-indigo-600"></i>
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Smart Workflows</h3>
-                    <p class="text-gray-600 text-sm mb-4">Automate follow-ups and task creation. Focus on selling, not busy work.</p>
-                    <div class="text-xs text-indigo-600 font-medium">Replaces: Manual processes</div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Smart Pricing Model</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        Unlimited team access with no per-seat charges. Replace multiple tools with one 
+                        better solution and save 67% compared to traditional contact intelligence platforms.
+                    </p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Demo Section -->
-    <section id="demo" class="py-16 bg-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12">
-                <h2 class="text-3xl font-bold text-gray-900 mb-4">
-                    See Our AI Email Discovery in Action
-                </h2>
-                <p class="text-gray-600 max-w-2xl mx-auto">
-                    Enter any company domain and watch our AI discover their exact email pattern in seconds.
-                </p>
-            </div>
-
-            <div class="demo-container max-w-4xl mx-auto bg-white rounded-lg border p-8">
-                <!-- Demo Interface -->
-                <div class="space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Company Domain</label>
-                            <input type="text" id="demo-domain" placeholder="e.g., techcorp.com" 
-                                   class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Known Email (optional)</label>
-                            <input type="email" id="demo-email" placeholder="john.smith@techcorp.com"
-                                   class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        </div>
-                    </div>
-
-                    <button onclick="runDemo()" id="demo-button"
-                            class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 font-semibold">
-                        Discover Email Pattern
-                    </button>
-
-                    <!-- Demo Results -->
-                    <div id="demo-results" class="hidden space-y-4">
-                        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
-                            <div class="flex items-center space-x-2 mb-2">
-                                <i data-lucide="check-circle" class="w-5 h-5 text-green-600"></i>
-                                <span class="font-semibold text-green-800">Pattern Discovered!</span>
-                                <span id="demo-confidence" class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">95% Confidence</span>
-                            </div>
-                            <div class="font-mono text-lg bg-white p-3 rounded border" id="demo-pattern">
-                                {first}.{last}@{domain}
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Test with New Person</label>
-                                <input type="text" id="demo-person" placeholder="Sarah Johnson"
-                                       class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            </div>
-                            <div class="flex items-end">
-                                <button onclick="generateTestEmail()" 
-                                        class="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700">
-                                    Generate Email
-                                </button>
-                            </div>
-                        </div>
-
-                        <div id="generated-email" class="hidden bg-blue-50 border border-blue-200 rounded-lg p-4">
-                            <div class="text-sm text-blue-800 mb-1">Generated Email:</div>
-                            <div class="font-mono text-lg text-blue-900" id="generated-email-text"></div>
-                        </div>
-
-                        <div class="text-center pt-4">
-                            <a href="contact-finder.html" class="inline-flex items-center space-x-2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 font-semibold">
-                                <i data-lucide="users" class="w-4 h-4"></i>
-                                <span>Try Full Contact Finder →</span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Demo Examples -->
-                <div class="mt-8 bg-gray-50 rounded-lg p-4">
-                    <div class="text-sm text-gray-600 mb-2">Try these examples:</div>
-                    <div class="flex flex-wrap gap-2">
-                        <button onclick="loadExample('techcorp.com', 'john.smith@techcorp.com')" 
-                                class="px-3 py-1 bg-white border rounded text-sm hover:bg-gray-50">
-                            TechCorp
-                        </button>
-                        <button onclick="loadExample('datasoft.com', 'mikebrown@datasoft.com')" 
-                                class="px-3 py-1 bg-white border rounded text-sm hover:bg-gray-50">
-                            DataSoft
-                        </button>
-                        <button onclick="loadExample('innovatelab.com', '')" 
-                                class="px-3 py-1 bg-white border rounded text-sm hover:bg-gray-50">
-                            InnovateLab
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Pricing Section -->
-    <section id="pricing" class="py-16 bg-gray-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12">
-                <h2 class="text-3xl font-bold text-gray-900 mb-4">
-                    Simple, Transparent Pricing
-                </h2>
-                <p class="text-gray-600 max-w-2xl mx-auto">
-                    Replace your entire sales tool stack for less than you're paying for email sequences alone.
-                </p>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-                <!-- Current Stack -->
-                <div class="bg-white rounded-lg border p-6 relative">
-                    <div class="text-center mb-6">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Your Current Stack</h3>
-                        <div class="text-3xl font-bold text-red-600 mb-1">$270+</div>
-                        <div class="text-sm text-gray-600">per user/month</div>
-                    </div>
-                    <ul class="space-y-3 text-sm text-gray-600">
-                        <li class="flex items-center space-x-2">
-                            <i data-lucide="x" class="w-4 h-4 text-red-500"></i>
-                            <span>MixMax: $49/month</span>
-                        </li>
-                        <li class="flex items-center space-x-2">
-                            <i data-lucide="x" class="w-4 h-4 text-red-500"></i>
-                            <span>Cognism: $87/month</span>
-                        </li>
-                        <li class="flex items-center space-x-2">
-                            <i data-lucide="x" class="w-4 h-4 text-red-500"></i>
-                            <span>NeverBounce: $35/month</span>
-                        </li>
-                        <li class="flex items-center space-x-2">
-                            <i data-lucide="x" class="w-4 h-4 text-red-500"></i>
-                            <span>Calendly: $15/month</span>
-                        </li>
-                        <li class="flex items-center space-x-2">
-                            <i data-lucide="x" class="w-4 h-4 text-red-500"></i>
-                            <span>+ 4 more tools</span>
-                        </li>
-                    </ul>
-                    <div class="mt-6 p-3 bg-red-50 rounded text-xs text-red-800">
-                        <strong>Problems:</strong> Tools don't integrate, bad data quality, context switching
-                    </div>
-                </div>
-
-                <!-- Sales Simplified Plan -->
-                <div class="bg-blue-600 text-white rounded-lg p-6 relative transform scale-105">
-                    <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full text-xs font-medium">
-                        RECOMMENDED
-                    </div>
-                    <div class="text-center mb-6">
-                        <h3 class="text-lg font-semibold mb-2">Sales Simplified All-in-One</h3>
-                        <div class="text-3xl font-bold mb-1">$199</div>
-                        <div class="text-sm opacity-90">per user/month</div>
-                    </div>
-                    <ul class="space-y-3 text-sm">
-                        <li class="flex items-center space-x-2">
-                            <i data-lucide="check" class="w-4 h-4 text-green-400"></i>
-                            <span>AI Email Discovery</span>
-                        </li>
-                        <li class="flex items-center space-x-2">
-                            <i data-lucide="check" class="w-4 h-4 text-green-400"></i>
-                            <span>Contact Finder</span>
-                        </li>
-                        <li class="flex items-center space-x-2">
-                            <i data-lucide="check" class="w-4 h-4 text-green-400"></i>
-                            <span>Email Sequences</span>
-                        </li>
-                        <li class="flex items-center space-x-2">
-                            <i data-lucide="check" class="w-4 h-4 text-green-400"></i>
-                            <span>CRM Integration</span>
-                        </li>
-                        <li class="flex items-center space-x-2">
-                            <i data-lucide="check" class="w-4 h-4 text-green-400"></i>
-                            <span>Email Validation</span>
-                        </li>
-                        <li class="flex items-center space-x-2">
-                            <i data-lucide="check" class="w-4 h-4 text-green-400"></i>
-                            <span>Analytics Dashboard</span>
-                        </li>
-                    </ul>
-                    <button onclick="showWaitlist()" class="w-full mt-6 bg-white text-blue-600 py-3 rounded-lg font-semibold hover:bg-gray-100">
-                        Join Beta Waitlist
-                    </button>
-                </div>
-
-                <!-- Savings -->
-                <div class="bg-white rounded-lg border p-6 relative">
-                    <div class="text-center mb-6">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Your Savings</h3>
-                        <div class="text-3xl font-bold text-green-600 mb-1">$71+</div>
-                        <div class="text-sm text-gray-600">saved per user/month</div>
-                    </div>
-                    <ul class="space-y-3 text-sm text-gray-600">
-                        <li class="flex items-center space-x-2">
-                            <i data-lucide="trending-up" class="w-4 h-4 text-green-500"></i>
-                            <span>26% cost reduction</span>
-                        </li>
-                        <li class="flex items-center space-x-2">
-                            <i data-lucide="clock" class="w-4 h-4 text-green-500"></i>
-                            <span>2+ hours saved daily</span>
-                        </li>
-                        <li class="flex items-center space-x-2">
-                            <i data-lucide="shield" class="w-4 h-4 text-green-500"></i>
-                            <span>Better data quality</span>
-                        </li>
-                        <li class="flex items-center space-x-2">
-                            <i data-lucide="zap" class="w-4 h-4 text-green-500"></i>
-                            <span>Single workflow</span>
-                        </li>
-                    </ul>
-                    <div class="mt-6 p-3 bg-green-50 rounded text-xs text-green-800">
-                        <strong>10-person team saves $8,520/year</strong> while increasing productivity
-                    </div>
-                </div>
-            </div>
-
-            <div class="text-center mt-8">
-                <p class="text-gray-600 text-sm">Beta pricing available for first 50 customers. No long-term contracts.</p>
+    <!-- CTA Section -->
+    <section class="hero-gradient text-white py-20">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-4xl font-bold mb-6">Ready to Transform Your Contact Intelligence?</h2>
+            <p class="text-xl text-blue-100 mb-8">
+                Join forward-thinking sales teams who've upgraded to better data quality and smarter pricing
+            </p>
+            <button onclick="goToLogin()" class="bg-white text-blue-600 px-10 py-4 rounded-xl font-bold text-xl hover:bg-blue-50 transition-all duration-200 shadow-2xl pulse-glow">
+                Access Your Platform
+                <i data-lucide="arrow-right" class="w-6 h-6 ml-2 inline"></i>
+            </button>
+            <div class="mt-6 text-sm text-blue-200">
+                Enterprise-grade security • GDPR compliant • 99.9% uptime
             </div>
         </div>
     </section>
 
     <!-- Footer -->
     <footer class="bg-gray-900 text-white py-12">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div class="flex items-center justify-center space-x-3 mb-4">
-                <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                    <i data-lucide="zap" class="w-5 h-5 text-white"></i>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <div class="flex items-center justify-center space-x-3 mb-4">
+                    <div class="w-10 h-10 brand-gradient rounded-lg flex items-center justify-center">
+                        <i data-lucide="zap" class="w-6 h-6 text-white"></i>
+                    </div>
+                    <h3 class="text-xl font-bold">Sales Simplified</h3>
                 </div>
-                <span class="text-xl font-bold">Sales Simplified</span>
+                <p class="text-gray-400 mb-6">Contact Intelligence Platform</p>
+                <div class="text-sm text-gray-500">
+                    © 2025 Sales Simplified. All rights reserved.
+                </div>
             </div>
-            <p class="text-gray-400 mb-6">Replace your sales tool stack. Sell more. Save money.</p>
-            <div class="flex justify-center space-x-4 mb-6">
-                <a href="contact-finder.html" class="text-gray-400 hover:text-white">Contact Finder</a>
-                <a href="workflow.html" class="text-gray-400 hover:text-white">Platform Demo</a>
-                <a href="prospect-search.html" class="text-gray-400 hover:text-white">Prospect Search</a>
-            </div>
-            <button onclick="showWaitlist()" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700">
-                Join Beta Waitlist
-            </button>
         </div>
     </footer>
 
-    <!-- Waitlist Modal -->
-    <div id="waitlist-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
-        <div class="bg-white rounded-lg p-6 max-w-md w-full">
-            <div class="text-center mb-6">
-                <h3 class="text-xl font-bold text-gray-900 mb-2">Join the Beta Waitlist</h3>
-                <p class="text-gray-600 text-sm">Be among the first 50 customers to get beta pricing and early access.</p>
-            </div>
-            <div class="space-y-4">
-                <input type="text" id="waitlist-name" placeholder="Your Name" 
-                       class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <input type="email" id="waitlist-email" placeholder="Work Email" 
-                       class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <input type="text" id="waitlist-company" placeholder="Company" 
-                       class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <select id="waitlist-team-size" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="">Team Size</option>
-                    <option value="1-10">1-10 people</option>
-                    <option value="11-50">11-50 people</option>
-                    <option value="51-200">51-200 people</option>
-                    <option value="200+">200+ people</option>
-                </select>
-            </div>
-            <div class="flex space-x-3 mt-6">
-                <button onclick="hideWaitlist()" class="flex-1 bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-300">
-                    Cancel
-                </button>
-                <button onclick="submitWaitlist()" class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700">
-                    Join Waitlist
-                </button>
-            </div>
-        </div>
-    </div>
-
     <script>
-        lucide.createIcons();
-
-        function scrollToDemo() {
-            document.getElementById('demo').scrollIntoView({ behavior: 'smooth' });
+        function goToLogin() {
+            // For now, just show an alert - you'll replace this with actual login page navigation
+            window.location.href = 'login.html';
         }
 
-        function showWaitlist() {
-            document.getElementById('waitlist-modal').classList.remove('hidden');
-        }
-
-        function hideWaitlist() {
-            document.getElementById('waitlist-modal').classList.add('hidden');
-        }
-
-        function submitWaitlist() {
-            const name = document.getElementById('waitlist-name').value;
-            const email = document.getElementById('waitlist-email').value;
-            
-            if (!name || !email) {
-                alert('Please fill in your name and email');
-                return;
+        function switchLogo(logoNumber) {
+            // Hide all logos
+            for (let i = 1; i <= 4; i++) {
+                document.getElementById(`logo${i}`).classList.add('hidden');
             }
-
-            // In production, this would submit to your backend
-            alert(`Thanks ${name}! We'll send beta access to ${email} soon.`);
-            hideWaitlist();
-            
-            // Clear form
-            document.getElementById('waitlist-name').value = '';
-            document.getElementById('waitlist-email').value = '';
-            document.getElementById('waitlist-company').value = '';
-            document.getElementById('waitlist-team-size').value = '';
+            // Show selected logo
+            document.getElementById(`logo${logoNumber}`).classList.remove('hidden');
         }
 
-        function loadExample(domain, email) {
-            document.getElementById('demo-domain').value = domain;
-            document.getElementById('demo-email').value = email;
-        }
-
-        function runDemo() {
-            const domain = document.getElementById('demo-domain').value;
-            if (!domain) {
-                alert('Please enter a company domain');
-                return;
-            }
-
-            const button = document.getElementById('demo-button');
-            button.innerHTML = '<div class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent inline-block mr-2"></div>Analyzing...';
-            button.disabled = true;
-
-            setTimeout(() => {
-                // Simulate pattern discovery
-                const email = document.getElementById('demo-email').value;
-                let pattern, confidence;
-
-                if (email && email.includes('.')) {
-                    pattern = '{first}.{last}@{domain}';
-                    confidence = '95%';
-                } else if (email && email.length > 15) {
-                    pattern = '{first}{last}@{domain}';
-                    confidence = '88%';
-                } else {
-                    pattern = '{first}.{last}@{domain}';
-                    confidence = '82%';
-                }
-
-                // Show results
-                document.getElementById('demo-pattern').textContent = pattern.replace('{domain}', domain);
-                document.getElementById('demo-confidence').textContent = confidence + ' Confidence';
-                document.getElementById('demo-results').classList.remove('hidden');
-
-                // Reset button
-                button.innerHTML = 'Discover Email Pattern';
-                button.disabled = false;
-                
-                // Re-initialize icons
+        // Initialize icons
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof lucide !== 'undefined') {
                 lucide.createIcons();
-            }, 2000);
-        }
-
-        function generateTestEmail() {
-            const person = document.getElementById('demo-person').value;
-            const domain = document.getElementById('demo-domain').value;
-            const pattern = document.getElementById('demo-pattern').textContent;
-
-            if (!person || !person.includes(' ')) {
-                alert('Please enter first and last name');
-                return;
-            }
-
-            const [firstName, lastName] = person.toLowerCase().split(' ');
-            let email = pattern
-                .replace('{first}', firstName)
-                .replace('{last}', lastName)
-                .replace('{f}', firstName.charAt(0))
-                .replace('{l}', lastName.charAt(0));
-
-            document.getElementById('generated-email-text').textContent = email;
-            document.getElementById('generated-email').classList.remove('hidden');
-            document.getElementById('demo-person').value = '';
-        }
-
-        // Close modal when clicking outside
-        document.getElementById('waitlist-modal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                hideWaitlist();
             }
         });
     </script>

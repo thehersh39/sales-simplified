@@ -63,40 +63,14 @@
     <nav class="hero-gradient text-white shadow-2xl sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-20">
-                <!-- Logo Options - Try different designs -->
                 <div class="flex items-center space-x-4">
-                    <!-- Logo Option 1: Lightning Bolt -->
-                    <div id="logo1" class="w-12 h-12 brand-gradient rounded-xl flex items-center justify-center shadow-lg">
+                    <div class="w-12 h-12 brand-gradient rounded-xl flex items-center justify-center shadow-lg">
                         <i data-lucide="zap" class="w-7 h-7 text-white"></i>
                     </div>
-                    
-                    <!-- Logo Option 2: Target/Scope (hidden by default) -->
-                    <div id="logo2" class="w-12 h-12 brand-gradient rounded-xl flex items-center justify-center shadow-lg hidden">
-                        <i data-lucide="target" class="w-7 h-7 text-white"></i>
-                    </div>
-                    
-                    <!-- Logo Option 3: Brain/AI (hidden by default) -->
-                    <div id="logo3" class="w-12 h-12 brand-gradient rounded-xl flex items-center justify-center shadow-lg hidden">
-                        <i data-lucide="brain" class="w-7 h-7 text-white"></i>
-                    </div>
-                    
-                    <!-- Logo Option 4: Radar (hidden by default) -->
-                    <div id="logo4" class="w-12 h-12 brand-gradient rounded-xl flex items-center justify-center shadow-lg hidden">
-                        <i data-lucide="radar" class="w-7 h-7 text-white"></i>
-                    </div>
-                    
                     <div>
                         <h1 class="text-2xl font-bold tracking-tight">Sales Simplified</h1>
                         <p class="text-sm text-blue-200 font-medium">Contact Intelligence Platform</p>
                     </div>
-                </div>
-
-                <!-- Logo Switcher (for testing) -->
-                <div class="hidden md:flex space-x-2">
-                    <button onclick="switchLogo(1)" class="px-3 py-1 bg-blue-600/20 rounded text-xs hover:bg-blue-600/40">⚡</button>
-                    <button onclick="switchLogo(2)" class="px-3 py-1 bg-blue-600/20 rounded text-xs hover:bg-blue-600/40">🎯</button>
-                    <button onclick="switchLogo(3)" class="px-3 py-1 bg-blue-600/20 rounded text-xs hover:bg-blue-600/40">🧠</button>
-                    <button onclick="switchLogo(4)" class="px-3 py-1 bg-blue-600/20 rounded text-xs hover:bg-blue-600/40">📡</button>
                 </div>
 
                 <!-- Login Button -->
@@ -119,8 +93,8 @@
                 </h1>
             </div>
             <p class="text-xl md:text-2xl text-blue-100 mb-8 max-w-3xl mx-auto leading-relaxed">
-                Multi-source data fusion technology that delivers 60-80% verified emails 
-                at 67% less cost than traditional platforms
+                Multi-source data fusion with advanced email pattern detection that delivers 60-80% verified emails 
+                at significantly lower cost than traditional platforms
             </p>
             <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
                 <button onclick="goToLogin()" class="bg-white text-blue-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-50 transition-all duration-200 shadow-2xl">
@@ -128,7 +102,7 @@
                     <i data-lucide="arrow-right" class="w-5 h-5 ml-2 inline"></i>
                 </button>
                 <div class="text-sm text-blue-200">
-                    ✅ No per-seat charges • ✅ Unlimited users • ✅ Enterprise-grade data
+                    ✅ Advanced pattern detection • ✅ Multi-source fusion • ✅ Enterprise-grade data
                 </div>
             </div>
         </div>
@@ -163,20 +137,20 @@
                 
                 <div class="stat-card rounded-2xl p-8 text-center card-glow">
                     <div class="w-16 h-16 bg-purple-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i data-lucide="users" class="w-8 h-8 text-white"></i>
+                        <i data-lucide="zap" class="w-8 h-8 text-white"></i>
                     </div>
-                    <div class="text-4xl font-bold text-gray-900 mb-2">Unlimited</div>
-                    <div class="text-sm text-gray-600 font-medium">Team Members</div>
-                    <div class="text-xs text-purple-600 mt-1">No per-seat pricing</div>
+                    <div class="text-4xl font-bold text-gray-900 mb-2">Smart</div>
+                    <div class="text-sm text-gray-600 font-medium">Pricing Model</div>
+                    <div class="text-xs text-purple-600 mt-1">Scale efficiently</div>
                 </div>
                 
                 <div class="stat-card rounded-2xl p-8 text-center card-glow">
                     <div class="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i data-lucide="database" class="w-8 h-8 text-white"></i>
+                        <i data-lucide="search" class="w-8 h-8 text-white"></i>
                     </div>
-                    <div class="text-4xl font-bold text-gray-900 mb-2">Multi</div>
-                    <div class="text-sm text-gray-600 font-medium">Data Sources</div>
-                    <div class="text-xs text-orange-600 mt-1">Enhanced AI fusion</div>
+                    <div class="text-4xl font-bold text-gray-900 mb-2">Pattern</div>
+                    <div class="text-sm text-gray-600 font-medium">Email Detection</div>
+                    <div class="text-xs text-orange-600 mt-1">Advanced algorithms</div>
                 </div>
             </div>
         </div>
@@ -206,12 +180,12 @@
                 
                 <div class="text-center">
                     <div class="w-20 h-20 bg-green-500 rounded-2xl flex items-center justify-center mx-auto mb-6 floating" style="animation-delay: 0.5s;">
-                        <i data-lucide="shield-check" class="w-10 h-10 text-white"></i>
+                        <i data-lucide="target" class="w-10 h-10 text-white"></i>
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Verified Email Quality</h3>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Advanced Email Pattern Detection</h3>
                     <p class="text-gray-600 leading-relaxed">
-                        Stop wasting time on bounced emails. Our advanced verification delivers 60-80% 
-                        accurate contacts, eliminating the "majority wrong emails" problem of other platforms.
+                        Our proprietary algorithms analyze company naming conventions, organizational structures, 
+                        and historical patterns to predict and verify email formats with industry-leading accuracy.
                     </p>
                 </div>
                 
@@ -221,8 +195,8 @@
                     </div>
                     <h3 class="text-2xl font-bold text-gray-900 mb-4">Smart Pricing Model</h3>
                     <p class="text-gray-600 leading-relaxed">
-                        Unlimited team access with no per-seat charges. Replace multiple tools with one 
-                        better solution and save 67% compared to traditional contact intelligence platforms.
+                        Transparent, scalable pricing that grows with your business. No hidden fees, no surprise charges, 
+                        and significant cost savings compared to legacy contact intelligence platforms.
                     </p>
                 </div>
             </div>
@@ -266,17 +240,7 @@
 
     <script>
         function goToLogin() {
-            // For now, just show an alert - you'll replace this with actual login page navigation
             window.location.href = 'login.html';
-        }
-
-        function switchLogo(logoNumber) {
-            // Hide all logos
-            for (let i = 1; i <= 4; i++) {
-                document.getElementById(`logo${i}`).classList.add('hidden');
-            }
-            // Show selected logo
-            document.getElementById(`logo${logoNumber}`).classList.remove('hidden');
         }
 
         // Initialize icons

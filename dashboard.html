@@ -221,236 +221,6 @@
 
                 <!-- Recent Activity & Saved Lists -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <!-- Recent Activity -->
-                    <div class="bg-white rounded-lg shadow-sm p-6">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
-                        <div id="recent-activity" class="space-y-4">
-                            <div class="text-center py-8 text-gray-500">
-                                <i data-lucide="activity" class="w-8 h-8 mx-auto mb-2"></i>
-                                <p class="text-sm">Start searching to see your activity</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Saved Lists -->
-                    <div class="bg-white rounded-lg shadow-sm p-6">
-                        <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-lg font-semibold text-gray-900">Saved Lists</h3>
-                            <button onclick="createNewList()" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
-                                Create New
-                            </button>
-                        </div>
-                        <div id="saved-lists-preview" class="space-y-3">
-                            <div class="text-center py-8 text-gray-500">
-                                <i data-lucide="list" class="w-8 h-8 mx-auto mb-2"></i>
-                                <p class="text-sm">No saved lists yet</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Contact Finder Section -->
-            <div id="contact-finder-section" class="section-content hidden">
-                <div class="flex items-center justify-between mb-6">
-                    <div>
-                        <h2 class="text-2xl font-bold text-gray-900">Contact Finder</h2>
-                        <p class="text-gray-600">Enhanced AI-powered multi-source contact discovery</p>
-                    </div>
-                    <div class="flex items-center space-x-3">
-                        <div class="flex bg-gray-100 rounded-lg p-1">
-                            <button onclick="setContactView('grid')" id="grid-view-btn" class="px-3 py-1 rounded bg-white text-gray-900 text-sm font-medium shadow-sm">
-                                <i data-lucide="grid-3x3" class="w-4 h-4"></i>
-                            </button>
-                            <button onclick="setContactView('list')" id="list-view-btn" class="px-3 py-1 rounded text-gray-600 text-sm font-medium">
-                                <i data-lucide="list" class="w-4 h-4"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
-                    <div class="fusion-badge text-white px-3 py-1 rounded-full text-xs font-medium mb-4 inline-block">
-                        ENHANCED MULTI-SOURCE DATA FUSION
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Company Domain</label>
-                            <input type="text" id="search-domain" placeholder="e.g., salesforce.com" 
-                                   class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Seniority Level</label>
-                            <select id="seniority-filter" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
-                                <option value="">All Levels</option>
-                                <option value="c_level">C-Level</option>
-                                <option value="vp">VP Level</option>
-                                <option value="director">Director</option>
-                                <option value="manager">Manager</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Department</label>
-                            <select id="department-filter" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
-                                <option value="">All Departments</option>
-                                <option value="sales">Sales</option>
-                                <option value="marketing">Marketing</option>
-                                <option value="engineering">Engineering</option>
-                                <option value="operations">Operations</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Results Limit</label>
-                            <select id="results-limit" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
-                                <option value="25">25 contacts</option>
-                                <option value="50">50 contacts</option>
-                                <option value="100">100 contacts</option>
-                            </select>
-                        </div>
-                    </div>
-                    <button onclick="executeSearch()" id="main-search-btn" class="w-full brand-gradient text-white py-3 rounded-lg font-semibold hover:opacity-90 flex items-center justify-center space-x-2">
-                        <i data-lucide="search" class="w-5 h-5"></i>
-                        <span>Find Contacts with Enhanced AI Data Fusion</span>
-                    </button>
-                    <div class="mt-3 text-center">
-                        <p class="text-xs text-gray-500">🚀 Advanced Intelligence + Pattern Detection + Enhanced Scoring</p>
-                    </div>
-                </div>
-
-                <div id="fusion-status" class="hidden bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-4 mb-6">
-                    <div class="flex items-center space-x-2 mb-2">
-                        <i data-lucide="brain" class="w-5 h-5 text-blue-600"></i>
-                        <span class="font-medium text-blue-900">Enhanced AI Data Fusion Progress:</span>
-                    </div>
-                    <div class="space-y-2 text-sm">
-                        <div id="status-source1" class="flex items-center space-x-2">
-                            <div class="w-2 h-2 rounded-full bg-gray-300"></div>
-                            <span class="text-gray-600">Enterprise Database 1: Initializing...</span>
-                        </div>
-                        <div id="status-source2" class="flex items-center space-x-2">
-                            <div class="w-2 h-2 rounded-full bg-gray-300"></div>
-                            <span class="text-gray-600">Enterprise Database 2: Waiting...</span>
-                        </div>
-                        <div id="status-source3" class="flex items-center space-x-2">
-                            <div class="w-2 h-2 rounded-full bg-gray-300"></div>
-                            <span class="text-gray-600">Web Intelligence: Standby...</span>
-                        </div>
-                        <div id="status-fusion" class="flex items-center space-x-2">
-                            <div class="w-2 h-2 rounded-full bg-gray-300"></div>
-                            <span class="text-gray-600">Enhanced AI Engine: Standby...</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="search-results" class="hidden">
-                    <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-4">
-                                <h3 class="text-lg font-semibold text-gray-900">Search Results</h3>
-                                <span id="results-count" class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">0 contacts</span>
-                            </div>
-                            <div class="flex items-center space-x-3">
-                                <button onclick="selectAllContacts()" id="select-all-btn" class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50">
-                                    Select All
-                                </button>
-                                <button onclick="addToList()" id="add-to-list-btn" class="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 disabled:opacity-50" disabled>
-                                    Add to List
-                                </button>
-                                <button onclick="exportContacts()" id="export-selected-btn" class="px-4 py-2 brand-gradient text-white rounded-lg text-sm font-medium hover:opacity-90 disabled:opacity-50" disabled>
-                                    Export Selected
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="contacts-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    </div>
-
-                    <div id="contacts-list" class="hidden bg-white rounded-lg shadow-sm overflow-hidden">
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            <input type="checkbox" id="select-all-list" class="rounded border-gray-300" onchange="selectAllContactsCheckbox()">
-                                        </th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Source</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="contacts-table-body" class="bg-white divide-y divide-gray-200">
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="search-loading" class="hidden">
-                    <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
-                        <div class="text-center">
-                            <div class="inline-flex items-center space-x-3 mb-4">
-                                <div class="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                                <h3 class="text-lg font-semibold text-gray-900">Enhanced Multi-Source Analysis</h3>
-                            </div>
-                            <p id="search-status" class="text-gray-600 mb-4">Initializing enhanced AI data fusion...</p>
-                            <div class="grid grid-cols-4 gap-4 max-w-lg mx-auto">
-                                <div class="text-center">
-                                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-2">
-                                        <i data-lucide="database" class="w-6 h-6 text-blue-600"></i>
-                                    </div>
-                                    <p class="text-xs text-gray-600">Database Alpha</p>
-                                </div>
-                                <div class="text-center">
-                                    <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mx-auto mb-2">
-                                        <i data-lucide="target" class="w-6 h-6 text-orange-600"></i>
-                                    </div>
-                                    <p class="text-xs text-gray-600">Database Beta</p>
-                                </div>
-                                <div class="text-center">
-                                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-2">
-                                        <i data-lucide="globe" class="w-6 h-6 text-purple-600"></i>
-                                    </div>
-                                    <p class="text-xs text-gray-600">Web Intel</p>
-                                </div>
-                                <div class="text-center">
-                                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-2">
-                                        <i data-lucide="brain" class="w-6 h-6 text-green-600"></i>
-                                    </div>
-                                    <p class="text-xs text-gray-600">AI Fusion</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Contact Lists Section -->
-            <div id="contact-lists-section" class="section-content hidden">
-                <div class="flex items-center justify-between mb-6">
-                    <div>
-                        <h2 class="text-2xl font-bold text-gray-900">Contact Lists</h2>
-                        <p class="text-gray-600">Organize and manage your saved contacts</p>
-                    </div>
-                    <button onclick="createNewList()" class="px-4 py-2 brand-gradient text-white rounded-lg font-medium hover:opacity-90 flex items-center space-x-2">
-                        <i data-lucide="plus" class="w-4 h-4"></i>
-                        <span>Create New List</span>
-                    </button>
-                </div>
-                <div id="contact-lists-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                </div>
-            </div>
-
-            <!-- Reports Section -->
-            <div id="reports-section" class="section-content hidden">
-                <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-gray-900">Reports & Analytics</h2>
-                    <p class="text-gray-600">Track your contact discovery performance</p>
-                </div>
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <div class="bg-white rounded-lg shadow-sm p-6">
                         <h3 class="text-lg font-semibold text-gray-900 mb-4">Search Activity</h3>
                         <div class="text-center py-8 text-gray-500">
@@ -550,6 +320,130 @@
         let selectedContacts = new Set();
         let companyData = null;
         let contactViewMode = 'grid';
+        let salesforceConnected = false;
+
+        // ===== SALESFORCE INTEGRATION FUNCTIONS =====
+        
+        // Check Salesforce connection status
+        async function checkSalesforceConnection() {
+            try {
+                const response = await fetch('/.netlify/functions/salesforce-status');
+                const data = await response.json();
+                salesforceConnected = data.connected;
+                updateSalesforceUI();
+            } catch (error) {
+                console.error('Error checking Salesforce connection:', error);
+            }
+        }
+
+        // Update Salesforce UI based on connection status
+        function updateSalesforceUI() {
+            const connectBtn = document.getElementById('salesforce-connect-btn');
+            const exportContactBtn = document.getElementById('salesforce-export-contact-btn');
+            const exportLeadBtn = document.getElementById('salesforce-export-lead-btn');
+            
+            if (salesforceConnected) {
+                connectBtn.innerHTML = '<i data-lucide="check-circle" class="w-4 h-4"></i><span>Salesforce Connected</span>';
+                connectBtn.className = 'px-4 py-2 bg-green-600 text-white rounded-lg font-medium flex items-center space-x-2';
+                
+                if (exportContactBtn) {
+                    exportContactBtn.disabled = false;
+                    exportContactBtn.classList.remove('opacity-50');
+                }
+                if (exportLeadBtn) {
+                    exportLeadBtn.disabled = false;
+                    exportLeadBtn.classList.remove('opacity-50');
+                }
+            } else {
+                connectBtn.innerHTML = '<i data-lucide="link" class="w-4 h-4"></i><span>Connect Salesforce</span>';
+                connectBtn.className = 'px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 flex items-center space-x-2';
+                
+                if (exportContactBtn) {
+                    exportContactBtn.disabled = true;
+                    exportContactBtn.classList.add('opacity-50');
+                }
+                if (exportLeadBtn) {
+                    exportLeadBtn.disabled = true;
+                    exportLeadBtn.classList.add('opacity-50');
+                }
+            }
+            
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        }
+
+        // Connect to Salesforce
+        function connectSalesforce() {
+            if (salesforceConnected) return;
+            window.location.href = '/.netlify/functions/salesforce-auth';
+        }
+
+        // Export to Salesforce with choice of Contact or Lead
+        async function exportToSalesforce(exportType = 'Contact') {
+            const contactsToExport = selectedContacts.size > 0 
+                ? Array.from(selectedContacts).map(index => currentContacts[index])
+                : currentContacts;
+            
+            if (contactsToExport.length === 0) {
+                showError('No contacts selected for export');
+                return;
+            }
+
+            if (!salesforceConnected) {
+                showError('Please connect to Salesforce first');
+                return;
+            }
+
+            const exportBtn = document.getElementById(`salesforce-export-${exportType.toLowerCase()}-btn`);
+            const originalText = exportBtn.innerHTML;
+            exportBtn.innerHTML = '<div class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent inline-block mr-2"></div>Exporting...';
+            exportBtn.disabled = true;
+
+            try {
+                const response = await fetch('/.netlify/functions/salesforce-export', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        contacts: contactsToExport,
+                        exportType: exportType
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    const recordType = exportType === 'Contact' ? 'Contacts' : 'Leads';
+                    alert(`✅ Successfully exported ${result.exported} ${recordType} to Salesforce!\n\n${recordType} are now ready for your team to engage with.`);
+                    
+                    // Track metrics
+                    incrementMetric('exports');
+                    incrementMetric('exportedContacts', result.exported);
+                    addToRecentActivity('export', `Exported ${result.exported} ${recordType} to Salesforce`);
+                    
+                    // Clear selection
+                    selectedContacts.clear();
+                    updateSelectionUI();
+                    document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+                    
+                } else if (result.needsReauth) {
+                    salesforceConnected = false;
+                    updateSalesforceUI();
+                    showError('Salesforce connection expired. Please reconnect.');
+                } else {
+                    throw new Error(result.error || 'Export failed');
+                }
+
+            } catch (error) {
+                console.error('Salesforce export error:', error);
+                showError(`Export failed: ${error.message}`);
+            } finally {
+                exportBtn.innerHTML = originalText;
+                exportBtn.disabled = false;
+            }
+        }
 
         // ===== DATA PERSISTENCE FUNCTIONS =====
         function getStoredData(key, defaultValue = null) {
@@ -1411,6 +1305,24 @@
             document.getElementById('add-to-list-btn').disabled = !hasSelection;
             document.getElementById('export-selected-btn').disabled = !hasSelection;
             
+            // Update Salesforce export buttons
+            const exportContactBtn = document.getElementById('salesforce-export-contact-btn');
+            const exportLeadBtn = document.getElementById('salesforce-export-lead-btn');
+            
+            if (exportContactBtn && exportLeadBtn) {
+                const shouldEnable = hasSelection && salesforceConnected;
+                exportContactBtn.disabled = !shouldEnable;
+                exportLeadBtn.disabled = !shouldEnable;
+                
+                if (shouldEnable) {
+                    exportContactBtn.classList.remove('opacity-50');
+                    exportLeadBtn.classList.remove('opacity-50');
+                } else {
+                    exportContactBtn.classList.add('opacity-50');
+                    exportLeadBtn.classList.add('opacity-50');
+                }
+            }
+            
             const selectAllBtn = document.getElementById('select-all-btn');
             if (selectAllBtn) {
                 selectAllBtn.textContent = selectedContacts.size === currentContacts.length ? 'Deselect All' : 'Select All';
@@ -1655,6 +1567,9 @@
             updateRecentActivity();
             updateSavedListsPreview();
             
+            // Initialize Salesforce connection check
+            checkSalesforceConnection();
+            
             document.getElementById('quick-search-input').addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     quickSearchExecute();
@@ -1674,8 +1589,267 @@
                 document.getElementById('search-domain').value = pendingSearch.domain;
                 setTimeout(() => executeSearch(), 100);
             }
+            
+            // Check for Salesforce OAuth callback
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('salesforce_connected') === 'true') {
+                salesforceConnected = true;
+                updateSalesforceUI();
+                alert('✅ Salesforce connected successfully!');
+                window.history.replaceState({}, document.title, window.location.pathname);
+            } else if (urlParams.get('salesforce_error') === 'true') {
+                showError('Failed to connect to Salesforce. Please try again.');
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
         });
     </script>
 
 </body>
-</html>
+</html>8">
+                    <!-- Recent Activity -->
+                    <div class="bg-white rounded-lg shadow-sm p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
+                        <div id="recent-activity" class="space-y-4">
+                            <div class="text-center py-8 text-gray-500">
+                                <i data-lucide="activity" class="w-8 h-8 mx-auto mb-2"></i>
+                                <p class="text-sm">Start searching to see your activity</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Saved Lists -->
+                    <div class="bg-white rounded-lg shadow-sm p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-900">Saved Lists</h3>
+                            <button onclick="createNewList()" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                                Create New
+                            </button>
+                        </div>
+                        <div id="saved-lists-preview" class="space-y-3">
+                            <div class="text-center py-8 text-gray-500">
+                                <i data-lucide="list" class="w-8 h-8 mx-auto mb-2"></i>
+                                <p class="text-sm">No saved lists yet</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Finder Section -->
+            <div id="contact-finder-section" class="section-content hidden">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-900">Contact Finder</h2>
+                        <p class="text-gray-600">Enhanced AI-powered multi-source contact discovery</p>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <div class="flex bg-gray-100 rounded-lg p-1">
+                            <button onclick="setContactView('grid')" id="grid-view-btn" class="px-3 py-1 rounded bg-white text-gray-900 text-sm font-medium shadow-sm">
+                                <i data-lucide="grid-3x3" class="w-4 h-4"></i>
+                            </button>
+                            <button onclick="setContactView('list')" id="list-view-btn" class="px-3 py-1 rounded text-gray-600 text-sm font-medium">
+                                <i data-lucide="list" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+                    <div class="fusion-badge text-white px-3 py-1 rounded-full text-xs font-medium mb-4 inline-block">
+                        ENHANCED MULTI-SOURCE DATA FUSION
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Company Domain</label>
+                            <input type="text" id="search-domain" placeholder="e.g., salesforce.com" 
+                                   class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Seniority Level</label>
+                            <select id="seniority-filter" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
+                                <option value="">All Levels</option>
+                                <option value="c_level">C-Level</option>
+                                <option value="vp">VP Level</option>
+                                <option value="director">Director</option>
+                                <option value="manager">Manager</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Department</label>
+                            <select id="department-filter" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
+                                <option value="">All Departments</option>
+                                <option value="sales">Sales</option>
+                                <option value="marketing">Marketing</option>
+                                <option value="engineering">Engineering</option>
+                                <option value="operations">Operations</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Results Limit</label>
+                            <select id="results-limit" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
+                                <option value="25">25 contacts</option>
+                                <option value="50">50 contacts</option>
+                                <option value="100">100 contacts</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button onclick="executeSearch()" id="main-search-btn" class="w-full brand-gradient text-white py-3 rounded-lg font-semibold hover:opacity-90 flex items-center justify-center space-x-2">
+                        <i data-lucide="search" class="w-5 h-5"></i>
+                        <span>Find Contacts with Enhanced AI Data Fusion</span>
+                    </button>
+                    <div class="mt-3 text-center">
+                        <p class="text-xs text-gray-500">🚀 Advanced Intelligence + Pattern Detection + Enhanced Scoring</p>
+                    </div>
+                </div>
+
+                <div id="fusion-status" class="hidden bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-4 mb-6">
+                    <div class="flex items-center space-x-2 mb-2">
+                        <i data-lucide="brain" class="w-5 h-5 text-blue-600"></i>
+                        <span class="font-medium text-blue-900">Enhanced AI Data Fusion Progress:</span>
+                    </div>
+                    <div class="space-y-2 text-sm">
+                        <div id="status-source1" class="flex items-center space-x-2">
+                            <div class="w-2 h-2 rounded-full bg-gray-300"></div>
+                            <span class="text-gray-600">Enterprise Database 1: Initializing...</span>
+                        </div>
+                        <div id="status-source2" class="flex items-center space-x-2">
+                            <div class="w-2 h-2 rounded-full bg-gray-300"></div>
+                            <span class="text-gray-600">Enterprise Database 2: Waiting...</span>
+                        </div>
+                        <div id="status-source3" class="flex items-center space-x-2">
+                            <div class="w-2 h-2 rounded-full bg-gray-300"></div>
+                            <span class="text-gray-600">Web Intelligence: Standby...</span>
+                        </div>
+                        <div id="status-fusion" class="flex items-center space-x-2">
+                            <div class="w-2 h-2 rounded-full bg-gray-300"></div>
+                            <span class="text-gray-600">Enhanced AI Engine: Standby...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="search-results" class="hidden">
+                    <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <h3 class="text-lg font-semibold text-gray-900">Search Results</h3>
+                                <span id="results-count" class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">0 contacts</span>
+                            </div>
+                            <div class="flex items-center space-x-3 flex-wrap">
+                                <button onclick="selectAllContacts()" id="select-all-btn" class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50">
+                                    Select All
+                                </button>
+                                <button onclick="addToList()" id="add-to-list-btn" class="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 disabled:opacity-50" disabled>
+                                    Add to List
+                                </button>
+                                <button onclick="exportContacts()" id="export-selected-btn" class="px-4 py-2 brand-gradient text-white rounded-lg text-sm font-medium hover:opacity-90 disabled:opacity-50" disabled>
+                                    Export Excel
+                                </button>
+                                
+                                <!-- Salesforce Integration Buttons -->
+                                <button onclick="connectSalesforce()" id="salesforce-connect-btn" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 flex items-center space-x-2">
+                                    <i data-lucide="link" class="w-4 h-4"></i>
+                                    <span>Connect Salesforce</span>
+                                </button>
+                                
+                                <div class="flex space-x-2">
+                                    <button onclick="exportToSalesforce('Contact')" id="salesforce-export-contact-btn" class="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 disabled:opacity-50 flex items-center space-x-2" disabled>
+                                        <i data-lucide="user-plus" class="w-4 h-4"></i>
+                                        <span>Export as Contacts</span>
+                                    </button>
+                                    <button onclick="exportToSalesforce('Lead')" id="salesforce-export-lead-btn" class="px-4 py-2 bg-orange-600 text-white rounded-lg text-sm font-medium hover:bg-orange-700 disabled:opacity-50 flex items-center space-x-2" disabled>
+                                        <i data-lucide="user-check" class="w-4 h-4"></i>
+                                        <span>Export as Leads</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="contacts-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    </div>
+
+                    <div id="contacts-list" class="hidden bg-white rounded-lg shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            <input type="checkbox" id="select-all-list" class="rounded border-gray-300" onchange="selectAllContactsCheckbox()">
+                                        </th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Source</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="contacts-table-body" class="bg-white divide-y divide-gray-200">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="search-loading" class="hidden">
+                    <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+                        <div class="text-center">
+                            <div class="inline-flex items-center space-x-3 mb-4">
+                                <div class="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                                <h3 class="text-lg font-semibold text-gray-900">Enhanced Multi-Source Analysis</h3>
+                            </div>
+                            <p id="search-status" class="text-gray-600 mb-4">Initializing enhanced AI data fusion...</p>
+                            <div class="grid grid-cols-4 gap-4 max-w-lg mx-auto">
+                                <div class="text-center">
+                                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                                        <i data-lucide="database" class="w-6 h-6 text-blue-600"></i>
+                                    </div>
+                                    <p class="text-xs text-gray-600">Database Alpha</p>
+                                </div>
+                                <div class="text-center">
+                                    <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                                        <i data-lucide="target" class="w-6 h-6 text-orange-600"></i>
+                                    </div>
+                                    <p class="text-xs text-gray-600">Database Beta</p>
+                                </div>
+                                <div class="text-center">
+                                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                                        <i data-lucide="globe" class="w-6 h-6 text-purple-600"></i>
+                                    </div>
+                                    <p class="text-xs text-gray-600">Web Intel</p>
+                                </div>
+                                <div class="text-center">
+                                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                                        <i data-lucide="brain" class="w-6 h-6 text-green-600"></i>
+                                    </div>
+                                    <p class="text-xs text-gray-600">AI Fusion</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Lists Section -->
+            <div id="contact-lists-section" class="section-content hidden">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-900">Contact Lists</h2>
+                        <p class="text-gray-600">Organize and manage your saved contacts</p>
+                    </div>
+                    <button onclick="createNewList()" class="px-4 py-2 brand-gradient text-white rounded-lg font-medium hover:opacity-90 flex items-center space-x-2">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                        <span>Create New List</span>
+                    </button>
+                </div>
+                <div id="contact-lists-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                </div>
+            </div>
+
+            <!-- Reports Section -->
+            <div id="reports-section" class="section-content hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-gray-900">Reports & Analytics</h2>
+                    <p class="text-gray-600">Track your contact discovery performance</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-

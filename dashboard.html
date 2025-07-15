@@ -12,25 +12,25 @@
             <div class="bg-white rounded-xl shadow-lg p-6">
                 <h3 class="text-xl font-semibold mb-6">Available Integrations</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div class="border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition-colors">
+                    <div class="border border-gray-200 rounded-lg p-6 hover:border-blue-300 transition-colors card-hover">
                         <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-4">
-                            <i data-lucide="hub" class="w-6 h-6 text-orange-600"></i>
+                            <i data-lucide="settings" class="w-6 h-6 text-orange-600"></i>
                         </div>
                         <h4 class="font-semibold mb-2">HubSpot</h4>
                         <p class="text-sm text-gray-600 mb-4">Marketing automation and CRM integration</p>
                         <button class="btn-primary text-sm w-full">Connect</button>
                     </div>
                     
-                    <div class="border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition-colors">
+                    <div class="border border-gray-200 rounded-lg p-6 hover:border-blue-300 transition-colors card-hover">
                         <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
-                            <i data-lucide="slack" class="w-6 h-6 text-purple-600"></i>
+                            <i data-lucide="message-square" class="w-6 h-6 text-purple-600"></i>
                         </div>
                         <h4 class="font-semibold mb-2">Slack</h4>
                         <p class="text-sm text-gray-600 mb-4">Team notifications and updates</p>
                         <button class="btn-primary text-sm w-full">Connect</button>
                     </div>
                     
-                    <div class="border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition-colors">
+                    <div class="border border-gray-200 rounded-lg p-6 hover:border-blue-300 transition-colors card-hover">
                         <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
                             <i data-lucide="table" class="w-6 h-6 text-green-600"></i>
                         </div>
@@ -39,7 +39,7 @@
                         <button class="btn-primary text-sm w-full">Connect</button>
                     </div>
                     
-                    <div class="border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition-colors">
+                    <div class="border border-gray-200 rounded-lg p-6 hover:border-blue-300 transition-colors card-hover">
                         <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
                             <i data-lucide="zap" class="w-6 h-6 text-blue-600"></i>
                         </div>
@@ -48,7 +48,7 @@
                         <button class="btn-primary text-sm w-full">Connect</button>
                     </div>
                     
-                    <div class="border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition-colors">
+                    <div class="border border-gray-200 rounded-lg p-6 hover:border-blue-300 transition-colors card-hover">
                         <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-4">
                             <i data-lucide="calendar" class="w-6 h-6 text-red-600"></i>
                         </div>
@@ -57,7 +57,7 @@
                         <button class="btn-primary text-sm w-full">Connect</button>
                     </div>
                     
-                    <div class="border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition-colors">
+                    <div class="border border-gray-200 rounded-lg p-6 hover:border-blue-300 transition-colors card-hover">
                         <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mb-4">
                             <i data-lucide="database" class="w-6 h-6 text-indigo-600"></i>
                         </div>
@@ -2511,14 +2511,14 @@
                                 <i data-lucide="cloud-off" class="w-4 h-4"></i>
                                 Disconnected
                             </div>
-                            <button id="sfdcConfigBtn" class="btn-secondary text-sm">Configure</button>
+                            <button id="sfdcConfigBtn" onclick="showSalesforceModal()" class="btn-secondary text-sm">Configure</button>
                         </div>
                     </div>
                     
                     <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
                         <div class="flex items-center gap-4">
                             <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                                <i data-lucide="linkedin" class="w-6 h-6 text-blue-600"></i>
+                                <i data-lucide="briefcase" class="w-6 h-6 text-blue-600"></i>
                             </div>
                             <div>
                                 <h4 class="font-semibold">LinkedIn Sales Navigator</h4>
@@ -2536,8 +2536,8 @@
                     
                     <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
                         <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                                <i data-lucide="mail" class="w-6 h-6 text-orange-600"></i>
+                            <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+                                <i data-lucide="mail" class="w-6 h-6 text-red-600"></i>
                             </div>
                             <div>
                                 <h4 class="font-semibold">Gmail</h4>
@@ -2545,4 +2545,12 @@
                             </div>
                         </div>
                         <div class="flex items-center gap-3">
-                            <div class="integration-
+                            <div class="integration-status connected">
+                                <i data-lucide="check-circle" class="w-4 h-4"></i>
+                                Connected
+                            </div>
+                            <button class="btn-secondary text-sm">Settings</button>
+                        </div>
+                    </div>
+                </div>
+            </div>

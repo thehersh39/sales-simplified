@@ -1,70 +1,548 @@
-<div class="integration-status connected">
-                                <i data-lucide="check-circle" class="w-4 h-4"></i>
-                                Connected
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Company</label>
+                        <input type="text" id="companySearch" class="input-field" placeholder="Enter company name">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Job Title</label>
+                        <input type="text" id="jobTitleSearch" class="input-field" placeholder="e.g., Marketing Director">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Industry</label>
+                        <select id="industrySearch" class="select-field">
+                            <option value="">All Industries</option>
+                            <option value="technology">Technology</option>
+                            <option value="healthcare">Healthcare</option>
+                            <option value="finance">Finance</option>
+                            <option value="retail">Retail</option>
+                            <option value="manufacturing">Manufacturing</option>
+                            <option value="education">Education</option>
+                            <option value="real-estate">Real Estate</option>
+                            <option value="consulting">Consulting</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Location</label>
+                        <input type="text" id="locationSearch" class="input-field" placeholder="City, State or Country">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Company Size</label>
+                        <select id="companySizeSearch" class="select-field">
+                            <option value="">Any Size</option>
+                            <option value="startup">Startup (1-10)</option>
+                            <option value="small">Small (11-50)</option>
+                            <option value="medium">Medium (51-200)</option>
+                            <option value="large">Large (201-1000)</option>
+                            <option value="enterprise">Enterprise (1000+)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="flex gap-4 mb-6">
+                    <button id="searchBtn" class="btn-primary">
+                        <i data-lucide="search" class="w-4 h-4 inline mr-2"></i>
+                        Search Contacts
+                    </button>
+                    <button id="clearBtn" class="btn-secondary">
+                        <i data-lucide="x" class="w-4 h-4 inline mr-2"></i>
+                        Clear Filters
+                    </button>
+                    <button id="saveSearchBtn" class="btn-secondary">
+                        <i data-lucide="bookmark" class="w-4 h-4 inline mr-2"></i>
+                        Save Search
+                    </button>
+                </div>
+                
+                <!-- Loading Indicator -->
+                <div id="searchLoader" class="text-center py-8 hidden">
+                    <div class="loader mx-auto mb-4"></div>
+                    <p class="text-gray-600">Searching for contacts...</p>
+                </div>
+            </div>
+
+            <!-- Search Results -->
+            <div id="searchResults" class="bg-white rounded-xl shadow-lg p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-semibold">Search Results</h3>
+                    <div class="flex gap-2">
+                        <button id="bulkSelectBtn" class="btn-secondary text-sm">
+                            <i data-lucide="check-square" class="w-4 h-4 inline mr-1"></i>
+                            Bulk Select
+                        </button>
+                        <button id="exportResultsBtn" class="btn-secondary text-sm">
+                            <i data-lucide="download" class="w-4 h-4 inline mr-1"></i>
+                            Export
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="contactsContainer">
+                    <div class="empty-state">
+                        <i data-lucide="search" class="empty-state-icon"></i>
+                        <h3 class="text-lg font-medium mb-2">Ready to Find Contacts</h3>
+                        <p class="text-gray-600">Use the search form above to find contacts matching your criteria</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Lists Section -->
+        <div id="contactListsSection" class="section-hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold">Contact Lists</h2>
+                <div class="flex gap-2">
+                    <button id="importListBtn" class="btn-secondary">
+                        <i data-lucide="upload" class="w-4 h-4 inline mr-2"></i>
+                        Import List
+                    </button>
+                    <button id="createListBtn" class="btn-primary">
+                        <i data-lucide="plus" class="w-4 h-4 inline mr-2"></i>
+                        Create New List
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Lists Overview -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                <div class="metric-card">
+                    <h3 class="text-lg font-semibold mb-2">Total Lists</h3>
+                    <div class="text-3xl font-bold text-indigo-600 mb-2">12</div>
+                    <div class="text-sm text-green-600">+2 this month</div>
+                </div>
+                <div class="metric-card">
+                    <h3 class="text-lg font-semibold mb-2">Total Contacts</h3>
+                    <div class="text-3xl font-bold text-green-600 mb-2">1,247</div>
+                    <div class="text-sm text-green-600">+156 this month</div>
+                </div>
+                <div class="metric-card">
+                    <h3 class="text-lg font-semibold mb-2">Average List Size</h3>
+                    <div class="text-3xl font-bold text-purple-600 mb-2">104</div>
+                    <div class="text-sm text-gray-600">contacts per list</div>
+                </div>
+            </div>
+            
+            <!-- Contact Lists Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="list-item">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold">Tech Leaders</h3>
+                        <div class="flex items-center gap-2">
+                            <span class="tag technology">234 contacts</span>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 mb-4">CTOs, VPs of Engineering, and Tech Directors from top technology companies</p>
+                    <div class="mb-4">
+                        <div class="text-sm text-gray-600 mb-1">Recent Activity</div>
+                        <div class="text-xs text-gray-500">Last updated: 2 days ago</div>
+                        <div class="text-xs text-gray-500">Last campaign: Tech Q1 Outreach (34.8% open rate)</div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="viewList('tech-leaders')" class="btn-primary text-sm flex-1">
+                            <i data-lucide="eye" class="w-4 h-4 inline mr-1"></i>
+                            View
+                        </button>
+                        <button onclick="editList('tech-leaders')" class="btn-secondary text-sm">
+                            <i data-lucide="edit" class="w-4 h-4 inline mr-1"></i>
+                            Edit
+                        </button>
+                        <button onclick="exportList('tech-leaders')" class="btn-secondary text-sm">
+                            <i data-lucide="download" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="list-item">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold">Healthcare Executives</h3>
+                        <div class="flex items-center gap-2">
+                            <span class="tag healthcare">89 contacts</span>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 mb-4">Healthcare industry decision makers including hospital administrators and clinic directors</p>
+                    <div class="mb-4">
+                        <div class="text-sm text-gray-600 mb-1">Recent Activity</div>
+                        <div class="text-xs text-gray-500">Last updated: 1 week ago</div>
+                        <div class="text-xs text-gray-500">Last campaign: Healthcare Solutions (28.1% open rate)</div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="viewList('healthcare-executives')" class="btn-primary text-sm flex-1">
+                            <i data-lucide="eye" class="w-4 h-4 inline mr-1"></i>
+                            View
+                        </button>
+                        <button onclick="editList('healthcare-executives')" class="btn-secondary text-sm">
+                            <i data-lucide="edit" class="w-4 h-4 inline mr-1"></i>
+                            Edit
+                        </button>
+                        <button onclick="exportList('healthcare-executives')" class="btn-secondary text-sm">
+                            <i data-lucide="download" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="list-item">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold">Finance Directors</h3>
+                        <div class="flex items-center gap-2">
+                            <span class="tag finance">156 contacts</span>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 mb-4">CFOs, Finance VPs, and Controllers from various industries</p>
+                    <div class="mb-4">
+                        <div class="text-sm text-gray-600 mb-1">Recent Activity</div>
+                        <div class="text-xs text-gray-500">Last updated: 3 days ago</div>
+                        <div class="text-xs text-gray-500">Last campaign: Finance Follow-up (23.9% open rate)</div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="viewList('finance-directors')" class="btn-primary text-sm flex-1">
+                            <i data-lucide="eye" class="w-4 h-4 inline mr-1"></i>
+                            View
+                        </button>
+                        <button onclick="editList('finance-directors')" class="btn-secondary text-sm">
+                            <i data-lucide="edit" class="w-4 h-4 inline mr-1"></i>
+                            Edit
+                        </button>
+                        <button onclick="exportList('finance-directors')" class="btn-secondary text-sm">
+                            <i data-lucide="download" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="list-item">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold">Retail Managers</h3>
+                        <div class="flex items-center gap-2">
+                            <span class="tag retail">67 contacts</span>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 mb-4">Retail operations managers and store directors</p>
+                    <div class="mb-4">
+                        <div class="text-sm text-gray-600 mb-1">Recent Activity</div>
+                        <div class="text-xs text-gray-500">Last updated: 5 days ago</div>
+                        <div class="text-xs text-gray-500">Last campaign: Retail Solutions (19.4% open rate)</div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="viewList('retail-managers')" class="btn-primary text-sm flex-1">
+                            <i data-lucide="eye" class="w-4 h-4 inline mr-1"></i>
+                            View
+                        </button>
+                        <button onclick="editList('retail-managers')" class="btn-secondary text-sm">
+                            <i data-lucide="edit" class="w-4 h-4 inline mr-1"></i>
+                            Edit
+                        </button>
+                        <button onclick="exportList('retail-managers')" class="btn-secondary text-sm">
+                            <i data-lucide="download" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="list-item">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold">Manufacturing Leaders</h3>
+                        <div class="flex items-center gap-2">
+                            <span class="tag manufacturing">123 contacts</span>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 mb-4">Manufacturing directors and plant managers</p>
+                    <div class="mb-4">
+                        <div class="text-sm text-gray-600 mb-1">Recent Activity</div>
+                        <div class="text-xs text-gray-500">Last updated: 1 week ago</div>
+                        <div class="text-xs text-gray-500">Last campaign: Manufacturing Efficiency (15.2% open rate)</div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="viewList('manufacturing-leaders')" class="btn-primary text-sm flex-1">
+                            <i data-lucide="eye" class="w-4 h-4 inline mr-1"></i>
+                            View
+                        </button>
+                        <button onclick="editList('manufacturing-leaders')" class="btn-secondary text-sm">
+                            <i data-lucide="edit" class="w-4 h-4 inline mr-1"></i>
+                            Edit
+                        </button>
+                        <button onclick="exportList('manufacturing-leaders')" class="btn-secondary text-sm">
+                            <i data-lucide="download" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="list-item border-2 border-dashed border-gray-300 text-center">
+                    <div class="py-8">
+                        <i data-lucide="plus-circle" class="w-12 h-12 mx-auto mb-4 text-gray-400"></i>
+                        <h3 class="text-lg font-medium text-gray-700 mb-2">Create New List</h3>
+                        <p class="text-gray-500 mb-4">Build a targeted contact list for your next campaign</p>
+                        <button onclick="createNewList()" class="btn-primary">
+                            <i data-lucide="plus" class="w-4 h-4 inline mr-2"></i>
+                            Get Started
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reports Section -->
+        <div id="reportsSection" class="section-hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold">Reports & Analytics</h2>
+                <div class="flex gap-2">
+                    <button id="dateRangeBtn" class="btn-secondary">
+                        <i data-lucide="calendar" class="w-4 h-4 inline mr-2"></i>
+                        Last 30 Days
+                    </button>
+                    <button id="exportReportBtn" class="btn-primary">
+                        <i data-lucide="download" class="w-4 h-4 inline mr-2"></i>
+                        Export Report
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Key Metrics Overview -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="metric-card">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-sm font-medium text-gray-600">Total Emails Sent</h3>
+                        <i data-lucide="mail" class="w-5 h-5 text-blue-600"></i>
+                    </div>
+                    <div class="text-3xl font-bold text-blue-600 mb-2">2,847</div>
+                    <div class="text-sm text-green-600">+15.3% vs last month</div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-sm font-medium text-gray-600">Open Rate</h3>
+                        <i data-lucide="eye" class="w-5 h-5 text-green-600"></i>
+                    </div>
+                    <div class="text-3xl font-bold text-green-600 mb-2">34.2%</div>
+                    <div class="text-sm text-green-600">+2.1% vs last month</div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-sm font-medium text-gray-600">Click Rate</h3>
+                        <i data-lucide="mouse-pointer" class="w-5 h-5 text-purple-600"></i>
+                    </div>
+                    <div class="text-3xl font-bold text-purple-600 mb-2">8.7%</div>
+                    <div class="text-sm text-red-600">-0.5% vs last month</div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-sm font-medium text-gray-600">Response Rate</h3>
+                        <i data-lucide="message-circle" class="w-5 h-5 text-orange-600"></i>
+                    </div>
+                    <div class="text-3xl font-bold text-orange-600 mb-2">12.3%</div>
+                    <div class="text-sm text-green-600">+3.2% vs last month</div>
+                </div>
+            </div>
+            
+            <!-- Charts Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-lg font-semibold mb-4">Campaign Performance Trend</h3>
+                    <div class="chart-container">
+                        <div class="flex items-center justify-center h-full">
+                            <div class="text-center">
+                                <i data-lucide="trending-up" class="w-16 h-16 text-gray-400 mx-auto mb-4"></i>
+                                <p class="text-gray-600">Performance trend chart</p>
+                                <p class="text-sm text-gray-500">Chart integration placeholder</p>
                             </div>
-                            <button class="btn-secondary text-sm">Settings</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-lg font-semibold mb-4">Industry Breakdown</h3>
+                    <div class="chart-container">
+                        <div class="flex items-center justify-center h-full">
+                            <div class="text-center">
+                                <i data-lucide="pie-chart" class="w-16 h-16 text-gray-400 mx-auto mb-4"></i>
+                                <p class="text-gray-600">Industry distribution chart</p>
+                                <p class="text-sm text-gray-500">Chart integration placeholder</p>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
             
-            <!-- Available Integrations -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-lg font-semibold mb-4">Lead Generation</h3>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
+                            <div>
+                                <div class="font-medium">This Month</div>
+                                <div class="text-sm text-gray-600">January 2025</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-2xl font-bold text-green-600">89</div>
+                                <div class="text-sm text-green-600">leads</div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
+                            <div>
+                                <div class="font-medium">Last Month</div>
+                                <div class="text-sm text-gray-600">December 2024</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-2xl font-bold text-gray-600">76</div>
+                                <div class="text-sm text-gray-600">leads</div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-between items-center p-4 bg-green-50 rounded-lg border border-green-200">
+                            <div>
+                                <div class="font-medium text-green-800">Growth</div>
+                                <div class="text-sm text-green-600">Month over month</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-2xl font-bold text-green-600">+17.1%</div>
+                                <div class="text-sm text-green-600">improvement</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-lg font-semibold mb-4">Top Performing Lists</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                            <div>
+                                <div class="font-medium">Tech Leaders</div>
+                                <div class="text-sm text-gray-600">234 contacts</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-bold text-green-600">34.8%</div>
+                                <div class="text-xs text-gray-600">open rate</div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                            <div>
+                                <div class="font-medium">Healthcare Executives</div>
+                                <div class="text-sm text-gray-600">89 contacts</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-bold text-blue-600">28.1%</div>
+                                <div class="text-xs text-gray-600">open rate</div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                            <div>
+                                <div class="font-medium">Finance Directors</div>
+                                <div class="text-sm text-gray-600">156 contacts</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-bold text-purple-600">23.9%</div>
+                                <div class="text-xs text-gray-600">open rate</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Detailed Campaign Table -->
             <div class="bg-white rounded-xl shadow-lg p-6">
-                <h3 class="text-xl font-semibold mb-6">Available Integrations</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div class="border border-gray-200 rounded-lg p-6 hover:border-blue-300 transition-colors card-hover">
-                        <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-4">
-                            <i data-lucide="settings" class="w-6 h-6 text-orange-600"></i>
-                        </div>
-                        <h4 class="font-semibold mb-2">HubSpot</h4>
-                        <p class="text-sm text-gray-600 mb-4">Marketing automation and CRM integration</p>
-                        <button class="btn-primary text-sm w-full">Connect</button>
-                    </div>
-                    
-                    <div class="border border-gray-200 rounded-lg p-6 hover:border-blue-300 transition-colors card-hover">
-                        <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
-                            <i data-lucide="message-square" class="w-6 h-6 text-purple-600"></i>
-                        </div>
-                        <h4 class="font-semibold mb-2">Slack</h4>
-                        <p class="text-sm text-gray-600 mb-4">Team notifications and updates</p>
-                        <button class="btn-primary text-sm w-full">Connect</button>
-                    </div>
-                    
-                    <div class="border border-gray-200 rounded-lg p-6 hover:border-blue-300 transition-colors card-hover">
-                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-                            <i data-lucide="table" class="w-6 h-6 text-green-600"></i>
-                        </div>
-                        <h4 class="font-semibold mb-2">Google Sheets</h4>
-                        <p class="text-sm text-gray-600 mb-4">Export data and create reports</p>
-                        <button class="btn-primary text-sm w-full">Connect</button>
-                    </div>
-                    
-                    <div class="border border-gray-200 rounded-lg p-6 hover:border-blue-300 transition-colors card-hover">
-                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
-                            <i data-lucide="zap" class="w-6 h-6 text-blue-600"></i>
-                        </div>
-                        <h4 class="font-semibold mb-2">Zapier</h4>
-                        <p class="text-sm text-gray-600 mb-4">Automate workflows with 3000+ apps</p>
-                        <button class="btn-primary text-sm w-full">Connect</button>
-                    </div>
-                    
-                    <div class="border border-gray-200 rounded-lg p-6 hover:border-blue-300 transition-colors card-hover">
-                        <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-4">
-                            <i data-lucide="calendar" class="w-6 h-6 text-red-600"></i>
-                        </div>
-                        <h4 class="font-semibold mb-2">Google Calendar</h4>
-                        <p class="text-sm text-gray-600 mb-4">Schedule meetings and follow-ups</p>
-                        <button class="btn-primary text-sm w-full">Connect</button>
-                    </div>
-                    
-                    <div class="border border-gray-200 rounded-lg p-6 hover:border-blue-300 transition-colors card-hover">
-                        <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mb-4">
-                            <i data-lucide="database" class="w-6 h-6 text-indigo-600"></i>
-                        </div>
-                        <h4 class="font-semibold mb-2">Pipedrive</h4>
-                        <p class="text-sm text-gray-600 mb-4">Sales pipeline management</p>
-                        <button class="btn-primary text-sm w-full">Connect</button>
-                    </div>
+                <h3 class="text-lg font-semibold mb-4">Campaign Details</h3>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Campaign Name</th>
+                                <th>List</th>
+                                <th>Sent</th>
+                                <th>Delivered</th>
+                                <th>Opens</th>
+                                <th>Clicks</th>
+                                <th>Responses</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <div class="font-medium">Tech Leaders Q1 Outreach</div>
+                                    <div class="text-xs text-gray-500">Sent 2 days ago</div>
+                                </td>
+                                <td>Tech Leaders</td>
+                                <td>145</td>
+                                <td>142 (97.9%)</td>
+                                <td>49 (34.8%)</td>
+                                <td>12 (8.5%)</td>
+                                <td>3 (2.1%)</td>
+                                <td><span class="status-badge completed">Completed</span></td>
+                                <td>
+                                    <button class="text-blue-600 hover:text-blue-800 text-sm">View</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="font-medium">Healthcare Decision Makers</div>
+                                    <div class="text-xs text-gray-500">Sent 1 week ago</div>
+                                </td>
+                                <td>Healthcare Executives</td>
+                                <td>89</td>
+                                <td>87 (97.8%)</td>
+                                <td>25 (28.1%)</td>
+                                <td>7 (7.9%)</td>
+                                <td>2 (2.2%)</td>
+                                <td><span class="status-badge completed">Completed</span></td>
+                                <td>
+                                    <button class="text-blue-600 hover:text-blue-800 text-sm">View</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="font-medium">Finance Directors Follow-up</div>
+                                    <div class="text-xs text-gray-500">Sent 2 weeks ago</div>
+                                </td>
+                                <td>Finance Directors</td>
+                                <td>67</td>
+                                <td>65 (97.0%)</td>
+                                <td>16 (23.9%)</td>
+                                <td>4 (6.0%)</td>
+                                <td>1 (1.5%)</td>
+                                <td><span class="status-badge completed">Completed</span></td>
+                                <td>
+                                    <button class="text-blue-600 hover:text-blue-800 text-sm">View</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="font-medium">Manufacturing Efficiency</div>
+                                    <div class="text-xs text-gray-500">Scheduled for tomorrow</div>
+                                </td>
+                                <td>Manufacturing Leaders</td>
+                                <td>-</td>
+                                <td>-</td>
+                                <td>-</td>
+                                <td>-</td>
+                                <td>-</td>
+                                <td><span class="status-badge active">Scheduled</span></td>
+                                <td>
+                                    <button class="text-blue-600 hover:text-blue-800 text-sm">Edit</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="font-medium">Retail Solutions Q1</div>
+                                    <div class="text-xs text-gray-500">Draft</div>
+                                </td>
+                                <td>Retail Managers</td>
+                                <td>-</td>
+                                <td>-</td>
+                                <td>-</td>
+                                <td>-</td>
+                                <td>-</td>
+                                <td><span class="status-badge draft">Draft</span></td>
+                                <td>
+                                    <button class="text-blue-600 hover:text-blue-800 text-sm">Edit</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -76,12 +554,6 @@
             <span class="close">&times;</span>
             <h2 class="text-2xl font-bold mb-4">Connect to Salesforce</h2>
             <p class="mb-6 text-gray-600">Connect your Salesforce account to sync contacts and leads automatically.</p>
-            
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Salesforce Instance URL</label>
-                <input type="text" id="sfdcUrl" class="input-field" placeholder="https://yourcompany.salesforce.com">
-                <p class="text-xs text-gray-500 mt-1">Your Salesforce domain URL</p>
-            </div>
             
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Username</label>
@@ -162,10 +634,6 @@
         let sfdcConnected = false;
         let currentSection = 'dashboard';
         let searchResults = [];
-        let currentPage = 1;
-        let resultsPerPage = 10;
-        let selectedContacts = new Set();
-        let bulkSelectMode = false;
 
         // Sample contact data - expanded for better demo
         const sampleContacts = [
@@ -180,11 +648,7 @@
                 location: "San Francisco, CA",
                 linkedIn: "linkedin.com/in/johnsmith",
                 notes: "Interested in AI solutions",
-                seniority: "c-level",
-                department: "engineering",
                 companySize: "large",
-                technologies: "AWS, Kubernetes, Python",
-                experience: "15+",
                 lastContact: "2024-01-10"
             },
             {
@@ -198,11 +662,7 @@
                 location: "New York, NY",
                 linkedIn: "linkedin.com/in/sarahjohnson",
                 notes: "Looking for marketing automation tools",
-                seniority: "director",
-                department: "marketing",
                 companySize: "medium",
-                technologies: "HubSpot, Salesforce, Google Analytics",
-                experience: "6-10",
                 lastContact: "2024-01-08"
             },
             {
@@ -216,11 +676,7 @@
                 location: "Chicago, IL",
                 linkedIn: "linkedin.com/in/mikechen",
                 notes: "Evaluating cloud infrastructure",
-                seniority: "vp",
-                department: "engineering",
                 companySize: "large",
-                technologies: "Docker, Jenkins, React",
-                experience: "11-15",
                 lastContact: "2024-01-05"
             },
             {
@@ -234,11 +690,7 @@
                 location: "Austin, TX",
                 linkedIn: "linkedin.com/in/emilyrodriguez",
                 notes: "Scaling operations team",
-                seniority: "director",
-                department: "operations",
                 companySize: "medium",
-                technologies: "Shopify, Zendesk, Slack",
-                experience: "6-10",
                 lastContact: "2024-01-12"
             },
             {
@@ -252,11 +704,7 @@
                 location: "Detroit, MI",
                 linkedIn: "linkedin.com/in/davidwilson",
                 notes: "Implementing lean manufacturing",
-                seniority: "director",
-                department: "operations",
                 companySize: "enterprise",
-                technologies: "SAP, Oracle, AutoCAD",
-                experience: "15+",
                 lastContact: "2024-01-03"
             },
             {
@@ -270,11 +718,7 @@
                 location: "Seattle, WA",
                 linkedIn: "linkedin.com/in/lisawang",
                 notes: "Looking for financial management tools",
-                seniority: "c-level",
-                department: "finance",
                 companySize: "startup",
-                technologies: "QuickBooks, Stripe, Excel",
-                experience: "11-15",
                 lastContact: "2024-01-15"
             },
             {
@@ -288,11 +732,7 @@
                 location: "Boston, MA",
                 linkedIn: "linkedin.com/in/robertbrown",
                 notes: "Interested in CRM solutions",
-                seniority: "mid",
-                department: "sales",
                 companySize: "small",
-                technologies: "Salesforce, LinkedIn Sales Navigator",
-                experience: "3-5",
                 lastContact: "2024-01-11"
             },
             {
@@ -306,18 +746,14 @@
                 location: "Denver, CO",
                 linkedIn: "linkedin.com/in/jenniferdavis",
                 notes: "Modernizing HR processes",
-                seniority: "director",
-                department: "hr",
                 companySize: "medium",
-                technologies: "Workday, BambooHR, Zoom",
-                experience: "6-10",
                 lastContact: "2024-01-09"
             }
         ];
 
         // Navigation functions
         function showSection(section) {
-            const sections = ['dashboard', 'contactFinder', 'contactLists', 'reports', 'campaigns', 'integrations'];
+            const sections = ['dashboard', 'contactFinder', 'contactLists', 'reports'];
             sections.forEach(s => {
                 const sectionEl = document.getElementById(s + 'Section');
                 const navEl = document.getElementById(s + 'Nav');
@@ -339,11 +775,6 @@
             }
             
             currentSection = section;
-            
-            // Special handling for integrations section
-            if (section === 'integrations') {
-                updateIntegrationsStatus();
-            }
         }
 
         // Search functionality
@@ -353,12 +784,7 @@
                 jobTitle: document.getElementById('jobTitleSearch').value.toLowerCase(),
                 industry: document.getElementById('industrySearch').value.toLowerCase(),
                 location: document.getElementById('locationSearch')?.value.toLowerCase() || '',
-                companySize: document.getElementById('companySizeSearch')?.value || '',
-                seniority: document.getElementById('senioritySearch')?.value || '',
-                department: document.getElementById('departmentSearch')?.value || '',
-                technologies: document.getElementById('technologiesSearch')?.value.toLowerCase() || '',
-                experience: document.getElementById('experienceSearch')?.value || '',
-                keywords: document.getElementById('keywordsSearch')?.value.toLowerCase() || ''
+                companySize: document.getElementById('companySizeSearch')?.value || ''
             };
 
             showLoading();
@@ -370,21 +796,11 @@
                     const matchesIndustry = !filters.industry || contact.industry === filters.industry;
                     const matchesLocation = !filters.location || contact.location.toLowerCase().includes(filters.location);
                     const matchesCompanySize = !filters.companySize || contact.companySize === filters.companySize;
-                    const matchesSeniority = !filters.seniority || contact.seniority === filters.seniority;
-                    const matchesDepartment = !filters.department || contact.department === filters.department;
-                    const matchesTechnologies = !filters.technologies || contact.technologies.toLowerCase().includes(filters.technologies);
-                    const matchesExperience = !filters.experience || contact.experience === filters.experience;
-                    const matchesKeywords = !filters.keywords || 
-                        contact.notes.toLowerCase().includes(filters.keywords) ||
-                        contact.technologies.toLowerCase().includes(filters.keywords);
 
-                    return matchesCompany && matchesTitle && matchesIndustry && matchesLocation && 
-                           matchesCompanySize && matchesSeniority && matchesDepartment && 
-                           matchesTechnologies && matchesExperience && matchesKeywords;
+                    return matchesCompany && matchesTitle && matchesIndustry && matchesLocation && matchesCompanySize;
                 });
 
                 hideLoading();
-                currentPage = 1;
                 displaySearchResults();
             }, 1500);
         }
@@ -392,7 +808,6 @@
         function showLoading() {
             document.getElementById('searchLoader').classList.remove('hidden');
             document.getElementById('contactsContainer').innerHTML = '';
-            document.getElementById('searchResultsCount').classList.add('hidden');
         }
 
         function hideLoading() {
@@ -401,7 +816,6 @@
 
         function displaySearchResults() {
             const container = document.getElementById('contactsContainer');
-            const countContainer = document.getElementById('searchResultsCount');
             
             if (searchResults.length === 0) {
                 container.innerHTML = `
@@ -411,29 +825,12 @@
                         <p class="text-gray-600">Try adjusting your search criteria or clear filters to see all contacts</p>
                     </div>
                 `;
-                countContainer.classList.add('hidden');
                 lucide.createIcons();
                 return;
             }
 
-            // Show results count
-            countContainer.textContent = `Found ${searchResults.length} contact${searchResults.length !== 1 ? 's' : ''} matching your criteria`;
-            countContainer.classList.remove('hidden');
-
-            // Pagination
-            const startIndex = (currentPage - 1) * resultsPerPage;
-            const endIndex = startIndex + resultsPerPage;
-            const paginatedResults = searchResults.slice(startIndex, endIndex);
-
-            container.innerHTML = paginatedResults.map(contact => `
+            container.innerHTML = searchResults.map(contact => `
                 <div class="contact-card">
-                    ${bulkSelectMode ? `
-                        <div class="flex items-center mb-3">
-                            <input type="checkbox" class="checkbox-input contact-checkbox" data-contact-id="${contact.id}" 
-                                   ${selectedContacts.has(contact.id) ? 'checked' : ''}>
-                            <span class="text-sm text-gray-600">Select this contact</span>
-                        </div>
-                    ` : ''}
                     <div class="flex justify-between items-start mb-3">
                         <div>
                             <h4 class="font-semibold text-lg">${contact.name}</h4>
@@ -448,13 +845,12 @@
                             <p class="text-sm text-gray-600"><strong>Location:</strong> ${contact.location}</p>
                         </div>
                         <div>
-                            <p class="text-sm text-gray-600"><strong>Department:</strong> ${contact.department}</p>
                             <p class="text-sm text-gray-600"><strong>Company Size:</strong> ${contact.companySize}</p>
                             <p class="text-sm text-gray-600"><strong>Last Contact:</strong> ${formatDate(contact.lastContact)}</p>
+                            <p class="text-sm text-gray-600"><strong>LinkedIn:</strong> ${contact.linkedIn}</p>
                         </div>
                     </div>
                     <div class="mb-3">
-                        <p class="text-sm text-gray-600"><strong>Technologies:</strong> ${contact.technologies}</p>
                         <p class="text-sm text-gray-600"><strong>Notes:</strong> ${contact.notes}</p>
                     </div>
                     <div class="flex gap-2 flex-wrap">
@@ -478,78 +874,6 @@
                 </div>
             `).join('');
 
-            // Update pagination
-            updatePagination();
-            
-            // Add event listeners for checkboxes
-            if (bulkSelectMode) {
-                document.querySelectorAll('.contact-checkbox').forEach(checkbox => {
-                    checkbox.addEventListener('change', handleContactSelection);
-                });
-            }
-
-            lucide.createIcons();
-        }
-
-        function updatePagination() {
-            const pagination = document.getElementById('pagination');
-            const totalPages = Math.ceil(searchResults.length / resultsPerPage);
-            
-            if (totalPages <= 1) {
-                pagination.classList.add('hidden');
-                return;
-            }
-
-            pagination.classList.remove('hidden');
-            
-            const prevBtn = document.getElementById('prevPage');
-            const nextBtn = document.getElementById('nextPage');
-            const pageInfo = document.getElementById('pageInfo');
-
-            prevBtn.disabled = currentPage === 1;
-            nextBtn.disabled = currentPage === totalPages;
-            pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
-        }
-
-        function handleContactSelection(event) {
-            const contactId = parseInt(event.target.dataset.contactId);
-            if (event.target.checked) {
-                selectedContacts.add(contactId);
-            } else {
-                selectedContacts.delete(contactId);
-            }
-            updateBulkActions();
-        }
-
-        function updateBulkActions() {
-            const bulkActions = document.getElementById('bulkActions');
-            const selectedCount = document.getElementById('selectedCount');
-            
-            if (selectedContacts.size > 0) {
-                bulkActions.classList.add('show');
-                selectedCount.textContent = `${selectedContacts.size} contact${selectedContacts.size !== 1 ? 's' : ''} selected`;
-            } else {
-                bulkActions.classList.remove('show');
-            }
-        }
-
-        function toggleBulkSelect() {
-            bulkSelectMode = !bulkSelectMode;
-            const bulkSelectBtn = document.getElementById('bulkSelectBtn');
-            
-            if (bulkSelectMode) {
-                bulkSelectBtn.innerHTML = '<i data-lucide="x" class="w-4 h-4 inline mr-1"></i>Cancel';
-                bulkSelectBtn.classList.add('bg-red-600', 'hover:bg-red-700');
-                bulkSelectBtn.classList.remove('btn-secondary');
-            } else {
-                bulkSelectBtn.innerHTML = '<i data-lucide="check-square" class="w-4 h-4 inline mr-1"></i>Bulk Select';
-                bulkSelectBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
-                bulkSelectBtn.classList.add('btn-secondary');
-                selectedContacts.clear();
-                updateBulkActions();
-            }
-            
-            displaySearchResults();
             lucide.createIcons();
         }
 
@@ -560,11 +884,10 @@
             document.getElementById('industrySearch').value = '';
             
             // Clear advanced filters if they exist
-            const advancedFields = ['locationSearch', 'companySizeSearch', 'senioritySearch', 'departmentSearch', 'technologiesSearch', 'experienceSearch', 'keywordsSearch'];
-            advancedFields.forEach(fieldId => {
-                const field = document.getElementById(fieldId);
-                if (field) field.value = '';
-            });
+            const locationField = document.getElementById('locationSearch');
+            const companySizeField = document.getElementById('companySizeSearch');
+            if (locationField) locationField.value = '';
+            if (companySizeField) companySizeField.value = '';
 
             // Reset UI
             document.getElementById('contactsContainer').innerHTML = `
@@ -574,8 +897,6 @@
                     <p class="text-gray-600">Use the search form above to find contacts matching your criteria</p>
                 </div>
             `;
-            document.getElementById('searchResultsCount').classList.add('hidden');
-            document.getElementById('pagination').classList.add('hidden');
             
             lucide.createIcons();
         }
@@ -605,21 +926,10 @@
                         <h3 class="text-lg font-semibold mb-4 mt-6">Professional Details</h3>
                         <div class="space-y-3">
                             <div><strong>Industry:</strong> <span class="tag ${contact.industry}">${contact.industry}</span></div>
-                            <div><strong>Department:</strong> ${contact.department}</div>
-                            <div><strong>Seniority:</strong> ${contact.seniority}</div>
                             <div><strong>Company Size:</strong> ${contact.companySize}</div>
-                            <div><strong>Experience:</strong> ${contact.experience} years</div>
                         </div>
                     </div>
                     <div>
-                        <h3 class="text-lg font-semibold mb-4">Technologies & Interests</h3>
-                        <div class="mb-4">
-                            <strong>Technologies Used:</strong>
-                            <div class="mt-2 flex flex-wrap gap-2">
-                                ${contact.technologies.split(', ').map(tech => `<span class="tag">${tech}</span>`).join('')}
-                            </div>
-                        </div>
-                        
                         <h3 class="text-lg font-semibold mb-4">Notes & Activity</h3>
                         <div class="space-y-4">
                             <div>
@@ -643,7 +953,309 @@
                                     </div>
                                 </div>
                             </div>
-                        </div<!DOCTYPE html>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-8 flex gap-4 flex-wrap">
+                    <button onclick="addToSalesforce(${contact.id})" class="btn-success">
+                        <i data-lucide="cloud" class="w-4 h-4 inline mr-2"></i>
+                        Add to Salesforce
+                    </button>
+                    <button onclick="sendEmail(${contact.id})" class="btn-primary">
+                        <i data-lucide="mail" class="w-4 h-4 inline mr-2"></i>
+                        Send Email
+                    </button>
+                    <button onclick="addToList(${contact.id})" class="btn-secondary">
+                        <i data-lucide="list" class="w-4 h-4 inline mr-2"></i>
+                        Add to List
+                    </button>
+                    <button onclick="scheduleFollowUp(${contact.id})" class="btn-secondary">
+                        <i data-lucide="calendar" class="w-4 h-4 inline mr-2"></i>
+                        Schedule Follow-up
+                    </button>
+                </div>
+            `;
+            
+            modal.style.display = 'block';
+            lucide.createIcons();
+        }
+
+        function addToSalesforce(contactId) {
+            if (!sfdcConnected) {
+                showNotification('Please connect to Salesforce first', 'warning');
+                return;
+            }
+
+            const contact = sampleContacts.find(c => c.id === contactId);
+            if (!contact) return;
+
+            showNotification(`Adding ${contact.name} to Salesforce...`, 'info');
+
+            // Simulate Salesforce API call
+            setTimeout(() => {
+                showNotification(`${contact.name} added to Salesforce successfully!`, 'success');
+                
+                // Update contact record to show it's in Salesforce
+                contact.inSalesforce = true;
+            }, 2000);
+        }
+
+        function addToList(contactId) {
+            const contact = sampleContacts.find(c => c.id === contactId);
+            if (!contact) return;
+
+            showNotification(`${contact.name} would be added to a contact list`, 'info');
+        }
+
+        function sendEmail(contactId) {
+            const contact = sampleContacts.find(c => c.id === contactId);
+            if (!contact) return;
+
+            window.location.href = `mailto:${contact.email}?subject=Hello from Sales Simplified&body=Hi ${contact.name},%0D%0A%0D%0AI hope this email finds you well.%0D%0A%0D%0ABest regards`;
+        }
+
+        function scheduleFollowUp(contactId) {
+            const contact = sampleContacts.find(c => c.id === contactId);
+            if (!contact) return;
+
+            showNotification(`Follow-up scheduled with ${contact.name}`, 'success');
+        }
+
+        // Salesforce connection functions
+        function showSalesforceModal() {
+            document.getElementById('sfdcModal').style.display = 'block';
+        }
+
+        function hideSalesforceModal() {
+            document.getElementById('sfdcModal').style.display = 'none';
+        }
+
+        function connectToSalesforce() {
+            const url = document.getElementById('sfdcUrl').value;
+            const username = document.getElementById('sfdcUsername').value;
+            const token = document.getElementById('sfdcToken').value;
+
+            if (!url || !username || !token) {
+                showNotification('Please fill in all fields', 'error');
+                return;
+            }
+
+            // Simulate connection process
+            const connectBtn = document.getElementById('connectSfdcBtn');
+            const originalText = connectBtn.innerHTML;
+            connectBtn.innerHTML = '<div class="loader inline-block mr-2" style="width: 16px; height: 16px; border-width: 2px;"></div>Connecting...';
+            connectBtn.disabled = true;
+
+            setTimeout(() => {
+                // Simulate successful connection
+                sfdcConnected = true;
+                updateSalesforceStatus();
+                hideSalesforceModal();
+                
+                // Reset form
+                document.getElementById('sfdcUrl').value = '';
+                document.getElementById('sfdcUsername').value = '';
+                document.getElementById('sfdcToken').value = '';
+                
+                connectBtn.innerHTML = originalText;
+                connectBtn.disabled = false;
+                
+                showNotification('Connected to Salesforce successfully!', 'success');
+            }, 2000);
+        }
+
+        function updateSalesforceStatus() {
+            const statusElement = document.getElementById('sfdcStatus');
+            const connectBtn = document.getElementById('sfdcConnectBtn');
+            
+            if (sfdcConnected) {
+                statusElement.innerHTML = '<i data-lucide="cloud" class="w-4 h-4 inline mr-1"></i>Salesforce: Connected';
+                statusElement.classList.remove('sfdc-disconnected');
+                statusElement.classList.add('sfdc-connected');
+                connectBtn.innerHTML = 'Disconnect';
+                connectBtn.onclick = disconnectFromSalesforce;
+            } else {
+                statusElement.innerHTML = '<i data-lucide="cloud-off" class="w-4 h-4 inline mr-1"></i>Salesforce: Disconnected';
+                statusElement.classList.remove('sfdc-connected');
+                statusElement.classList.add('sfdc-disconnected');
+                connectBtn.innerHTML = 'Connect Salesforce';
+                connectBtn.onclick = showSalesforceModal;
+            }
+            
+            lucide.createIcons();
+        }
+
+        function disconnectFromSalesforce() {
+            sfdcConnected = false;
+            updateSalesforceStatus();
+            showNotification('Disconnected from Salesforce', 'info');
+        }
+
+        // List management functions
+        function viewList(listId) {
+            showNotification(`Viewing ${listId} list`, 'info');
+        }
+
+        function editList(listId) {
+            showNotification(`Editing ${listId} list`, 'info');
+        }
+
+        function exportList(listId) {
+            showNotification(`Exporting ${listId} list`, 'info');
+        }
+
+        function createNewList() {
+            document.getElementById('createListModal').style.display = 'block';
+        }
+
+        function hideCreateListModal() {
+            document.getElementById('createListModal').style.display = 'none';
+        }
+
+        function saveNewList() {
+            const name = document.getElementById('listName').value;
+            const description = document.getElementById('listDescription').value;
+            const industry = document.getElementById('listIndustry').value;
+
+            if (!name.trim()) {
+                showNotification('Please enter a list name', 'error');
+                return;
+            }
+
+            setTimeout(() => {
+                hideCreateListModal();
+                showNotification(`Contact list "${name}" created successfully!`, 'success');
+                
+                // Reset form
+                document.getElementById('listName').value = '';
+                document.getElementById('listDescription').value = '';
+                document.getElementById('listIndustry').value = '';
+            }, 1000);
+        }
+
+        // Utility functions
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <div class="flex items-center">
+                    <i data-lucide="${getNotificationIcon(type)}" class="w-4 h-4 mr-2"></i>
+                    ${message}
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            lucide.createIcons();
+
+            setTimeout(() => {
+                notification.remove();
+            }, 4000);
+        }
+
+        function getNotificationIcon(type) {
+            switch (type) {
+                case 'success': return 'check-circle';
+                case 'error': return 'x-circle';
+                case 'warning': return 'alert-triangle';
+                default: return 'info';
+            }
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Navigation
+            document.getElementById('dashboardNav').addEventListener('click', () => showSection('dashboard'));
+            document.getElementById('contactFinderNav').addEventListener('click', () => showSection('contactFinder'));
+            document.getElementById('contactListsNav').addEventListener('click', () => showSection('contactLists'));
+            document.getElementById('reportsNav').addEventListener('click', () => showSection('reports'));
+
+            // Search functionality
+            document.getElementById('searchBtn').addEventListener('click', performSearch);
+            document.getElementById('clearBtn').addEventListener('click', clearSearch);
+
+            // Salesforce
+            document.getElementById('sfdcConnectBtn').addEventListener('click', showSalesforceModal);
+            document.getElementById('connectSfdcBtn').addEventListener('click', connectToSalesforce);
+            document.getElementById('cancelSfdcBtn').addEventListener('click', hideSalesforceModal);
+
+            // List management
+            const createListBtn = document.getElementById('createListBtn');
+            if (createListBtn) {
+                createListBtn.addEventListener('click', createNewList);
+            }
+            
+            const saveListBtn = document.getElementById('saveListBtn');
+            if (saveListBtn) {
+                saveListBtn.addEventListener('click', saveNewList);
+            }
+            
+            const cancelListBtn = document.getElementById('cancelListBtn');
+            if (cancelListBtn) {
+                cancelListBtn.addEventListener('click', hideCreateListModal);
+            }
+
+            // Modal close buttons
+            document.querySelectorAll('.close').forEach(closeBtn => {
+                closeBtn.addEventListener('click', function() {
+                    this.closest('.modal').style.display = 'none';
+                });
+            });
+
+            // Close modals when clicking outside
+            window.addEventListener('click', function(event) {
+                const modals = document.querySelectorAll('.modal');
+                modals.forEach(modal => {
+                    if (event.target === modal) {
+                        modal.style.display = 'none';
+                    }
+                });
+            });
+
+            // Enter key support for search
+            const searchFields = ['companySearch', 'jobTitleSearch', 'locationSearch'];
+            searchFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field) {
+                    field.addEventListener('keypress', function(e) {
+                        if (e.key === 'Enter') performSearch();
+                    });
+                }
+            });
+
+            // Initialize the page
+            updateSalesforceStatus();
+            showSection('dashboard');
+        });
+
+        // Export functions to global scope for onclick handlers
+        window.showSection = showSection;
+        window.viewContact = viewContact;
+        window.addToSalesforce = addToSalesforce;
+        window.addToList = addToList;
+        window.sendEmail = sendEmail;
+        window.scheduleFollowUp = scheduleFollowUp;
+        window.viewList = viewList;
+        window.editList = editList;
+        window.exportList = exportList;
+        window.createNewList = createNewList;
+    </script>
+</body>
+</html>Salesforce Instance URL</label>
+                <input type="text" id="sfdcUrl" class="input-field" placeholder="https://yourcompany.salesforce.com">
+                <p class="text-xs text-gray-500 mt-1">Your Salesforce domain URL</p>
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2"><!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -771,38 +1383,75 @@
         .notification.error { background: #ef4444; }
         .notification.info { background: #3b82f6; }
         .notification.warning { background: #f59e0b; }
-        
         .chart-container {
             position: relative;
             height: 300px;
             margin: 20px 0;
         }
-        
         .progress-bar {
             background: #e5e7eb;
             border-radius: 10px;
             overflow: hidden;
             height: 8px;
         }
-        
         .progress-fill {
             height: 100%;
             border-radius: 10px;
             transition: width 0.3s ease;
         }
-        
-        .tooltip {
-            position: absolute;
-            background: rgba(0,0,0,0.8);
-            color: white;
-            padding: 8px 12px;
-            border-radius: 4px;
-            font-size: 12px;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.2s;
+        .activity-item {
+            padding: 16px;
+            border-left: 4px solid #e5e7eb;
+            margin: 10px 0;
+            background: #f9fafb;
+            border-radius: 0 8px 8px 0;
         }
-        
+        .activity-item.email { border-left-color: #3b82f6; }
+        .activity-item.call { border-left-color: #22c55e; }
+        .activity-item.meeting { border-left-color: #f59e0b; }
+        .activity-item.note { border-left-color: #8b5cf6; }
+        .metric-card {
+            background: white;
+            border-radius: 10px;
+            padding: 24px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border: 1px solid #e5e7eb;
+        }
+        .table-container {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+        .data-table th {
+            background: #f9fafb;
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .data-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        .data-table tbody tr:hover {
+            background: #f9fafb;
+        }
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .status-badge.active { background: #dcfce7; color: #166534; }
+        .status-badge.paused { background: #fef3c7; color: #92400e; }
+        .status-badge.completed { background: #e5e7eb; color: #374151; }
+        .status-badge.draft { background: #dbeafe; color: #1e40af; }
         .list-item {
             border: 1px solid #e2e8f0;
             border-radius: 8px;
@@ -811,105 +1460,10 @@
             background: white;
             transition: all 0.3s ease;
         }
-        
         .list-item:hover {
             border-color: #667eea;
             box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
         }
-        
-        .campaign-row {
-            border-bottom: 1px solid #e2e8f0;
-            transition: background-color 0.2s;
-        }
-        
-        .campaign-row:hover {
-            background-color: #f8fafc;
-        }
-        
-        .search-filters {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 10px;
-            padding: 20px;
-            margin: 20px 0;
-        }
-        
-        .filter-group {
-            margin: 15px 0;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-        }
-        
-        .btn-secondary {
-            background: #6b7280;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-secondary:hover {
-            background: #4b5563;
-        }
-        
-        .btn-success {
-            background: #22c55e;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-success:hover {
-            background: #16a34a;
-        }
-        
-        .input-field {
-            width: 100%;
-            padding: 10px 12px;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            transition: border-color 0.2s;
-        }
-        
-        .input-field:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-        
-        .select-field {
-            width: 100%;
-            padding: 10px 12px;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            background: white;
-            transition: border-color 0.2s;
-        }
-        
-        .select-field:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-        
         .tag {
             display: inline-block;
             background: #e5e7eb;
@@ -919,366 +1473,99 @@
             font-size: 12px;
             margin: 2px;
         }
-        
         .tag.technology { background: #dbeafe; color: #1e40af; }
         .tag.healthcare { background: #dcfce7; color: #166534; }
         .tag.finance { background: #fef3c7; color: #92400e; }
         .tag.retail { background: #fce7f3; color: #be185d; }
         .tag.manufacturing { background: #f3e8ff; color: #7c2d12; }
-        
-        .activity-item {
-            padding: 16px;
-            border-left: 4px solid #e5e7eb;
-            margin: 10px 0;
-            background: #f9fafb;
-            border-radius: 0 8px 8px 0;
-        }
-        
-        .activity-item.email { border-left-color: #3b82f6; }
-        .activity-item.call { border-left-color: #22c55e; }
-        .activity-item.meeting { border-left-color: #f59e0b; }
-        .activity-item.note { border-left-color: #8b5cf6; }
-        
-        .metric-card {
-            background: white;
-            border-radius: 10px;
-            padding: 24px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            border: 1px solid #e5e7eb;
-        }
-        
-        .metric-number {
-            font-size: 2.5rem;
-            font-weight: bold;
-            margin: 10px 0;
-        }
-        
-        .metric-change {
-            font-size: 0.875rem;
-            font-weight: 500;
-        }
-        
-        .metric-change.positive { color: #22c55e; }
-        .metric-change.negative { color: #ef4444; }
-        .metric-change.neutral { color: #6b7280; }
-        
-        .sidebar {
-            background: white;
-            border-right: 1px solid #e5e7eb;
-            height: 100vh;
-            position: fixed;
-            left: -300px;
-            top: 0;
-            width: 300px;
-            transition: left 0.3s ease;
-            z-index: 999;
-        }
-        
-        .sidebar.open {
-            left: 0;
-        }
-        
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 998;
-            display: none;
-        }
-        
-        .overlay.show {
-            display: block;
-        }
-        
-        .dropdown {
-            position: relative;
-            display: inline-block;
-        }
-        
-        .dropdown-content {
-            display: none;
-            position: absolute;
-            right: 0;
-            background: white;
-            min-width: 200px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-            border-radius: 8px;
-            padding: 8px 0;
-            z-index: 1000;
-        }
-        
-        .dropdown-content.show {
-            display: block;
-        }
-        
-        .dropdown-item {
-            color: #374151;
-            padding: 12px 16px;
-            text-decoration: none;
-            display: block;
-            transition: background-color 0.2s;
-        }
-        
-        .dropdown-item:hover {
-            background-color: #f3f4f6;
-        }
-        
-        .table-container {
-            overflow-x: auto;
-            border-radius: 8px;
-            border: 1px solid #e5e7eb;
-        }
-        
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-        }
-        
-        .data-table th {
-            background: #f9fafb;
-            padding: 12px 16px;
-            text-align: left;
-            font-weight: 600;
-            color: #374151;
-            border-bottom: 1px solid #e5e7eb;
-        }
-        
-        .data-table td {
-            padding: 12px 16px;
-            border-bottom: 1px solid #f3f4f6;
-        }
-        
-        .data-table tbody tr:hover {
-            background: #f9fafb;
-        }
-        
-        .status-badge {
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 500;
-        }
-        
-        .status-badge.active { background: #dcfce7; color: #166534; }
-        .status-badge.paused { background: #fef3c7; color: #92400e; }
-        .status-badge.completed { background: #e5e7eb; color: #374151; }
-        .status-badge.draft { background: #dbeafe; color: #1e40af; }
-        
-        .chart-legend {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-top: 20px;
-        }
-        
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .legend-color {
-            width: 16px;
-            height: 16px;
-            border-radius: 2px;
-        }
-        
-        .search-result-count {
-            background: #f3f4f6;
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin: 16px 0;
-            color: #6b7280;
-            font-size: 14px;
-        }
-        
         .empty-state {
             text-align: center;
             padding: 60px 20px;
             color: #6b7280;
         }
-        
         .empty-state-icon {
             width: 64px;
             height: 64px;
             margin: 0 auto 16px;
             opacity: 0.5;
         }
-        
-        .pagination {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
-            margin: 24px 0;
-        }
-        
-        .pagination button {
-            padding: 8px 12px;
-            border: 1px solid #d1d5db;
-            background: white;
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
             border-radius: 6px;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.3s ease;
         }
-        
-        .pagination button:hover {
-            background: #f3f4f6;
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
         }
-        
-        .pagination button.active {
-            background: #667eea;
+        .btn-secondary {
+            background: #6b7280;
             color: white;
-            border-color: #667eea;
-        }
-        
-        .pagination button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        
-        .bulk-actions {
-            background: #f9fafb;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            padding: 16px;
-            margin: 16px 0;
-            display: none;
-        }
-        
-        .bulk-actions.show {
-            display: block;
-        }
-        
-        .checkbox-input {
-            width: 16px;
-            height: 16px;
-            margin-right: 8px;
-        }
-        
-        .advanced-filters {
-            background: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            padding: 20px;
-            margin: 16px 0;
-            display: none;
-        }
-        
-        .advanced-filters.show {
-            display: block;
-        }
-        
-        .filter-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr auto;
-            gap: 12px;
-            align-items: end;
-            margin: 12px 0;
-        }
-        
-        .export-options {
-            background: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            padding: 20px;
-            margin: 16px 0;
-        }
-        
-        .integration-status {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 12px;
+            border: none;
+            padding: 10px 20px;
             border-radius: 6px;
-            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
-        
-        .integration-status.connected {
-            background: #dcfce7;
-            color: #166534;
+        .btn-secondary:hover {
+            background: #4b5563;
         }
-        
-        .integration-status.disconnected {
-            background: #fee2e2;
-            color: #991b1b;
+        .btn-success {
+            background: #22c55e;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
-        
-        .integration-status.syncing {
-            background: #dbeafe;
-            color: #1e40af;
+        .btn-success:hover {
+            background: #16a34a;
         }
-        
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
+        .input-field {
             width: 100%;
-            height: 100%;
-            background: rgba(255,255,255,0.9);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            display: none;
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            transition: border-color 0.2s;
         }
-        
-        .loading-overlay.show {
-            display: flex;
+        .input-field:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
-        
-        .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid #667eea;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
+        .select-field {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            background: white;
+            transition: border-color 0.2s;
         }
-        
+        .select-field:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
         @media (max-width: 768px) {
-            .grid-responsive {
-                grid-template-columns: 1fr;
-            }
-            
-            .nav-horizontal {
-                overflow-x: auto;
-                white-space: nowrap;
-            }
-            
             .modal-content {
                 width: 95%;
                 margin: 10% auto;
             }
-            
             .stat-cards {
                 grid-template-columns: 1fr;
             }
-            
             .contact-card {
                 margin: 8px 0;
-            }
-            
-            .filter-row {
-                grid-template-columns: 1fr;
-                gap: 8px;
             }
         }
     </style>
 </head>
 <body class="bg-gray-50">
-    <!-- Loading Overlay -->
-    <div id="loadingOverlay" class="loading-overlay">
-        <div class="text-center">
-            <div class="loading-spinner"></div>
-            <p class="mt-4 text-gray-600">Loading...</p>
-        </div>
-    </div>
-
     <!-- Header -->
     <header class="gradient-bg text-white shadow-lg">
         <div class="container mx-auto px-4 py-6">
@@ -1295,31 +1582,6 @@
                     <button id="sfdcConnectBtn" class="bg-white text-indigo-600 px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors">
                         Connect Salesforce
                     </button>
-                    <div class="dropdown">
-                        <button id="userMenuBtn" class="bg-white bg-opacity-20 text-white px-3 py-2 rounded-lg hover:bg-opacity-30 transition-colors">
-                            <i data-lucide="user" class="w-4 h-4 inline mr-1"></i>
-                            Menu
-                        </button>
-                        <div id="userDropdown" class="dropdown-content">
-                            <a href="#" class="dropdown-item">
-                                <i data-lucide="user" class="w-4 h-4 inline mr-2"></i>
-                                Profile
-                            </a>
-                            <a href="#" class="dropdown-item">
-                                <i data-lucide="settings" class="w-4 h-4 inline mr-2"></i>
-                                Settings
-                            </a>
-                            <a href="#" class="dropdown-item">
-                                <i data-lucide="help-circle" class="w-4 h-4 inline mr-2"></i>
-                                Help
-                            </a>
-                            <hr class="my-2">
-                            <a href="#" class="dropdown-item">
-                                <i data-lucide="log-out" class="w-4 h-4 inline mr-2"></i>
-                                Sign Out
-                            </a>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -1328,7 +1590,7 @@
     <!-- Navigation -->
     <nav class="bg-white shadow-md sticky top-0 z-50">
         <div class="container mx-auto px-4">
-            <div class="flex space-x-1 nav-horizontal">
+            <div class="flex space-x-1">
                 <button id="dashboardNav" class="nav-active px-6 py-3 text-sm font-medium rounded-t-lg transition-colors">
                     <i data-lucide="home" class="w-4 h-4 inline mr-2"></i>
                     Dashboard
@@ -1344,14 +1606,6 @@
                 <button id="reportsNav" class="nav-inactive px-6 py-3 text-sm font-medium rounded-t-lg transition-colors">
                     <i data-lucide="bar-chart" class="w-4 h-4 inline mr-2"></i>
                     Reports
-                </button>
-                <button id="campaignsNav" class="nav-inactive px-6 py-3 text-sm font-medium rounded-t-lg transition-colors">
-                    <i data-lucide="mail" class="w-4 h-4 inline mr-2"></i>
-                    Campaigns
-                </button>
-                <button id="integrationsNav" class="nav-inactive px-6 py-3 text-sm font-medium rounded-t-lg transition-colors">
-                    <i data-lucide="link" class="w-4 h-4 inline mr-2"></i>
-                    Integrations
                 </button>
             </div>
         </div>
@@ -1411,19 +1665,25 @@
                     <div class="bg-white rounded-xl shadow-lg p-6">
                         <h3 class="text-xl font-semibold mb-6">Performance Overview</h3>
                         <div class="chart-container">
-                            <canvas id="performanceChart" width="400" height="200"></canvas>
+                            <div class="flex items-center justify-center h-full">
+                                <div class="text-center">
+                                    <i data-lucide="bar-chart-3" class="w-16 h-16 text-gray-400 mx-auto mb-4"></i>
+                                    <p class="text-gray-600">Chart visualization would appear here</p>
+                                    <p class="text-sm text-gray-500">Integration with Chart.js or similar library</p>
+                                </div>
+                            </div>
                         </div>
-                        <div class="chart-legend">
-                            <div class="legend-item">
-                                <div class="legend-color" style="background: #667eea;"></div>
+                        <div class="flex justify-center gap-8 mt-4">
+                            <div class="flex items-center gap-2">
+                                <div class="w-4 h-4 bg-blue-500 rounded"></div>
                                 <span class="text-sm">Emails Sent</span>
                             </div>
-                            <div class="legend-item">
-                                <div class="legend-color" style="background: #22c55e;"></div>
+                            <div class="flex items-center gap-2">
+                                <div class="w-4 h-4 bg-green-500 rounded"></div>
                                 <span class="text-sm">Responses</span>
                             </div>
-                            <div class="legend-item">
-                                <div class="legend-color" style="background: #f59e0b;"></div>
+                            <div class="flex items-center gap-2">
+                                <div class="w-4 h-4 bg-orange-500 rounded"></div>
                                 <span class="text-sm">Leads</span>
                             </div>
                         </div>
@@ -1597,960 +1857,7 @@
         <!-- Contact Finder Section -->
         <div id="contactFinderSection" class="section-hidden">
             <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-bold">Contact Finder</h2>
-                    <button id="advancedFiltersToggle" class="btn-secondary text-sm">
-                        <i data-lucide="filter" class="w-4 h-4 inline mr-2"></i>
-                        Advanced Filters
-                    </button>
-                </div>
+                <h2 class="text-2xl font-bold mb-6">Contact Finder</h2>
                 
-                <!-- Basic Search Form -->
-                <div class="search-filters">
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
-                        <div class="filter-group">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Company</label>
-                            <input type="text" id="companySearch" class="input-field" placeholder="Enter company name">
-                        </div>
-                        <div class="filter-group">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Job Title</label>
-                            <input type="text" id="jobTitleSearch" class="input-field" placeholder="e.g., Marketing Director">
-                        </div>
-                        <div class="filter-group">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Industry</label>
-                            <select id="industrySearch" class="select-field">
-                                <option value="">All Industries</option>
-                                <option value="technology">Technology</option>
-                                <option value="healthcare">Healthcare</option>
-                                <option value="finance">Finance</option>
-                                <option value="retail">Retail</option>
-                                <option value="manufacturing">Manufacturing</option>
-                                <option value="education">Education</option>
-                                <option value="real-estate">Real Estate</option>
-                                <option value="consulting">Consulting</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                        <div class="filter-group">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Location</label>
-                            <input type="text" id="locationSearch" class="input-field" placeholder="City, State or Country">
-                        </div>
-                        <div class="filter-group">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Company Size</label>
-                            <select id="companySizeSearch" class="select-field">
-                                <option value="">Any Size</option>
-                                <option value="startup">Startup (1-10)</option>
-                                <option value="small">Small (11-50)</option>
-                                <option value="medium">Medium (51-200)</option>
-                                <option value="large">Large (201-1000)</option>
-                                <option value="enterprise">Enterprise (1000+)</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Advanced Filters -->
-                <div id="advancedFilters" class="advanced-filters">
-                    <h3 class="text-lg font-semibold mb-4">Advanced Search Options</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                        <div class="filter-group">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Seniority Level</label>
-                            <select id="senioritySearch" class="select-field">
-                                <option value="">Any Level</option>
-                                <option value="entry">Entry Level</option>
-                                <option value="mid">Mid Level</option>
-                                <option value="senior">Senior Level</option>
-                                <option value="director">Director</option>
-                                <option value="vp">Vice President</option>
-                                <option value="c-level">C-Level</option>
-                            </select>
-                        </div>
-                        <div class="filter-group">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Department</label>
-                            <select id="departmentSearch" class="select-field">
-                                <option value="">Any Department</option>
-                                <option value="sales">Sales</option>
-                                <option value="marketing">Marketing</option>
-                                <option value="engineering">Engineering</option>
-                                <option value="finance">Finance</option>
-                                <option value="hr">Human Resources</option>
-                                <option value="operations">Operations</option>
-                                <option value="legal">Legal</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                        <div class="filter-group">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Technologies Used</label>
-                            <input type="text" id="technologiesSearch" class="input-field" placeholder="e.g., Salesforce, HubSpot">
-                        </div>
-                        <div class="filter-group">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Years of Experience</label>
-                            <select id="experienceSearch" class="select-field">
-                                <option value="">Any Experience</option>
-                                <option value="0-2">0-2 years</option>
-                                <option value="3-5">3-5 years</option>
-                                <option value="6-10">6-10 years</option>
-                                <option value="11-15">11-15 years</option>
-                                <option value="15+">15+ years</option>
-                            </select>
-                        </div>
-                        <div class="filter-group">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Keywords</label>
-                            <input type="text" id="keywordsSearch" class="input-field" placeholder="Skills, interests, etc.">
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="flex gap-4 mb-6">
-                    <button id="searchBtn" class="btn-primary">
-                        <i data-lucide="search" class="w-4 h-4 inline mr-2"></i>
-                        Search Contacts
-                    </button>
-                    <button id="clearBtn" class="btn-secondary">
-                        <i data-lucide="x" class="w-4 h-4 inline mr-2"></i>
-                        Clear Filters
-                    </button>
-                    <button id="saveSearchBtn" class="btn-secondary">
-                        <i data-lucide="bookmark" class="w-4 h-4 inline mr-2"></i>
-                        Save Search
-                    </button>
-                </div>
-                
-                <!-- Loading Indicator -->
-                <div id="searchLoader" class="text-center py-8 hidden">
-                    <div class="loader mx-auto mb-4"></div>
-                    <p class="text-gray-600">Searching for contacts...</p>
-                </div>
-            </div>
-
-            <!-- Search Results -->
-            <div id="searchResults" class="bg-white rounded-xl shadow-lg p-6">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-xl font-semibold">Search Results</h3>
-                    <div class="flex gap-2">
-                        <button id="bulkSelectBtn" class="btn-secondary text-sm">
-                            <i data-lucide="check-square" class="w-4 h-4 inline mr-1"></i>
-                            Bulk Select
-                        </button>
-                        <button id="exportResultsBtn" class="btn-secondary text-sm">
-                            <i data-lucide="download" class="w-4 h-4 inline mr-1"></i>
-                            Export
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Bulk Actions -->
-                <div id="bulkActions" class="bulk-actions">
-                    <div class="flex items-center justify-between">
-                        <span id="selectedCount" class="text-sm text-gray-600">0 contacts selected</span>
-                        <div class="flex gap-2">
-                            <button id="bulkAddToListBtn" class="btn-primary text-sm">Add to List</button>
-                            <button id="bulkAddToSfdcBtn" class="btn-success text-sm">Add to Salesforce</button>
-                            <button id="bulkExportBtn" class="btn-secondary text-sm">Export Selected</button>
-                        </div>
-                    </div>
-                </div>
-                
-                <div id="searchResultsCount" class="search-result-count hidden"></div>
-                <div id="contactsContainer">
-                    <div class="empty-state">
-                        <i data-lucide="search" class="empty-state-icon"></i>
-                        <h3 class="text-lg font-medium mb-2">Ready to Find Contacts</h3>
-                        <p class="text-gray-600">Use the search form above to find contacts matching your criteria</p>
-                    </div>
-                </div>
-                
-                <!-- Pagination -->
-                <div id="pagination" class="pagination hidden">
-                    <button id="prevPage" class="pagination-btn">
-                        <i data-lucide="chevron-left" class="w-4 h-4"></i>
-                    </button>
-                    <span id="pageInfo" class="text-sm text-gray-600"></span>
-                    <button id="nextPage" class="pagination-btn">
-                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Contact Lists Section -->
-        <div id="contactListsSection" class="section-hidden">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold">Contact Lists</h2>
-                <div class="flex gap-2">
-                    <button id="importListBtn" class="btn-secondary">
-                        <i data-lucide="upload" class="w-4 h-4 inline mr-2"></i>
-                        Import List
-                    </button>
-                    <button id="createListBtn" class="btn-primary">
-                        <i data-lucide="plus" class="w-4 h-4 inline mr-2"></i>
-                        Create New List
-                    </button>
-                </div>
-            </div>
-            
-            <!-- Lists Overview -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                <div class="metric-card">
-                    <h3 class="text-lg font-semibold mb-2">Total Lists</h3>
-                    <div class="metric-number text-indigo-600">12</div>
-                    <div class="metric-change positive">+2 this month</div>
-                </div>
-                <div class="metric-card">
-                    <h3 class="text-lg font-semibold mb-2">Total Contacts</h3>
-                    <div class="metric-number text-green-600">1,247</div>
-                    <div class="metric-change positive">+156 this month</div>
-                </div>
-                <div class="metric-card">
-                    <h3 class="text-lg font-semibold mb-2">Average List Size</h3>
-                    <div class="metric-number text-purple-600">104</div>
-                    <div class="metric-change neutral">contacts per list</div>
-                </div>
-            </div>
-            
-            <!-- Contact Lists Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div class="list-item">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-semibold">Tech Leaders</h3>
-                        <div class="flex items-center gap-2">
-                            <span class="tag technology">234 contacts</span>
-                            <div class="dropdown">
-                                <button class="text-gray-400 hover:text-gray-600">
-                                    <i data-lucide="more-horizontal" class="w-4 h-4"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <p class="text-gray-600 mb-4">CTOs, VPs of Engineering, and Tech Directors from top technology companies</p>
-                    <div class="mb-4">
-                        <div class="text-sm text-gray-600 mb-1">Recent Activity</div>
-                        <div class="text-xs text-gray-500">Last updated: 2 days ago</div>
-                        <div class="text-xs text-gray-500">Last campaign: Tech Q1 Outreach (34.8% open rate)</div>
-                    </div>
-                    <div class="flex gap-2">
-                        <button onclick="viewList('tech-leaders')" class="btn-primary text-sm flex-1">
-                            <i data-lucide="eye" class="w-4 h-4 inline mr-1"></i>
-                            View
-                        </button>
-                        <button onclick="editList('tech-leaders')" class="btn-secondary text-sm">
-                            <i data-lucide="edit" class="w-4 h-4 inline mr-1"></i>
-                            Edit
-                        </button>
-                        <button onclick="exportList('tech-leaders')" class="btn-secondary text-sm">
-                            <i data-lucide="download" class="w-4 h-4"></i>
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="list-item">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-semibold">Healthcare Executives</h3>
-                        <div class="flex items-center gap-2">
-                            <span class="tag healthcare">89 contacts</span>
-                            <div class="dropdown">
-                                <button class="text-gray-400 hover:text-gray-600">
-                                    <i data-lucide="more-horizontal" class="w-4 h-4"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <p class="text-gray-600 mb-4">Healthcare industry decision makers including hospital administrators and clinic directors</p>
-                    <div class="mb-4">
-                        <div class="text-sm text-gray-600 mb-1">Recent Activity</div>
-                        <div class="text-xs text-gray-500">Last updated: 1 week ago</div>
-                        <div class="text-xs text-gray-500">Last campaign: Healthcare Solutions (28.1% open rate)</div>
-                    </div>
-                    <div class="flex gap-2">
-                        <button onclick="viewList('healthcare-executives')" class="btn-primary text-sm flex-1">
-                            <i data-lucide="eye" class="w-4 h-4 inline mr-1"></i>
-                            View
-                        </button>
-                        <button onclick="editList('healthcare-executives')" class="btn-secondary text-sm">
-                            <i data-lucide="edit" class="w-4 h-4 inline mr-1"></i>
-                            Edit
-                        </button>
-                        <button onclick="exportList('healthcare-executives')" class="btn-secondary text-sm">
-                            <i data-lucide="download" class="w-4 h-4"></i>
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="list-item">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-semibold">Finance Directors</h3>
-                        <div class="flex items-center gap-2">
-                            <span class="tag finance">156 contacts</span>
-                            <div class="dropdown">
-                                <button class="text-gray-400 hover:text-gray-600">
-                                    <i data-lucide="more-horizontal" class="w-4 h-4"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <p class="text-gray-600 mb-4">CFOs, Finance VPs, and Controllers from various industries</p>
-                    <div class="mb-4">
-                        <div class="text-sm text-gray-600 mb-1">Recent Activity</div>
-                        <div class="text-xs text-gray-500">Last updated: 3 days ago</div>
-                        <div class="text-xs text-gray-500">Last campaign: Finance Follow-up (23.9% open rate)</div>
-                    </div>
-                    <div class="flex gap-2">
-                        <button onclick="viewList('finance-directors')" class="btn-primary text-sm flex-1">
-                            <i data-lucide="eye" class="w-4 h-4 inline mr-1"></i>
-                            View
-                        </button>
-                        <button onclick="editList('finance-directors')" class="btn-secondary text-sm">
-                            <i data-lucide="edit" class="w-4 h-4 inline mr-1"></i>
-                            Edit
-                        </button>
-                        <button onclick="exportList('finance-directors')" class="btn-secondary text-sm">
-                            <i data-lucide="download" class="w-4 h-4"></i>
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="list-item">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-semibold">Retail Managers</h3>
-                        <div class="flex items-center gap-2">
-                            <span class="tag retail">67 contacts</span>
-                            <div class="dropdown">
-                                <button class="text-gray-400 hover:text-gray-600">
-                                    <i data-lucide="more-horizontal" class="w-4 h-4"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <p class="text-gray-600 mb-4">Retail operations managers and store directors</p>
-                    <div class="mb-4">
-                        <div class="text-sm text-gray-600 mb-1">Recent Activity</div>
-                        <div class="text-xs text-gray-500">Last updated: 5 days ago</div>
-                        <div class="text-xs text-gray-500">Last campaign: Retail Solutions (19.4% open rate)</div>
-                    </div>
-                    <div class="flex gap-2">
-                        <button onclick="viewList('retail-managers')" class="btn-primary text-sm flex-1">
-                            <i data-lucide="eye" class="w-4 h-4 inline mr-1"></i>
-                            View
-                        </button>
-                        <button onclick="editList('retail-managers')" class="btn-secondary text-sm">
-                            <i data-lucide="edit" class="w-4 h-4 inline mr-1"></i>
-                            Edit
-                        </button>
-                        <button onclick="exportList('retail-managers')" class="btn-secondary text-sm">
-                            <i data-lucide="download" class="w-4 h-4"></i>
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="list-item">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-semibold">Manufacturing Leaders</h3>
-                        <div class="flex items-center gap-2">
-                            <span class="tag manufacturing">123 contacts</span>
-                            <div class="dropdown">
-                                <button class="text-gray-400 hover:text-gray-600">
-                                    <i data-lucide="more-horizontal" class="w-4 h-4"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <p class="text-gray-600 mb-4">Manufacturing directors and plant managers</p>
-                    <div class="mb-4">
-                        <div class="text-sm text-gray-600 mb-1">Recent Activity</div>
-                        <div class="text-xs text-gray-500">Last updated: 1 week ago</div>
-                        <div class="text-xs text-gray-500">Last campaign: Manufacturing Efficiency (15.2% open rate)</div>
-                    </div>
-                    <div class="flex gap-2">
-                        <button onclick="viewList('manufacturing-leaders')" class="btn-primary text-sm flex-1">
-                            <i data-lucide="eye" class="w-4 h-4 inline mr-1"></i>
-                            View
-                        </button>
-                        <button onclick="editList('manufacturing-leaders')" class="btn-secondary text-sm">
-                            <i data-lucide="edit" class="w-4 h-4 inline mr-1"></i>
-                            Edit
-                        </button>
-                        <button onclick="exportList('manufacturing-leaders')" class="btn-secondary text-sm">
-                            <i data-lucide="download" class="w-4 h-4"></i>
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="list-item border-2 border-dashed border-gray-300 text-center">
-                    <div class="py-8">
-                        <i data-lucide="plus-circle" class="w-12 h-12 mx-auto mb-4 text-gray-400"></i>
-                        <h3 class="text-lg font-medium text-gray-700 mb-2">Create New List</h3>
-                        <p class="text-gray-500 mb-4">Build a targeted contact list for your next campaign</p>
-                        <button onclick="createNewList()" class="btn-primary">
-                            <i data-lucide="plus" class="w-4 h-4 inline mr-2"></i>
-                            Get Started
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Reports Section -->
-        <div id="reportsSection" class="section-hidden">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold">Reports & Analytics</h2>
-                <div class="flex gap-2">
-                    <button id="dateRangeBtn" class="btn-secondary">
-                        <i data-lucide="calendar" class="w-4 h-4 inline mr-2"></i>
-                        Last 30 Days
-                    </button>
-                    <button id="exportReportBtn" class="btn-primary">
-                        <i data-lucide="download" class="w-4 h-4 inline mr-2"></i>
-                        Export Report
-                    </button>
-                </div>
-            </div>
-            
-            <!-- Key Metrics Overview -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <div class="metric-card">
-                    <div class="flex items-center justify-between mb-2">
-                        <h3 class="text-sm font-medium text-gray-600">Total Emails Sent</h3>
-                        <i data-lucide="mail" class="w-5 h-5 text-blue-600"></i>
-                    </div>
-                    <div class="metric-number text-blue-600">2,847</div>
-                    <div class="metric-change positive">+15.3% vs last month</div>
-                </div>
-                
-                <div class="metric-card">
-                    <div class="flex items-center justify-between mb-2">
-                        <h3 class="text-sm font-medium text-gray-600">Open Rate</h3>
-                        <i data-lucide="eye" class="w-5 h-5 text-green-600"></i>
-                    </div>
-                    <div class="metric-number text-green-600">34.2%</div>
-                    <div class="metric-change positive">+2.1% vs last month</div>
-                </div>
-                
-                <div class="metric-card">
-                    <div class="flex items-center justify-between mb-2">
-                        <h3 class="text-sm font-medium text-gray-600">Click Rate</h3>
-                        <i data-lucide="mouse-pointer" class="w-5 h-5 text-purple-600"></i>
-                    </div>
-                    <div class="metric-number text-purple-600">8.7%</div>
-                    <div class="metric-change negative">-0.5% vs last month</div>
-                </div>
-                
-                <div class="metric-card">
-                    <div class="flex items-center justify-between mb-2">
-                        <h3 class="text-sm font-medium text-gray-600">Response Rate</h3>
-                        <i data-lucide="message-circle" class="w-5 h-5 text-orange-600"></i>
-                    </div>
-                    <div class="metric-number text-orange-600">12.3%</div>
-                    <div class="metric-change positive">+3.2% vs last month</div>
-                </div>
-            </div>
-            
-            <!-- Charts Section -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                <div class="bg-white rounded-xl shadow-lg p-6">
-                    <h3 class="text-lg font-semibold mb-4">Campaign Performance Trend</h3>
-                    <div class="chart-container">
-                        <canvas id="campaignTrendChart" width="400" height="200"></canvas>
-                    </div>
-                </div>
-                
-                <div class="bg-white rounded-xl shadow-lg p-6">
-                    <h3 class="text-lg font-semibold mb-4">Industry Breakdown</h3>
-                    <div class="chart-container">
-                        <canvas id="industryChart" width="400" height="200"></canvas>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                <div class="bg-white rounded-xl shadow-lg p-6">
-                    <h3 class="text-lg font-semibold mb-4">Lead Generation</h3>
-                    <div class="space-y-4">
-                        <div class="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
-                            <div>
-                                <div class="font-medium">This Month</div>
-                                <div class="text-sm text-gray-600">January 2025</div>
-                            </div>
-                            <div class="text-right">
-                                <div class="text-2xl font-bold text-green-600">89</div>
-                                <div class="text-sm text-green-600">leads</div>
-                            </div>
-                        </div>
-                        
-                        <div class="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
-                            <div>
-                                <div class="font-medium">Last Month</div>
-                                <div class="text-sm text-gray-600">December 2024</div>
-                            </div>
-                            <div class="text-right">
-                                <div class="text-2xl font-bold text-gray-600">76</div>
-                                <div class="text-sm text-gray-600">leads</div>
-                            </div>
-                        </div>
-                        
-                        <div class="flex justify-between items-center p-4 bg-green-50 rounded-lg border border-green-200">
-                            <div>
-                                <div class="font-medium text-green-800">Growth</div>
-                                <div class="text-sm text-green-600">Month over month</div>
-                            </div>
-                            <div class="text-right">
-                                <div class="text-2xl font-bold text-green-600">+17.1%</div>
-                                <div class="text-sm text-green-600">improvement</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="bg-white rounded-xl shadow-lg p-6">
-                    <h3 class="text-lg font-semibold mb-4">Top Performing Lists</h3>
-                    <div class="space-y-3">
-                        <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
-                            <div>
-                                <div class="font-medium">Tech Leaders</div>
-                                <div class="text-sm text-gray-600">234 contacts</div>
-                            </div>
-                            <div class="text-right">
-                                <div class="font-bold text-green-600">34.8%</div>
-                                <div class="text-xs text-gray-600">open rate</div>
-                            </div>
-                        </div>
-                        
-                        <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
-                            <div>
-                                <div class="font-medium">Healthcare Executives</div>
-                                <div class="text-sm text-gray-600">89 contacts</div>
-                            </div>
-                            <div class="text-right">
-                                <div class="font-bold text-blue-600">28.1%</div>
-                                <div class="text-xs text-gray-600">open rate</div>
-                            </div>
-                        </div>
-                        
-                        <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
-                            <div>
-                                <div class="font-medium">Finance Directors</div>
-                                <div class="text-sm text-gray-600">156 contacts</div>
-                            </div>
-                            <div class="text-right">
-                                <div class="font-bold text-purple-600">23.9%</div>
-                                <div class="text-xs text-gray-600">open rate</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Detailed Campaign Table -->
-            <div class="bg-white rounded-xl shadow-lg p-6">
-                <h3 class="text-lg font-semibold mb-4">Campaign Details</h3>
-                <div class="table-container">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Campaign Name</th>
-                                <th>List</th>
-                                <th>Sent</th>
-                                <th>Delivered</th>
-                                <th>Opens</th>
-                                <th>Clicks</th>
-                                <th>Responses</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr class="campaign-row">
-                                <td>
-                                    <div class="font-medium">Tech Leaders Q1 Outreach</div>
-                                    <div class="text-xs text-gray-500">Sent 2 days ago</div>
-                                </td>
-                                <td>Tech Leaders</td>
-                                <td>145</td>
-                                <td>142 (97.9%)</td>
-                                <td>49 (34.8%)</td>
-                                <td>12 (8.5%)</td>
-                                <td>3 (2.1%)</td>
-                                <td><span class="status-badge completed">Completed</span></td>
-                                <td>
-                                    <button class="text-blue-600 hover:text-blue-800 text-sm">View</button>
-                                </td>
-                            </tr>
-                            <tr class="campaign-row">
-                                <td>
-                                    <div class="font-medium">Healthcare Decision Makers</div>
-                                    <div class="text-xs text-gray-500">Sent 1 week ago</div>
-                                </td>
-                                <td>Healthcare Executives</td>
-                                <td>89</td>
-                                <td>87 (97.8%)</td>
-                                <td>25 (28.1%)</td>
-                                <td>7 (7.9%)</td>
-                                <td>2 (2.2%)</td>
-                                <td><span class="status-badge completed">Completed</span></td>
-                                <td>
-                                    <button class="text-blue-600 hover:text-blue-800 text-sm">View</button>
-                                </td>
-                            </tr>
-                            <tr class="campaign-row">
-                                <td>
-                                    <div class="font-medium">Finance Directors Follow-up</div>
-                                    <div class="text-xs text-gray-500">Sent 2 weeks ago</div>
-                                </td>
-                                <td>Finance Directors</td>
-                                <td>67</td>
-                                <td>65 (97.0%)</td>
-                                <td>16 (23.9%)</td>
-                                <td>4 (6.0%)</td>
-                                <td>1 (1.5%)</td>
-                                <td><span class="status-badge completed">Completed</span></td>
-                                <td>
-                                    <button class="text-blue-600 hover:text-blue-800 text-sm">View</button>
-                                </td>
-                            </tr>
-                            <tr class="campaign-row">
-                                <td>
-                                    <div class="font-medium">Manufacturing Efficiency</div>
-                                    <div class="text-xs text-gray-500">Scheduled for tomorrow</div>
-                                </td>
-                                <td>Manufacturing Leaders</td>
-                                <td>-</td>
-                                <td>-</td>
-                                <td>-</td>
-                                <td>-</td>
-                                <td>-</td>
-                                <td><span class="status-badge active">Scheduled</span></td>
-                                <td>
-                                    <button class="text-blue-600 hover:text-blue-800 text-sm">Edit</button>
-                                </td>
-                            </tr>
-                            <tr class="campaign-row">
-                                <td>
-                                    <div class="font-medium">Retail Solutions Q1</div>
-                                    <div class="text-xs text-gray-500">Draft</div>
-                                </td>
-                                <td>Retail Managers</td>
-                                <td>-</td>
-                                <td>-</td>
-                                <td>-</td>
-                                <td>-</td>
-                                <td>-</td>
-                                <td><span class="status-badge draft">Draft</span></td>
-                                <td>
-                                    <button class="text-blue-600 hover:text-blue-800 text-sm">Edit</button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- Campaigns Section -->
-        <div id="campaignsSection" class="section-hidden">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold">Email Campaigns</h2>
-                <button id="createCampaignBtn" class="btn-primary">
-                    <i data-lucide="plus" class="w-4 h-4 inline mr-2"></i>
-                    Create Campaign
-                </button>
-            </div>
-            
-            <!-- Campaign Stats -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                <div class="metric-card">
-                    <h3 class="text-sm font-medium text-gray-600 mb-2">Active Campaigns</h3>
-                    <div class="metric-number text-blue-600">5</div>
-                    <div class="metric-change neutral">campaigns running</div>
-                </div>
-                <div class="metric-card">
-                    <h3 class="text-sm font-medium text-gray-600 mb-2">Scheduled</h3>
-                    <div class="metric-number text-orange-600">3</div>
-                    <div class="metric-change neutral">ready to send</div>
-                </div>
-                <div class="metric-card">
-                    <h3 class="text-sm font-medium text-gray-600 mb-2">Drafts</h3>
-                    <div class="metric-number text-gray-600">7</div>
-                    <div class="metric-change neutral">being created</div>
-                </div>
-                <div class="metric-card">
-                    <h3 class="text-sm font-medium text-gray-600 mb-2">This Month</h3>
-                    <div class="metric-number text-green-600">12</div>
-                    <div class="metric-change positive">campaigns sent</div>
-                </div>
-            </div>
-            
-            <!-- Campaign List -->
-            <div class="bg-white rounded-xl shadow-lg p-6">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-xl font-semibold">All Campaigns</h3>
-                    <div class="flex gap-2">
-                        <select class="select-field w-auto">
-                            <option>All Statuses</option>
-                            <option>Active</option>
-                            <option>Scheduled</option>
-                            <option>Draft</option>
-                            <option>Completed</option>
-                        </select>
-                        <button class="btn-secondary text-sm">
-                            <i data-lucide="filter" class="w-4 h-4 inline mr-1"></i>
-                            Filter
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="space-y-4">
-                    <div class="border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition-colors">
-                        <div class="flex items-center justify-between mb-3">
-                            <div class="flex items-center gap-3">
-                                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                                    <i data-lucide="mail" class="w-6 h-6 text-blue-600"></i>
-                                </div>
-                                <div>
-                                    <h4 class="font-semibold">Tech Leaders Q1 Outreach</h4>
-                                    <p class="text-sm text-gray-600">AI and Machine Learning Solutions</p>
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-3">
-                                <span class="status-badge completed">Completed</span>
-                                <div class="dropdown">
-                                    <button class="text-gray-400 hover:text-gray-600">
-                                        <i data-lucide="more-horizontal" class="w-5 h-5"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
-                            <div>
-                                <div class="text-gray-600">List</div>
-                                <div class="font-medium">Tech Leaders (234)</div>
-                            </div>
-                            <div>
-                                <div class="text-gray-600">Sent</div>
-                                <div class="font-medium">145</div>
-                            </div>
-                            <div>
-                                <div class="text-gray-600">Open Rate</div>
-                                <div class="font-medium text-green-600">34.8%</div>
-                            </div>
-                            <div>
-                                <div class="text-gray-600">Click Rate</div>
-                                <div class="font-medium text-blue-600">8.5%</div>
-                            </div>
-                            <div>
-                                <div class="text-gray-600">Responses</div>
-                                <div class="font-medium text-purple-600">3</div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition-colors">
-                        <div class="flex items-center justify-between mb-3">
-                            <div class="flex items-center gap-3">
-                                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                                    <i data-lucide="mail" class="w-6 h-6 text-green-600"></i>
-                                </div>
-                                <div>
-                                    <h4 class="font-semibold">Healthcare Decision Makers</h4>
-                                    <p class="text-sm text-gray-600">Digital Health Solutions</p>
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-3">
-                                <span class="status-badge completed">Completed</span>
-                                <div class="dropdown">
-                                    <button class="text-gray-400 hover:text-gray-600">
-                                        <i data-lucide="more-horizontal" class="w-5 h-5"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
-                            <div>
-                                <div class="text-gray-600">List</div>
-                                <div class="font-medium">Healthcare Executives (89)</div>
-                            </div>
-                            <div>
-                                <div class="text-gray-600">Sent</div>
-                                <div class="font-medium">89</div>
-                            </div>
-                            <div>
-                                <div class="text-gray-600">Open Rate</div>
-                                <div class="font-medium text-green-600">28.1%</div>
-                            </div>
-                            <div>
-                                <div class="text-gray-600">Click Rate</div>
-                                <div class="font-medium text-blue-600">7.9%</div>
-                            </div>
-                            <div>
-                                <div class="text-gray-600">Responses</div>
-                                <div class="font-medium text-purple-600">2</div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="border border-orange-200 rounded-lg p-4 bg-orange-50">
-                        <div class="flex items-center justify-between mb-3">
-                            <div class="flex items-center gap-3">
-                                <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                                    <i data-lucide="clock" class="w-6 h-6 text-orange-600"></i>
-                                </div>
-                                <div>
-                                    <h4 class="font-semibold">Manufacturing Efficiency</h4>
-                                    <p class="text-sm text-gray-600">Scheduled for tomorrow at 9:00 AM</p>
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-3">
-                                <span class="status-badge active">Scheduled</span>
-                                <div class="dropdown">
-                                    <button class="text-gray-400 hover:text-gray-600">
-                                        <i data-lucide="more-horizontal" class="w-5 h-5"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
-                            <div>
-                                <div class="text-gray-600">List</div>
-                                <div class="font-medium">Manufacturing Leaders (123)</div>
-                            </div>
-                            <div>
-                                <div class="text-gray-600">Recipients</div>
-                                <div class="font-medium">123</div>
-                            </div>
-                            <div colspan="3" class="md:col-span-3">
-                                <div class="text-gray-600">Automation Platform Integration</div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition-colors">
-                        <div class="flex items-center justify-between mb-3">
-                            <div class="flex items-center gap-3">
-                                <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
-                                    <i data-lucide="edit" class="w-6 h-6 text-gray-600"></i>
-                                </div>
-                                <div>
-                                    <h4 class="font-semibold">Retail Solutions Q1</h4>
-                                    <p class="text-sm text-gray-600">Draft - Customer Experience Platform</p>
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-3">
-                                <span class="status-badge draft">Draft</span>
-                                <div class="dropdown">
-                                    <button class="text-gray-400 hover:text-gray-600">
-                                        <i data-lucide="more-horizontal" class="w-5 h-5"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
-                            <div>
-                                <div class="text-gray-600">List</div>
-                                <div class="font-medium">Retail Managers (67)</div>
-                            </div>
-                            <div>
-                                <div class="text-gray-600">Progress</div>
-                                <div class="font-medium">75% Complete</div>
-                            </div>
-                            <div colspan="3" class="md:col-span-3">
-                                <button class="btn-primary text-sm">Continue Editing</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Integrations Section -->
-        <div id="integrationsSection" class="section-hidden">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold">Integrations</h2>
-                <button id="browseIntegrationsBtn" class="btn-primary">
-                    <i data-lucide="plus" class="w-4 h-4 inline mr-2"></i>
-                    Browse Integrations
-                </button>
-            </div>
-            
-            <!-- Integration Status Overview -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div class="metric-card">
-                    <h3 class="text-sm font-medium text-gray-600 mb-2">Connected</h3>
-                    <div class="metric-number text-green-600">3</div>
-                    <div class="metric-change neutral">integrations active</div>
-                </div>
-                <div class="metric-card">
-                    <h3 class="text-sm font-medium text-gray-600 mb-2">Available</h3>
-                    <div class="metric-number text-blue-600">12</div>
-                    <div class="metric-change neutral">ready to connect</div>
-                </div>
-                <div class="metric-card">
-                    <h3 class="text-sm font-medium text-gray-600 mb-2">Last Sync</h3>
-                    <div class="metric-number text-purple-600">2h</div>
-                    <div class="metric-change neutral">ago</div>
-                </div>
-            </div>
-            
-            <!-- Connected Integrations -->
-            <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
-                <h3 class="text-xl font-semibold mb-6">Connected Integrations</h3>
-                <div class="space-y-4">
-                    <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                                <i data-lucide="cloud" class="w-6 h-6 text-blue-600"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-semibold">Salesforce</h4>
-                                <p class="text-sm text-gray-600">CRM and lead management</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <div id="sfdcIntegrationStatus" class="integration-status disconnected">
-                                <i data-lucide="cloud-off" class="w-4 h-4"></i>
-                                Disconnected
-                            </div>
-                            <button id="sfdcConfigBtn" onclick="showSalesforceModal()" class="btn-secondary text-sm">Configure</button>
-                        </div>
-                    </div>
-                    
-                    <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                                <i data-lucide="briefcase" class="w-6 h-6 text-blue-600"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-semibold">LinkedIn Sales Navigator</h4>
-                                <p class="text-sm text-gray-600">Prospect discovery and outreach</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <div class="integration-status connected">
-                                <i data-lucide="check-circle" class="w-4 h-4"></i>
-                                Connected
-                            </div>
-                            <button class="btn-secondary text-sm">Settings</button>
-                        </div>
-                    </div>
-                    
-                    <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
-                                <i data-lucide="mail" class="w-6 h-6 text-red-600"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-semibold">Gmail</h4>
-                                <p class="text-sm text-gray-600">Email sending and tracking</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <div class="integration-status connected">
-                                <i data-lucide="check-circle" class="w-4 h-4"></i>
-                                Connected
-                            </div>
-                            <button class="btn-secondary text-sm">Settings</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                <!-- Search Form -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">

@@ -120,106 +120,19 @@
                 <div class="mt-8">
                     <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Quick Actions</h3>
                     <div class="space-y-2">
-                        <button onclick="quickSearch()" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg flex items-center space-x-2">
-                            <i data-lucide="zap" class="w-3 h-3"></i>
-                            <span>Quick Search</span>
-                        </button>
-                        <button onclick="exportLastSearch()" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg flex items-center space-x-2">
-                            <i data-lucide="download" class="w-3 h-3"></i>
-                            <span>Export Last Search</span>
-                        </button>
-                        <button onclick="createNewList()" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg flex items-center space-x-2">
-                            <i data-lucide="plus" class="w-3 h-3"></i>
-                            <span>Create List</span>
+                        <button onclick="showSection('contact-finder')" class="px-4 py-2 brand-gradient text-white rounded-lg font-medium hover:opacity-90">
+                            Find Contacts
                         </button>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Main Content -->
-        <div class="flex-1 p-6">
-            <!-- Dashboard Section -->
-            <div id="dashboard-section" class="section-content">
-                <!-- Dashboard Header -->
-                <div class="mb-8">
-                    <h2 class="text-2xl font-bold text-gray-900 mb-2">Dashboard</h2>
-                    <p class="text-gray-600">Welcome back! Here's your enhanced contact intelligence overview.</p>
+            <!-- Reports Section -->
+            <div id="reports-section" class="section-content hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-gray-900">Reports & Analytics</h2>
+                    <p class="text-gray-600">Track your contact discovery performance</p>
                 </div>
-
-                <!-- Quick Search Bar -->
-                <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
-                    <div class="flex items-center space-x-4">
-                        <div class="flex-1">
-                            <input type="text" id="quick-search-input" placeholder="Search any company domain..." 
-                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg search-glow">
-                        </div>
-                        <button onclick="quickSearchExecute()" class="px-6 py-3 brand-gradient text-white rounded-lg hover:opacity-90 font-semibold flex items-center space-x-2">
-                            <i data-lucide="search" class="w-5 h-5"></i>
-                            <span>Search</span>
-                        </button>
-                    </div>
-                    <div class="mt-3 flex flex-wrap gap-2">
-                        <span class="text-sm text-gray-500">Recent:</span>
-                        <button onclick="setQuickSearch('salesforce.com')" class="px-3 py-1 bg-blue-50 text-blue-700 rounded text-sm hover:bg-blue-100">salesforce.com</button>
-                        <button onclick="setQuickSearch('microsoft.com')" class="px-3 py-1 bg-blue-50 text-blue-700 rounded text-sm hover:bg-blue-100">microsoft.com</button>
-                        <button onclick="setQuickSearch('hubspot.com')" class="px-3 py-1 bg-blue-50 text-blue-700 rounded text-sm hover:bg-blue-100">hubspot.com</button>
-                    </div>
-                </div>
-
-                <!-- Stats Overview -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                    <div class="stats-card rounded-lg p-6 card-hover">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-medium text-gray-600">Total Searches</p>
-                                <p class="text-3xl font-bold text-gray-900" id="dashboard-total-searches">0</p>
-                                <p class="text-sm text-green-600" id="searches-growth">+0% this month</p>
-                            </div>
-                            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                                <i data-lucide="search" class="w-6 h-6 text-blue-600"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="stats-card rounded-lg p-6 card-hover">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-medium text-gray-600">Contacts Found</p>
-                                <p class="text-3xl font-bold text-gray-900" id="dashboard-contacts-found">0</p>
-                                <p class="text-sm text-green-600" id="contacts-verification">0% verified</p>
-                            </div>
-                            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                                <i data-lucide="users" class="w-6 h-6 text-green-600"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="stats-card rounded-lg p-6 card-hover">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-medium text-gray-600">Lists Created</p>
-                                <p class="text-3xl font-bold text-gray-900" id="dashboard-lists-created">0</p>
-                                <p class="text-sm text-blue-600" id="lists-growth">0 this week</p>
-                            </div>
-                            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                                <i data-lucide="list" class="w-6 h-6 text-purple-600"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="stats-card rounded-lg p-6 card-hover">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-medium text-gray-600">Exports</p>
-                                <p class="text-3xl font-bold text-gray-900" id="dashboard-exports">0</p>
-                                <p class="text-sm text-orange-600" id="average-export-size">0 contacts avg</p>
-                            </div>
-                            <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                                <i data-lucide="download" class="w-6 h-6 text-orange-600"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Recent Activity & Saved Lists -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <div class="bg-white rounded-lg shadow-sm p-6">
                         <h3 class="text-lg font-semibold text-gray-900 mb-4">Search Activity</h3>
@@ -356,7 +269,7 @@
                 }
             } else {
                 connectBtn.innerHTML = '<i data-lucide="link" class="w-4 h-4"></i><span>Connect Salesforce</span>';
-                connectBtn.className = 'px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 flex items-center space-x-2';
+                connectBtn.className = 'px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 flex items-center space-x-2';
                 
                 if (exportContactBtn) {
                     exportContactBtn.disabled = true;
@@ -605,26 +518,41 @@
             }
         }
 
-        // Navigation Functions
+        // ===== NAVIGATION FUNCTIONS =====
         function showSection(sectionName) {
+            // Hide all sections first
             document.querySelectorAll('.section-content').forEach(section => {
                 section.classList.add('hidden');
             });
             
+            // Remove active class from all nav items
             document.querySelectorAll('.nav-item').forEach(item => {
                 item.classList.remove('active');
                 item.classList.add('text-gray-700');
             });
             
-            document.getElementById(sectionName + '-section').classList.remove('hidden');
+            // Show the target section (with error checking)
+            const targetSection = document.getElementById(sectionName + '-section');
+            if (targetSection) {
+                targetSection.classList.remove('hidden');
+            } else {
+                console.error('Section not found:', sectionName + '-section');
+                return;
+            }
             
-            event.target.closest('.nav-item').classList.add('active');
-            event.target.closest('.nav-item').classList.remove('text-gray-700');
+            // Update active nav item (with error checking)
+            const activeNavItem = event?.target?.closest('.nav-item');
+            if (activeNavItem) {
+                activeNavItem.classList.add('active');
+                activeNavItem.classList.remove('text-gray-700');
+            }
             
+            // Special handling for specific sections
             if (sectionName === 'contact-lists') {
                 loadContactListsPage();
             }
             
+            // Reinitialize icons
             if (typeof lucide !== 'undefined') {
                 lucide.createIcons();
             }
@@ -681,7 +609,7 @@
             }
         }
 
-        // Quick Search Functions
+        // ===== QUICK SEARCH FUNCTIONS =====
         function setQuickSearch(domain) {
             document.getElementById('quick-search-input').value = domain;
         }
@@ -714,7 +642,7 @@
             }
         }
 
-        // Contact View Functions
+        // ===== CONTACT VIEW FUNCTIONS =====
         function setContactView(viewMode) {
             contactViewMode = viewMode;
             
@@ -745,7 +673,7 @@
             }
         }
 
-        // Search Functions
+        // ===== SEARCH FUNCTIONS =====
         async function executeSearch() {
             const domain = document.getElementById('search-domain').value.trim();
             if (!domain) {
@@ -829,7 +757,7 @@
             }
         }
 
-        // API Functions
+        // ===== API FUNCTIONS =====
         async function searchHunter(domain, limit) {
             const url = `https://api.hunter.io/v2/domain-search?domain=${domain}&limit=${limit}&api_key=${HUNTER_API_KEY}`;
             const response = await fetch(url);
@@ -1045,7 +973,7 @@
             return 'individual';
         }
 
-        // Display Functions
+        // ===== DISPLAY FUNCTIONS =====
         function displayResults(contacts) {
             document.getElementById('results-count').textContent = `${contacts.length} contacts`;
             
@@ -1185,7 +1113,7 @@
             }
         }
 
-        // UI Control Functions
+        // ===== UI CONTROL FUNCTIONS =====
         function showFusionProgress() {
             document.getElementById('fusion-status').classList.remove('hidden');
         }
@@ -1241,7 +1169,7 @@
             }
         }
 
-        // Contact Management Functions
+        // ===== CONTACT MANAGEMENT FUNCTIONS =====
         function toggleContact(index) {
             if (selectedContacts.has(index)) {
                 selectedContacts.delete(index);
@@ -1539,7 +1467,7 @@
             alert(`✅ Downloaded ${contactsToExport.length} contacts with enhanced data to ${filename}`);
         }
 
-        // Quick Actions
+        // ===== QUICK ACTIONS =====
         function createNewList() {
             document.getElementById('save-list-modal').classList.remove('hidden');
             document.getElementById('list-name-input').focus();
@@ -1557,7 +1485,7 @@
             }
         }
 
-        // Initialize
+        // ===== INITIALIZATION =====
         document.addEventListener('DOMContentLoaded', function() {
             if (typeof lucide !== 'undefined') {
                 lucide.createIcons();
@@ -1601,11 +1529,111 @@
                 showError('Failed to connect to Salesforce. Please try again.');
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
-        });
-    </script>
 
-</body>
-</html>8">
+            // Handle URL hash navigation
+            function handleHashNavigation() {
+                const hash = window.location.hash.substring(1);
+                if (hash && hash !== 'quickSearch()" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg flex items-center space-x-2">
+                            <i data-lucide="zap" class="w-3 h-3"></i>
+                            <span>Quick Search</span>
+                        </button>
+                        <button onclick="exportLastSearch()" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg flex items-center space-x-2">
+                            <i data-lucide="download" class="w-3 h-3"></i>
+                            <span>Export Last Search</span>
+                        </button>
+                        <button onclick="createNewList()" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg flex items-center space-x-2">
+                            <i data-lucide="plus" class="w-3 h-3"></i>
+                            <span>Create List</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 p-6">
+            <!-- Dashboard Section -->
+            <div id="dashboard-section" class="section-content">
+                <!-- Dashboard Header -->
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-2">Dashboard</h2>
+                    <p class="text-gray-600">Welcome back! Here's your enhanced contact intelligence overview.</p>
+                </div>
+
+                <!-- Quick Search Bar -->
+                <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
+                    <div class="flex items-center space-x-4">
+                        <div class="flex-1">
+                            <input type="text" id="quick-search-input" placeholder="Search any company domain..." 
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg search-glow">
+                        </div>
+                        <button onclick="quickSearchExecute()" class="px-6 py-3 brand-gradient text-white rounded-lg hover:opacity-90 font-semibold flex items-center space-x-2">
+                            <i data-lucide="search" class="w-5 h-5"></i>
+                            <span>Search</span>
+                        </button>
+                    </div>
+                    <div class="mt-3 flex flex-wrap gap-2">
+                        <span class="text-sm text-gray-500">Recent:</span>
+                        <button onclick="setQuickSearch('salesforce.com')" class="px-3 py-1 bg-blue-50 text-blue-700 rounded text-sm hover:bg-blue-100">salesforce.com</button>
+                        <button onclick="setQuickSearch('microsoft.com')" class="px-3 py-1 bg-blue-50 text-blue-700 rounded text-sm hover:bg-blue-100">microsoft.com</button>
+                        <button onclick="setQuickSearch('hubspot.com')" class="px-3 py-1 bg-blue-50 text-blue-700 rounded text-sm hover:bg-blue-100">hubspot.com</button>
+                    </div>
+                </div>
+
+                <!-- Stats Overview -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                    <div class="stats-card rounded-lg p-6 card-hover">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Total Searches</p>
+                                <p class="text-3xl font-bold text-gray-900" id="dashboard-total-searches">0</p>
+                                <p class="text-sm text-green-600" id="searches-growth">+0% this month</p>
+                            </div>
+                            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                <i data-lucide="search" class="w-6 h-6 text-blue-600"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stats-card rounded-lg p-6 card-hover">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Contacts Found</p>
+                                <p class="text-3xl font-bold text-gray-900" id="dashboard-contacts-found">0</p>
+                                <p class="text-sm text-green-600" id="contacts-verification">0% verified</p>
+                            </div>
+                            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                                <i data-lucide="users" class="w-6 h-6 text-green-600"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stats-card rounded-lg p-6 card-hover">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Lists Created</p>
+                                <p class="text-3xl font-bold text-gray-900" id="dashboard-lists-created">0</p>
+                                <p class="text-sm text-blue-600" id="lists-growth">0 this week</p>
+                            </div>
+                            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                                <i data-lucide="list" class="w-6 h-6 text-purple-600"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stats-card rounded-lg p-6 card-hover">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Exports</p>
+                                <p class="text-3xl font-bold text-gray-900" id="dashboard-exports">0</p>
+                                <p class="text-sm text-orange-600" id="average-export-size">0 contacts avg</p>
+                            </div>
+                            <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                                <i data-lucide="download" class="w-6 h-6 text-orange-600"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity & Saved Lists -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <!-- Recent Activity -->
                     <div class="bg-white rounded-lg shadow-sm p-6">
                         <h3 class="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
@@ -1843,13 +1871,8 @@
                     </button>
                 </div>
                 <div id="contact-lists-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                </div>
-            </div>
-
-            <!-- Reports Section -->
-            <div id="reports-section" class="section-content hidden">
-                <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-gray-900">Reports & Analytics</h2>
-                    <p class="text-gray-600">Track your contact discovery performance</p>
-                </div>
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-
+                    <div class="col-span-full text-center py-12 text-gray-500">
+                        <i data-lucide="list" class="w-16 h-16 mx-auto mb-4"></i>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">No contact lists yet</h3>
+                        <p class="text-gray-600 mb-4">Start by finding contacts and saving them to lists</p>
+                        <button onclick="

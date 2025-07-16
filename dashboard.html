@@ -1847,3 +1847,111 @@
                 'Company Name': contact.company,
                 'Email Verified': contact.verified ? 'Yes' : 'No',
                 'Confidence Score': contact.confidence + '%',
+                'Data Source': contact.source,
+                'Lead Source': 'Sales Simplified Enhanced',
+                'Lead Status': 'New',
+                'Date Exported': new Date().toLocaleDateString(),
+                'Exported By': 'Sales Simplified Platform'
+            }));
+
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.json_to_sheet(excelData);
+
+            const range = XLSX.utils.decode_range(ws['!ref']);
+            const colWidths = [];
+            for (let C = range.s.c; C <= range.e.c; ++C) {
+                let maxWidth = 10;
+                for (let R = range.s.r; R <= range.e.r; ++R) {
+                    const cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
+                    const cell = ws[cellAddress];
+                    if (cell && cell.v) {
+                        const cellLength = cell.v.toString().length;
+                        if (cellLength > maxWidth) maxWidth = cellLength;
+                    }
+                }
+                colWidths.push({ wch: Math.min(maxWidth + 2, 50) });
+            }
+            ws['!cols'] = colWidths;
+
+            const companyName = (companyData?.organization || 'contacts').replace(/[^a-zA-Z0-9]/g, '');
+            const sheetName = `${companyName} Contacts`;
+            XLSX.utils.book_append_sheet(wb, ws, sheetName);
+
+            const timestamp = new Date().toISOString().slice(0, 10);
+            const filename = `Sales_Simplified_Enhanced_${companyName}_${timestamp}.xlsx`;
+
+            XLSX.writeFile(wb, filename);
+
+            incrementMetric('exports');
+            incrementMetric('exportedContacts', contactsToExport.length);
+            addToRecentActivity('export', `Exported ${contactsToExport.length} enhanced contacts from ${companyName}`);
+
+            showSuccess(`Downloaded ${contactsToExport.length} contacts with enhanced data to ${filename}`);
+        }
+
+        // Quick Actions
+        function createNewList() {
+            document.getElementById('save-list-modal').classList.remove('hidden');
+            document.getElementById('list-name-input').focus();
+        }
+
+        function exportLastSearch() {
+            if (currentContacts.length > 0) {
+                selectedContacts.clear();
+                for (let i = 0; i < currentContacts.length; i++) {
+                    selectedContacts.add(i);
+                }
+                exportContacts();
+            } else {
+                showError('No recent search to export');
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+            
+            // Initialize Salesforce session if exists
+            const savedSession = localStorage.getItem('salesforceSession');
+            if (savedSession) {
+                try {
+                    salesforceSession = JSON.parse(savedSession);
+                    if (salesforceSession && salesforceSession.connected) {
+                        updateSalesforceStatus(true);
+                    }
+                } catch (e) {
+                    console.error('Error loading Salesforce session:', e);
+                    localStorage.removeItem('salesforceSession');
+                }
+            }
+            
+            updateDashboardMetrics();
+            updateRecentActivity();
+            updateSavedListsPreview();
+            
+            document.getElementById('quick-search-input').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    quickSearchExecute();
+                }
+            });
+            
+            document.getElementById('search-domain').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    executeSearch();
+                }
+            });
+
+            const pendingSearch = getStoredData('pendingSearch');
+            if (pendingSearch) {
+                localStorage.removeItem('pendingSearch');
+                showSection('contact-finder');
+                document.getElementById('search-domain').value = pendingSearch.domain;
+                setTimeout(() => executeSearch(), 100);
+            }
+        });
+    </script>
+
+</body>
+</html>

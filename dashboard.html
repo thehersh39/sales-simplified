@@ -707,15 +707,11 @@
             connectBtn.textContent = 'Connecting...';
 
             try {
-                // Try to use a CORS proxy service for the OAuth request
-                const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
-                const tokenUrl = `${proxyUrl}${instanceUrl}/services/oauth2/token`;
-
-                const tokenResponse = await fetch(tokenUrl, {
+                // Attempt direct connection first (will likely fail due to CORS)
+                const tokenResponse = await fetch(`${instanceUrl}/services/oauth2/token`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
-                        'X-Requested-With': 'XMLHttpRequest',
                     },
                     body: new URLSearchParams({
                         grant_type: 'password',
@@ -747,25 +743,14 @@
                 updateSalesforceStatus(true);
                 closeSalesforceModal();
                 showSuccess('Successfully connected to Salesforce!');
-                
-                // Clear form
-                document.getElementById('sf-instance-url').value = '';
-                document.getElementById('sf-username').value = '';
-                document.getElementById('sf-password').value = '';
-                document.getElementById('sf-consumer-key').value = '';
-                document.getElementById('sf-consumer-secret').value = '';
-
+                clearConnectionForm();
                 addToRecentActivity('salesforce', 'Connected to Salesforce CRM');
 
             } catch (error) {
                 console.error('Salesforce connection error:', error);
                 
-                // If CORS proxy fails, fall back to simulation mode with instructions
-                if (error.message.includes('Failed to fetch') || error.message.includes('CORS')) {
-                    showCorsInstructions();
-                } else {
-                    showError('Failed to connect to Salesforce: ' + error.message);
-                }
+                // Show demo mode option for any connection failure
+                showDemoModeOption(error.message);
                 
                 salesforceSession = null;
                 localStorage.removeItem('salesforceSession');
@@ -775,43 +760,61 @@
             }
         }
 
-        function showCorsInstructions() {
+        function clearConnectionForm() {
+            document.getElementById('sf-instance-url').value = '';
+            document.getElementById('sf-username').value = '';
+            document.getElementById('sf-password').value = '';
+            document.getElementById('sf-consumer-key').value = '';
+            document.getElementById('sf-consumer-secret').value = '';
+        }
+
+        function showDemoModeOption(errorMessage) {
             const modal = document.createElement('div');
             modal.className = 'fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50';
             modal.innerHTML = `
-                <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+                <div class="relative top-20 mx-auto p-5 border w-110 shadow-lg rounded-md bg-white max-w-lg">
                     <div class="mt-3">
                         <div class="flex items-center mb-4">
                             <div class="w-8 h-8 bg-yellow-500 rounded-lg flex items-center justify-center mr-3">
                                 <i data-lucide="alert-triangle" class="w-5 h-5 text-white"></i>
                             </div>
-                            <h3 class="text-lg font-medium text-gray-900">CORS Issue Detected</h3>
+                            <h3 class="text-lg font-medium text-gray-900">Connection Issue</h3>
                         </div>
                         
-                        <div class="space-y-3 text-sm text-gray-700">
-                            <p><strong>The browser is blocking the request due to CORS policy.</strong></p>
+                        <div class="space-y-4 text-sm text-gray-700">
+                            <div class="bg-red-50 p-3 rounded border border-red-200">
+                                <p class="font-medium text-red-800 mb-1">Error Details:</p>
+                                <p class="text-red-700 text-xs font-mono">${errorMessage}</p>
+                            </div>
                             
-                            <div class="bg-blue-50 p-3 rounded">
-                                <p class="font-medium text-blue-900 mb-2">Option 1: Enable Demo Mode</p>
-                                <p class="text-blue-800">Use simulated Salesforce integration for testing the UI.</p>
-                                <button onclick="enableDemoMode()" class="mt-2 px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700">
-                                    Enable Demo Mode
+                            <p><strong>This is expected!</strong> Browser security (CORS) prevents direct API calls to Salesforce from web pages.</p>
+                            
+                            <div class="bg-blue-50 p-4 rounded border border-blue-200">
+                                <div class="flex items-center mb-2">
+                                    <div class="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center mr-2">
+                                        <i data-lucide="play" class="w-4 h-4 text-white"></i>
+                                    </div>
+                                    <p class="font-medium text-blue-900">Try Demo Mode</p>
+                                </div>
+                                <p class="text-blue-800 mb-3">Test the complete Salesforce integration workflow with simulated API calls. Perfect for UI testing and demonstrations.</p>
+                                <button onclick="enableDemoMode()" class="w-full px-4 py-2 bg-blue-600 text-white rounded text-sm font-medium hover:bg-blue-700">
+                                    🚀 Enable Demo Mode
                                 </button>
                             </div>
                             
-                            <div class="bg-green-50 p-3 rounded">
-                                <p class="font-medium text-green-900 mb-2">Option 2: Production Setup</p>
-                                <p class="text-green-800 mb-2">For real integration, you need:</p>
-                                <ul class="text-xs text-green-700 ml-4 list-disc">
-                                    <li>Server-side proxy (Node.js/Python backend)</li>
-                                    <li>OAuth 2.0 Authorization Code flow</li>
-                                    <li>HTTPS domain</li>
+                            <div class="bg-gray-50 p-4 rounded border border-gray-200">
+                                <p class="font-medium text-gray-900 mb-2">💡 For Real Integration:</p>
+                                <ul class="text-xs text-gray-600 space-y-1">
+                                    <li>• Server-side backend (Node.js, Python, etc.)</li>
+                                    <li>• OAuth 2.0 Authorization Code flow</li>
+                                    <li>• HTTPS domain with proper CORS headers</li>
+                                    <li>• Salesforce Connected App with callback URL</li>
                                 </ul>
                             </div>
                         </div>
                         
                         <div class="flex justify-end space-x-2 mt-6">
-                            <button onclick="closeCorsModal()" class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50">
+                            <button onclick="closeDemoModal()" class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50">
                                 Close
                             </button>
                         </div>
@@ -827,7 +830,7 @@
                 document.body.removeChild(modal);
             };
             
-            window.closeCorsModal = () => {
+            window.closeDemoModal = () => {
                 document.body.removeChild(modal);
             };
             
@@ -837,11 +840,14 @@
         }
 
         function enableSalesforceDemoMode() {
+            const instanceUrl = document.getElementById('sf-instance-url').value.trim() || 'https://demo.salesforce.com';
+            const username = document.getElementById('sf-username').value.trim() || 'demo@salesforce.com';
+            
             // Create a demo session
             salesforceSession = {
-                instanceUrl: 'https://demo.salesforce.com',
+                instanceUrl: instanceUrl,
                 accessToken: 'demo_token_' + Date.now(),
-                username: 'demo@salesforce.com',
+                username: username,
                 connected: true,
                 connectedAt: new Date().toISOString(),
                 isDemoMode: true
@@ -850,8 +856,13 @@
             localStorage.setItem('salesforceSession', JSON.stringify(salesforceSession));
             updateSalesforceStatus(true);
             closeSalesforceModal();
-            showSuccess('Demo mode enabled! Salesforce integration will be simulated.');
+            clearConnectionForm();
+            
+            showSuccess('🎭 Demo Mode Enabled! Salesforce integration will be fully simulated.');
             addToRecentActivity('salesforce', 'Connected to Salesforce CRM (Demo Mode)');
+            
+            // Show demo mode indicator in status
+            document.getElementById('sf-connected').innerHTML = '🎭 Salesforce Connected (Demo)';
         }
 
         async function createContactInSalesforce(contact) {

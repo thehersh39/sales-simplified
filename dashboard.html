@@ -463,6 +463,37 @@
                     </div>
                 </div>
 
+                <!-- Company Information Card -->
+                <div id="company-info-card" class="hidden company-info-card rounded-lg p-6 mb-6">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <i data-lucide="building" class="w-8 h-8 text-blue-600"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-lg font-semibold text-gray-900" id="company-name">Company Name</h3>
+                            <p class="text-sm text-gray-600 mb-3" id="company-description">Company description and details</p>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                                <div>
+                                    <span class="text-gray-500">Industry:</span>
+                                    <span class="ml-1 font-medium" id="company-industry">Technology</span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-500">Size:</span>
+                                    <span class="ml-1 font-medium" id="company-size">1000+ employees</span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-500">Location:</span>
+                                    <span class="ml-1 font-medium" id="company-location">San Francisco, CA</span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-500">Founded:</span>
+                                    <span class="ml-1 font-medium" id="company-founded">1999</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div id="search-results" class="hidden">
                     <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
                         <div class="flex items-center justify-between">
@@ -1288,8 +1319,8 @@
             button.disabled = true;
 
             try {
-                // Show company information
-                showCompanyInfo(cleanDomain);
+                // Show company information first
+                await showCompanyInfo(cleanDomain);
                 
                 const limit = Math.min(parseInt(document.getElementById('results-limit').value), 100);
 
@@ -1326,6 +1357,7 @@
                 
                 incrementMetric('totalSearches');
                 incrementMetric('contactsFound', fusedData.contacts.length);
+                incrementMetric('companiesSearched');
                 
                 const verifiedCount = fusedData.contacts.filter(c => c.verified).length;
                 incrementMetric('verifiedEmails', verifiedCount);
@@ -1510,6 +1542,32 @@
         }
 
         // ===== ENHANCED DISPLAY FUNCTIONS =====
+
+        function createContactCard(contact, index) {
+            const grid = document.getElementById('contacts-grid');
+            const card = document.createElement('div');
+            card.className = 'contact-card p-6 card-hover';
+            
+            const isSelected = selectedContacts.has(index);
+            const verificationBadge = contact.verified 
+                ? '<span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">✓ Verified</span>'
+                : contact.deliverable 
+                    ? '<span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">Deliverable</span>'
+                    : '<span class="px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-medium">Unverified</span>';
+
+            const linkedinLink = contact.linkedin 
+                ? `<a href="${contact.linkedin}" target="_blank" class="flex items-center space-x-1 text-blue-600 hover:text-blue-800">
+                    <i data-lucide="linkedin" class="w-4 h-4"></i>
+                    <span class="text-xs">LinkedIn</span>
+                  </a>`
+                : '<span class="text-xs text-gray-400">No LinkedIn</span>';
+
+            const phoneDisplay = contact.phone 
+                ? `<div class="flex items-center space-x-2">
+                    <i data-lucide="phone" class="w-4 h-4 text-gray-400"></i>
+                    <span class="text-xs">${contact.phone}</span>
+                  </div>`
+                : '';
 
         function createContactCard(contact, index) {
             const grid = document.getElementById('contacts-grid');

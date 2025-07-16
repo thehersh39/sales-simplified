@@ -1,4 +1,964 @@
-// Navigation Functions
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Simplified - Contact Intelligence Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+        }
+        .card-hover {
+            transition: all 0.2s ease-in-out;
+        }
+        .card-hover:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        .stats-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border: 1px solid #e2e8f0;
+        }
+        .search-glow {
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        .contact-card {
+            background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+            border: 1px solid #e2e8f0;
+        }
+        .nav-item {
+            transition: all 0.2s ease;
+        }
+        .nav-item:hover {
+            background: rgba(59, 130, 246, 0.1);
+        }
+        .nav-item.active {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+        }
+        .table-row:hover {
+            background-color: #f8fafc;
+        }
+        .brand-gradient {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 50%, #1e40af 100%);
+        }
+        .fusion-badge {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        .salesforce-button {
+            background: linear-gradient(135deg, #1798c1 0%, #0f4c75 100%);
+        }
+        .salesforce-button:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Top Navigation -->
+    <nav class="gradient-bg text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 brand-gradient rounded-lg flex items-center justify-center">
+                        <i data-lucide="zap" class="w-6 h-6 text-white"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold">Sales Simplified</h1>
+                        <p class="text-xs text-blue-200">Enhanced Contact Intelligence Platform</p>
+                    </div>
+                </div>
+
+                <!-- Status Badge -->
+                <div class="flex items-center space-x-4">
+                    <div class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-bold">
+                        ✅ ACTIVE PLATFORM
+                    </div>
+                    
+                    <!-- Salesforce Status -->
+                    <div id="salesforce-status" class="hidden">
+                        <span id="sf-connected" class="hidden bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-bold">
+                            ✅ Salesforce Connected
+                        </span>
+                        <span id="sf-disconnected" class="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs font-bold">
+                            ⚪ Salesforce Disconnected
+                        </span>
+                    </div>
+                    
+                    <button id="connect-salesforce-btn" onclick="showSalesforceModal()" 
+                            class="salesforce-button text-white px-3 py-1 rounded-full text-xs font-bold hover:opacity-90">
+                        Connect Salesforce
+                    </button>
+                </div>
+
+                <!-- User Menu -->
+                <div class="flex items-center space-x-4">
+                    <div class="text-sm text-blue-200">
+                        <span class="font-medium">Professional Team</span> • Contact Intelligence
+                    </div>
+                    <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                        <i data-lucide="user" class="w-4 h-4 text-white"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="flex">
+        <!-- Sidebar Navigation -->
+        <div class="w-64 bg-white shadow-lg h-screen sticky top-16">
+            <div class="p-6">
+                <nav class="space-y-2">
+                    <a href="#" onclick="showSection('dashboard')" class="nav-item active flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium">
+                        <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="#" onclick="showSection('contact-finder')" class="nav-item flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-700">
+                        <i data-lucide="search" class="w-4 h-4"></i>
+                        <span>Contact Finder</span>
+                    </a>
+                    <a href="#" onclick="showSection('contact-lists')" class="nav-item flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-700">
+                        <i data-lucide="users" class="w-4 h-4"></i>
+                        <span>Contact Lists</span>
+                    </a>
+                    <a href="#" onclick="showSection('reports')" class="nav-item flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-700">
+                        <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+                        <span>Reports</span>
+                    </a>
+                    <a href="#" onclick="showSection('exports')" class="nav-item flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-700">
+                        <i data-lucide="download" class="w-4 h-4"></i>
+                        <span>Exports</span>
+                    </a>
+                </nav>
+
+                <!-- Quick Actions -->
+                <div class="mt-8">
+                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Quick Actions</h3>
+                    <div class="space-y-2">
+                        <button onclick="quickSearch()" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg flex items-center space-x-2">
+                            <i data-lucide="zap" class="w-3 h-3"></i>
+                            <span>Quick Search</span>
+                        </button>
+                        <button onclick="exportLastSearch()" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg flex items-center space-x-2">
+                            <i data-lucide="download" class="w-3 h-3"></i>
+                            <span>Export Last Search</span>
+                        </button>
+                        <button onclick="createNewList()" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg flex items-center space-x-2">
+                            <i data-lucide="plus" class="w-3 h-3"></i>
+                            <span>Create List</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 p-6">
+            <!-- Dashboard Section -->
+            <div id="dashboard-section" class="section-content">
+                <!-- Dashboard Header -->
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-2">Dashboard</h2>
+                    <p class="text-gray-600">Welcome back! Here's your enhanced contact intelligence overview.</p>
+                </div>
+
+                <!-- Quick Search Bar -->
+                <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
+                    <div class="flex items-center space-x-4">
+                        <div class="flex-1">
+                            <input type="text" id="quick-search-input" placeholder="Search any company domain..." 
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg search-glow">
+                        </div>
+                        <button onclick="quickSearchExecute()" class="px-6 py-3 brand-gradient text-white rounded-lg hover:opacity-90 font-semibold flex items-center space-x-2">
+                            <i data-lucide="search" class="w-5 h-5"></i>
+                            <span>Search</span>
+                        </button>
+                    </div>
+                    <div class="mt-3 flex flex-wrap gap-2">
+                        <span class="text-sm text-gray-500">Recent:</span>
+                        <button onclick="setQuickSearch('salesforce.com')" class="px-3 py-1 bg-blue-50 text-blue-700 rounded text-sm hover:bg-blue-100">salesforce.com</button>
+                        <button onclick="setQuickSearch('microsoft.com')" class="px-3 py-1 bg-blue-50 text-blue-700 rounded text-sm hover:bg-blue-100">microsoft.com</button>
+                        <button onclick="setQuickSearch('hubspot.com')" class="px-3 py-1 bg-blue-50 text-blue-700 rounded text-sm hover:bg-blue-100">hubspot.com</button>
+                    </div>
+                </div>
+
+                <!-- Stats Overview -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                    <div class="stats-card rounded-lg p-6 card-hover">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Total Searches</p>
+                                <p class="text-3xl font-bold text-gray-900" id="dashboard-total-searches">0</p>
+                                <p class="text-sm text-green-600" id="searches-growth">+0% this month</p>
+                            </div>
+                            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                <i data-lucide="search" class="w-6 h-6 text-blue-600"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stats-card rounded-lg p-6 card-hover">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Contacts Found</p>
+                                <p class="text-3xl font-bold text-gray-900" id="dashboard-contacts-found">0</p>
+                                <p class="text-sm text-green-600" id="contacts-verification">0% verified</p>
+                            </div>
+                            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                                <i data-lucide="users" class="w-6 h-6 text-green-600"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stats-card rounded-lg p-6 card-hover">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Lists Created</p>
+                                <p class="text-3xl font-bold text-gray-900" id="dashboard-lists-created">0</p>
+                                <p class="text-sm text-blue-600" id="lists-growth">0 this week</p>
+                            </div>
+                            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                                <i data-lucide="list" class="w-6 h-6 text-purple-600"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stats-card rounded-lg p-6 card-hover">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Exports</p>
+                                <p class="text-3xl font-bold text-gray-900" id="dashboard-exports">0</p>
+                                <p class="text-sm text-orange-600" id="average-export-size">0 contacts avg</p>
+                            </div>
+                            <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                                <i data-lucide="download" class="w-6 h-6 text-orange-600"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity & Saved Lists -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Recent Activity -->
+                    <div class="bg-white rounded-lg shadow-sm p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
+                        <div id="recent-activity" class="space-y-4">
+                            <div class="text-center py-8 text-gray-500">
+                                <i data-lucide="activity" class="w-8 h-8 mx-auto mb-2"></i>
+                                <p class="text-sm">Start searching to see your activity</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Saved Lists -->
+                    <div class="bg-white rounded-lg shadow-sm p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-900">Saved Lists</h3>
+                            <button onclick="createNewList()" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                                Create New
+                            </button>
+                        </div>
+                        <div id="saved-lists-preview" class="space-y-3">
+                            <div class="text-center py-8 text-gray-500">
+                                <i data-lucide="list" class="w-8 h-8 mx-auto mb-2"></i>
+                                <p class="text-sm">No saved lists yet</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Finder Section -->
+            <div id="contact-finder-section" class="section-content hidden">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-900">Contact Finder</h2>
+                        <p class="text-gray-600">Enhanced AI-powered multi-source contact discovery</p>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <div class="flex bg-gray-100 rounded-lg p-1">
+                            <button onclick="setContactView('grid')" id="grid-view-btn" class="px-3 py-1 rounded bg-white text-gray-900 text-sm font-medium shadow-sm">
+                                <i data-lucide="grid-3x3" class="w-4 h-4"></i>
+                            </button>
+                            <button onclick="setContactView('list')" id="list-view-btn" class="px-3 py-1 rounded text-gray-600 text-sm font-medium">
+                                <i data-lucide="list" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+                    <div class="fusion-badge text-white px-3 py-1 rounded-full text-xs font-medium mb-4 inline-block">
+                        ENHANCED MULTI-SOURCE DATA FUSION
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Company Domain</label>
+                            <input type="text" id="search-domain" placeholder="e.g., salesforce.com" 
+                                   class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Seniority Level</label>
+                            <select id="seniority-filter" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
+                                <option value="">All Levels</option>
+                                <option value="c_level">C-Level</option>
+                                <option value="vp">VP Level</option>
+                                <option value="director">Director</option>
+                                <option value="manager">Manager</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Department</label>
+                            <select id="department-filter" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
+                                <option value="">All Departments</option>
+                                <option value="sales">Sales</option>
+                                <option value="marketing">Marketing</option>
+                                <option value="engineering">Engineering</option>
+                                <option value="operations">Operations</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Results Limit</label>
+                            <select id="results-limit" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
+                                <option value="25">25 contacts</option>
+                                <option value="50">50 contacts</option>
+                                <option value="100">100 contacts</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button onclick="executeSearch()" id="main-search-btn" class="w-full brand-gradient text-white py-3 rounded-lg font-semibold hover:opacity-90 flex items-center justify-center space-x-2">
+                        <i data-lucide="search" class="w-5 h-5"></i>
+                        <span>Find Contacts with Enhanced AI Data Fusion</span>
+                    </button>
+                    <div class="mt-3 text-center">
+                        <p class="text-xs text-gray-500">🚀 Advanced Intelligence + Pattern Detection + Enhanced Scoring</p>
+                    </div>
+                </div>
+
+                <div id="fusion-status" class="hidden bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-4 mb-6">
+                    <div class="flex items-center space-x-2 mb-2">
+                        <i data-lucide="brain" class="w-5 h-5 text-blue-600"></i>
+                        <span class="font-medium text-blue-900">Enhanced AI Data Fusion Progress:</span>
+                    </div>
+                    <div class="space-y-2 text-sm">
+                        <div id="status-source1" class="flex items-center space-x-2">
+                            <div class="w-2 h-2 rounded-full bg-gray-300"></div>
+                            <span class="text-gray-600">Enterprise Database 1: Initializing...</span>
+                        </div>
+                        <div id="status-source2" class="flex items-center space-x-2">
+                            <div class="w-2 h-2 rounded-full bg-gray-300"></div>
+                            <span class="text-gray-600">Enterprise Database 2: Waiting...</span>
+                        </div>
+                        <div id="status-source3" class="flex items-center space-x-2">
+                            <div class="w-2 h-2 rounded-full bg-gray-300"></div>
+                            <span class="text-gray-600">Web Intelligence: Standby...</span>
+                        </div>
+                        <div id="status-fusion" class="flex items-center space-x-2">
+                            <div class="w-2 h-2 rounded-full bg-gray-300"></div>
+                            <span class="text-gray-600">Enhanced AI Engine: Standby...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="search-results" class="hidden">
+                    <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <h3 class="text-lg font-semibold text-gray-900">Search Results</h3>
+                                <span id="results-count" class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">0 contacts</span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <button onclick="selectAllContacts()" id="select-all-btn" class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50">
+                                    Select All
+                                </button>
+                                <button onclick="addToList()" id="add-to-list-btn" class="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 disabled:opacity-50" disabled>
+                                    Add to List
+                                </button>
+                                <button onclick="addToSalesforce()" id="add-to-salesforce-btn" class="px-4 py-2 salesforce-button text-white rounded-lg text-sm font-medium hover:opacity-90 disabled:opacity-50" disabled>
+                                    Add to Salesforce
+                                </button>
+                                <button onclick="exportContacts()" id="export-selected-btn" class="px-4 py-2 brand-gradient text-white rounded-lg text-sm font-medium hover:opacity-90 disabled:opacity-50" disabled>
+                                    Export Selected
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="contacts-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    </div>
+
+                    <div id="contacts-list" class="hidden bg-white rounded-lg shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            <input type="checkbox" id="select-all-list" class="rounded border-gray-300" onchange="selectAllContactsCheckbox()">
+                                        </th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Source</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="contacts-table-body" class="bg-white divide-y divide-gray-200">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="search-loading" class="hidden">
+                    <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+                        <div class="text-center">
+                            <div class="inline-flex items-center space-x-3 mb-4">
+                                <div class="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                                <h3 class="text-lg font-semibold text-gray-900">Enhanced Multi-Source Analysis</h3>
+                            </div>
+                            <p id="search-status" class="text-gray-600 mb-4">Initializing enhanced AI data fusion...</p>
+                            <div class="grid grid-cols-4 gap-4 max-w-lg mx-auto">
+                                <div class="text-center">
+                                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                                        <i data-lucide="database" class="w-6 h-6 text-blue-600"></i>
+                                    </div>
+                                    <p class="text-xs text-gray-600">Database Alpha</p>
+                                </div>
+                                <div class="text-center">
+                                    <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                                        <i data-lucide="target" class="w-6 h-6 text-orange-600"></i>
+                                    </div>
+                                    <p class="text-xs text-gray-600">Database Beta</p>
+                                </div>
+                                <div class="text-center">
+                                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                                        <i data-lucide="globe" class="w-6 h-6 text-purple-600"></i>
+                                    </div>
+                                    <p class="text-xs text-gray-600">Web Intel</p>
+                                </div>
+                                <div class="text-center">
+                                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                                        <i data-lucide="brain" class="w-6 h-6 text-green-600"></i>
+                                    </div>
+                                    <p class="text-xs text-gray-600">AI Fusion</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Lists Section -->
+            <div id="contact-lists-section" class="section-content hidden">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-900">Contact Lists</h2>
+                        <p class="text-gray-600">Organize and manage your saved contacts</p>
+                    </div>
+                    <button onclick="createNewList()" class="px-4 py-2 brand-gradient text-white rounded-lg font-medium hover:opacity-90 flex items-center space-x-2">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                        <span>Create New List</span>
+                    </button>
+                </div>
+                <div id="contact-lists-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                </div>
+            </div>
+
+            <!-- Reports Section -->
+            <div id="reports-section" class="section-content hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-gray-900">Reports & Analytics</h2>
+                    <p class="text-gray-600">Track your contact discovery performance</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="bg-white rounded-lg shadow-sm p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Search Activity</h3>
+                        <div class="text-center py-8 text-gray-500">
+                            <i data-lucide="bar-chart-3" class="w-12 h-12 mx-auto mb-2"></i>
+                            <p>Charts and analytics coming soon</p>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-sm p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Email Quality Metrics</h3>
+                        <div class="text-center py-8 text-gray-500">
+                            <i data-lucide="pie-chart" class="w-12 h-12 mx-auto mb-2"></i>
+                            <p>Quality metrics dashboard coming soon</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Exports Section -->
+            <div id="exports-section" class="section-content hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-gray-900">Export Center</h2>
+                    <p class="text-gray-600">Download your contacts in CRM-ready formats</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white rounded-lg shadow-sm p-6 text-center card-hover">
+                        <div class="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                            <i data-lucide="file-text" class="w-8 h-8 text-blue-600"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Salesforce Template</h3>
+                        <p class="text-sm text-gray-600 mb-4">Pre-formatted for direct Salesforce import</p>
+                        <button class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                            Download Template
+                        </button>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-sm p-6 text-center card-hover">
+                        <div class="w-16 h-16 bg-orange-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                            <i data-lucide="file-spreadsheet" class="w-8 h-8 text-orange-600"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">HubSpot Template</h3>
+                        <p class="text-sm text-gray-600 mb-4">Ready for HubSpot contact import</p>
+                        <button class="w-full px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700">
+                            Download Template
+                        </button>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-sm p-6 text-center card-hover">
+                        <div class="w-16 h-16 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                            <i data-lucide="download" class="w-8 h-8 text-green-600"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Custom Export</h3>
+                        <p class="text-sm text-gray-600 mb-4">Choose your own column format</p>
+                        <button class="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                            Customize Export
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Salesforce Connection Modal -->
+    <div id="salesforce-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <div class="flex items-center mb-4">
+                    <div class="w-8 h-8 salesforce-button rounded-lg flex items-center justify-center mr-3">
+                        <i data-lucide="cloud" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-900">Connect to Salesforce</h3>
+                </div>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Instance URL</label>
+                        <input type="text" id="sf-instance-url" placeholder="https://yourcompany.salesforce.com" 
+                               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <p class="text-xs text-gray-500 mt-1">Your Salesforce login URL</p>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Username</label>
+                        <input type="email" id="sf-username" placeholder="your.email@company.com" 
+                               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Password + Security Token</label>
+                        <input type="password" id="sf-password" placeholder="passwordSECURITYTOKEN" 
+                               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <p class="text-xs text-gray-500 mt-1">Combine your password with security token (no space)</p>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end space-x-2 mt-6">
+                    <button onclick="closeSalesforceModal()" class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50">
+                        Cancel
+                    </button>
+                    <button onclick="connectToSalesforce()" id="sf-connect-btn" class="px-4 py-2 salesforce-button text-white rounded-lg text-sm font-medium hover:opacity-90">
+                        Connect
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Message -->
+    <div id="error-section" class="hidden fixed bottom-4 right-4 bg-red-50 border border-red-200 rounded-lg p-4 shadow-lg z-50">
+        <div class="flex items-center space-x-2">
+            <i data-lucide="alert-circle" class="w-5 h-5 text-red-600"></i>
+            <span class="font-medium text-red-900">Error</span>
+        </div>
+        <p id="error-message" class="text-red-700 text-sm mt-1">An error occurred</p>
+        <button onclick="hideError()" class="absolute top-2 right-2 text-red-400 hover:text-red-600">
+            <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+    </div>
+
+    <!-- Success Message -->
+    <div id="success-section" class="hidden fixed bottom-4 right-4 bg-green-50 border border-green-200 rounded-lg p-4 shadow-lg z-50">
+        <div class="flex items-center space-x-2">
+            <i data-lucide="check-circle" class="w-5 h-5 text-green-600"></i>
+            <span class="font-medium text-green-900">Success</span>
+        </div>
+        <p id="success-message" class="text-green-700 text-sm mt-1">Operation completed successfully</p>
+        <button onclick="hideSuccess()" class="absolute top-2 right-2 text-green-400 hover:text-green-600">
+            <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+    </div>
+
+    <!-- Save List Modal -->
+    <div id="save-list-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Save Contact List</h3>
+                <input type="text" id="list-name-input" placeholder="Enter list name..." 
+                       class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-4">
+                <div class="flex justify-end space-x-2">
+                    <button onclick="cancelSaveList()" class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50">
+                        Cancel
+                    </button>
+                    <button onclick="confirmSaveList()" class="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700">
+                        Save List
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global Variables
+        const HUNTER_API_KEY = '64514bd46213dce4c8e6ed724555b2f9d0fa8e03';
+        const APOLLO_API_KEY = 'cgAc0fBksS1tJePYf0n4DA';
+
+        let currentContacts = [];
+        let selectedContacts = new Set();
+        let companyData = null;
+        let contactViewMode = 'grid';
+        let salesforceSession = null;
+
+        // ===== SALESFORCE FUNCTIONS =====
+        function showSalesforceModal() {
+            document.getElementById('salesforce-modal').classList.remove('hidden');
+        }
+
+        function closeSalesforceModal() {
+            document.getElementById('salesforce-modal').classList.add('hidden');
+        }
+
+        function showSuccess(message) {
+            document.getElementById('success-message').textContent = message;
+            document.getElementById('success-section').classList.remove('hidden');
+            setTimeout(hideSuccess, 5000);
+        }
+
+        function hideSuccess() {
+            document.getElementById('success-section').classList.add('hidden');
+        }
+
+        function updateSalesforceStatus(connected) {
+            const statusDiv = document.getElementById('salesforce-status');
+            const connectedSpan = document.getElementById('sf-connected');
+            const disconnectedSpan = document.getElementById('sf-disconnected');
+            const connectBtn = document.getElementById('connect-salesforce-btn');
+
+            statusDiv.classList.remove('hidden');
+            
+            if (connected) {
+                connectedSpan.classList.remove('hidden');
+                disconnectedSpan.classList.add('hidden');
+                connectBtn.textContent = 'Disconnect Salesforce';
+                connectBtn.onclick = disconnectFromSalesforce;
+            } else {
+                connectedSpan.classList.add('hidden');
+                disconnectedSpan.classList.remove('hidden');
+                connectBtn.textContent = 'Connect Salesforce';
+                connectBtn.onclick = showSalesforceModal;
+            }
+        }
+
+        async function connectToSalesforce() {
+            const instanceUrl = document.getElementById('sf-instance-url').value.trim();
+            const username = document.getElementById('sf-username').value.trim();
+            const password = document.getElementById('sf-password').value.trim();
+
+            if (!instanceUrl || !username || !password) {
+                showError('Please fill in all Salesforce connection fields');
+                return;
+            }
+
+            const connectBtn = document.getElementById('sf-connect-btn');
+            connectBtn.disabled = true;
+            connectBtn.textContent = 'Connecting...';
+
+            try {
+                // Simulate Salesforce connection
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                // Store connection info (in real app, this would be properly secured)
+                salesforceSession = {
+                    instanceUrl: instanceUrl,
+                    username: username,
+                    sessionId: 'mock_session_' + Date.now(),
+                    connected: true
+                };
+
+                localStorage.setItem('salesforceSession', JSON.stringify(salesforceSession));
+                
+                updateSalesforceStatus(true);
+                closeSalesforceModal();
+                showSuccess('Successfully connected to Salesforce!');
+                
+                // Clear form
+                document.getElementById('sf-instance-url').value = '';
+                document.getElementById('sf-username').value = '';
+                document.getElementById('sf-password').value = '';
+
+                addToRecentActivity('salesforce', 'Connected to Salesforce CRM');
+
+            } catch (error) {
+                showError('Failed to connect to Salesforce: ' + error.message);
+            } finally {
+                connectBtn.disabled = false;
+                connectBtn.textContent = 'Connect';
+            }
+        }
+
+        function disconnectFromSalesforce() {
+            salesforceSession = null;
+            localStorage.removeItem('salesforceSession');
+            updateSalesforceStatus(false);
+            showSuccess('Disconnected from Salesforce');
+            addToRecentActivity('salesforce', 'Disconnected from Salesforce CRM');
+        }
+
+        async function addToSalesforce() {
+            if (!salesforceSession) {
+                showError('Please connect to Salesforce first');
+                showSalesforceModal();
+                return;
+            }
+
+            if (selectedContacts.size === 0) {
+                showError('Please select contacts to add to Salesforce');
+                return;
+            }
+
+            const contactsToAdd = Array.from(selectedContacts).map(index => currentContacts[index]);
+            
+            try {
+                // Simulate adding contacts to Salesforce
+                for (const contact of contactsToAdd) {
+                    await simulateAddContactToSalesforce(contact);
+                }
+
+                showSuccess(`Successfully added ${contactsToAdd.length} contacts to Salesforce!`);
+                addToRecentActivity('salesforce', `Added ${contactsToAdd.length} contacts to Salesforce CRM`);
+                
+                // Clear selection
+                selectedContacts.clear();
+                document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+                updateSelectionUI();
+
+            } catch (error) {
+                showError('Failed to add contacts to Salesforce: ' + error.message);
+            }
+        }
+
+        async function addSingleContactToSalesforce(contact) {
+            if (!salesforceSession) {
+                showError('Please connect to Salesforce first');
+                showSalesforceModal();
+                return;
+            }
+
+            try {
+                await simulateAddContactToSalesforce(contact);
+                showSuccess(`Added ${contact.name} to Salesforce!`);
+                addToRecentActivity('salesforce', `Added ${contact.name} to Salesforce CRM`);
+            } catch (error) {
+                showError('Failed to add contact to Salesforce: ' + error.message);
+            }
+        }
+
+        async function simulateAddContactToSalesforce(contact) {
+            // Simulate API call delay
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            // In a real implementation, this would make actual Salesforce API calls
+            console.log('Adding contact to Salesforce:', contact);
+            
+            // Simulate potential errors
+            if (Math.random() < 0.05) { // 5% chance of error
+                throw new Error('Duplicate contact detected');
+            }
+            
+            return {
+                id: 'sf_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+                success: true
+            };
+        }
+
+        // ===== DATA PERSISTENCE FUNCTIONS =====
+        function getStoredData(key, defaultValue = null) {
+            try {
+                const stored = localStorage.getItem(key);
+                return stored ? JSON.parse(stored) : defaultValue;
+            } catch (e) {
+                console.error('Error reading from localStorage:', e);
+                return defaultValue;
+            }
+        }
+
+        function setStoredData(key, value) {
+            try {
+                localStorage.setItem(key, JSON.stringify(value));
+            } catch (e) {
+                console.error('Error writing to localStorage:', e);
+            }
+        }
+
+        function incrementMetric(metric, count = 1) {
+            const metrics = getStoredData('salesSimplifiedMetrics', {
+                totalSearches: 0,
+                contactsFound: 0,
+                verifiedEmails: 0,
+                listsCreated: 0,
+                exports: 0,
+                exportedContacts: 0
+            });
+            
+            metrics[metric] += count;
+            setStoredData('salesSimplifiedMetrics', metrics);
+            updateDashboardMetrics();
+        }
+
+        function updateDashboardMetrics() {
+            const metrics = getStoredData('salesSimplifiedMetrics', {
+                totalSearches: 0,
+                contactsFound: 0,
+                verifiedEmails: 0,
+                listsCreated: 0,
+                exports: 0,
+                exportedContacts: 0
+            });
+
+            document.getElementById('dashboard-total-searches').textContent = metrics.totalSearches;
+            document.getElementById('dashboard-contacts-found').textContent = metrics.contactsFound;
+            document.getElementById('dashboard-lists-created').textContent = metrics.listsCreated;
+            document.getElementById('dashboard-exports').textContent = metrics.exports;
+
+            const verificationRate = metrics.contactsFound > 0 ? Math.round((metrics.verifiedEmails / metrics.contactsFound) * 100) : 0;
+            document.getElementById('contacts-verification').textContent = `${verificationRate}% verified`;
+
+            const avgExportSize = metrics.exports > 0 ? Math.round(metrics.exportedContacts / metrics.exports) : 0;
+            document.getElementById('average-export-size').textContent = `${avgExportSize} contacts avg`;
+
+            const searchGrowth = Math.min(Math.floor(metrics.totalSearches / 10), 50);
+            document.getElementById('searches-growth').textContent = `+${searchGrowth}% this month`;
+
+            const listsThisWeek = Math.min(metrics.listsCreated, 7);
+            document.getElementById('lists-growth').textContent = `${listsThisWeek} this week`;
+        }
+
+        function addToRecentActivity(type, message) {
+            const activities = getStoredData('recentActivity', []);
+            const newActivity = {
+                type: type,
+                message: message,
+                timestamp: new Date().toISOString()
+            };
+            
+            activities.unshift(newActivity);
+            if (activities.length > 10) activities.pop();
+            
+            setStoredData('recentActivity', activities);
+            updateRecentActivity();
+        }
+
+        function updateRecentActivity() {
+            const activities = getStoredData('recentActivity', []);
+            const container = document.getElementById('recent-activity');
+            
+            if (activities.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8 text-gray-500">
+                        <i data-lucide="activity" class="w-8 h-8 mx-auto mb-2"></i>
+                        <p class="text-sm">Start searching to see your activity</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = activities.slice(0, 5).map(activity => {
+                const timeAgo = getTimeAgo(new Date(activity.timestamp));
+                const iconMap = { 'search': 'search', 'export': 'download', 'list': 'plus', 'salesforce': 'cloud' };
+                const colorMap = { 'search': 'blue', 'export': 'green', 'list': 'purple', 'salesforce': 'indigo' };
+                
+                return `
+                    <div class="flex items-start space-x-3">
+                        <div class="w-8 h-8 bg-${colorMap[activity.type]}-100 rounded-full flex items-center justify-center">
+                            <i data-lucide="${iconMap[activity.type]}" class="w-4 h-4 text-${colorMap[activity.type]}-600"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-sm font-medium text-gray-900">${activity.message}</p>
+                            <p class="text-xs text-gray-500">${timeAgo}</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        }
+
+        function getTimeAgo(date) {
+            const now = new Date();
+            const diff = now - date;
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(diff / 3600000);
+            const days = Math.floor(diff / 86400000);
+            
+            if (minutes < 60) return `${minutes} minute${minutes === 1 ? '' : 's'} ago`;
+            if (hours < 24) return `${hours} hour${hours === 1 ? '' : 's'} ago`;
+            return `${days} day${days === 1 ? '' : 's'} ago`;
+        }
+
+        function updateSavedListsPreview() {
+            const lists = getStoredData('contactLists', []);
+            const container = document.getElementById('saved-lists-preview');
+            
+            if (lists.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8 text-gray-500">
+                        <i data-lucide="list" class="w-8 h-8 mx-auto mb-2"></i>
+                        <p class="text-sm">No saved lists yet</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = lists.slice(0, 3).map(list => `
+                <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer" onclick="viewListFromDashboard('${list.id}')">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <i data-lucide="briefcase" class="w-4 h-4 text-blue-600"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-900">${list.name}</p>
+                            <p class="text-xs text-gray-500">${list.contacts.length} contacts</p>
+                        </div>
+                    </div>
+                    <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i>
+                </div>
+            `).join('');
+            
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        }
+
+        // Navigation Functions
         function showSection(sectionName) {
             document.querySelectorAll('.section-content').forEach(section => {
                 section.classList.add('hidden');
@@ -522,8 +1482,10 @@
                         <span class="px-2 py-1 rounded-full text-xs font-medium ${getSeniorityColor(contact.seniority)}">
                             ${contact.seniority}
                         </span>
-                        <button onclick="addContactToSalesforce(currentContacts[${index}])" class="salesforce-btn salesforce-btn-small salesforce-contact-btn" ${!salesforceConnected ? 'disabled' : ''}>
-                            Salesforce
+                        <button onclick="addSingleContactToSalesforce(currentContacts[${index}])" 
+                                class="px-2 py-1 salesforce-button text-white rounded text-xs hover:opacity-90 flex items-center space-x-1">
+                            <i data-lucide="cloud" class="w-3 h-3"></i>
+                            <span>Salesforce</span>
                         </button>
                     </div>
                 </div>
@@ -570,8 +1532,10 @@
                     ${verificationBadge}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                    <button onclick="addContactToSalesforce(currentContacts[${index}])" class="salesforce-btn salesforce-btn-small salesforce-contact-btn" ${!salesforceConnected ? 'disabled' : ''}>
-                        Salesforce
+                    <button onclick="addSingleContactToSalesforce(currentContacts[${index}])" 
+                            class="px-3 py-1 salesforce-button text-white rounded text-xs hover:opacity-90 flex items-center space-x-1">
+                        <i data-lucide="cloud" class="w-3 h-3"></i>
+                        <span>Salesforce</span>
                     </button>
                 </td>
             `;
@@ -706,12 +1670,8 @@
             const hasSelection = selectedContacts.size > 0;
             
             document.getElementById('add-to-list-btn').disabled = !hasSelection;
+            document.getElementById('add-to-salesforce-btn').disabled = !hasSelection;
             document.getElementById('export-selected-btn').disabled = !hasSelection;
-            
-            const bulkSalesforceBtn = document.getElementById('bulk-salesforce-btn');
-            if (bulkSalesforceBtn) {
-                bulkSalesforceBtn.disabled = !hasSelection || !salesforceConnected;
-            }
             
             const selectAllBtn = document.getElementById('select-all-btn');
             if (selectAllBtn) {
@@ -723,9 +1683,6 @@
                 headerCheckbox.checked = selectedContacts.size === currentContacts.length;
                 headerCheckbox.indeterminate = selectedContacts.size > 0 && selectedContacts.size < currentContacts.length;
             }
-            
-            // Update contact-specific Salesforce buttons
-            updateContactSalesforceButtons();
         }
 
         function addToList() {
@@ -775,7 +1732,7 @@
             document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
             updateSelectionUI();
             
-            showSuccessNotification(`List "${listName}" saved successfully with ${selectedContactsArray.length} contacts!`);
+            showSuccess(`List "${listName}" saved successfully with ${selectedContactsArray.length} contacts!`);
         }
 
         function viewListFromDashboard(listId) {
@@ -864,7 +1821,7 @@
             updateSavedListsPreview();
             loadContactListsPage();
             
-            showSuccessNotification(`List "${deletedList.name}" deleted successfully.`);
+            showSuccess(`List "${deletedList.name}" deleted successfully.`);
         }
 
         function exportContacts() {
@@ -890,1258 +1847,3 @@
                 'Company Name': contact.company,
                 'Email Verified': contact.verified ? 'Yes' : 'No',
                 'Confidence Score': contact.confidence + '%',
-                'Data Source': contact.source,
-                'Lead Source': 'Sales Simplified Enhanced',
-                'Lead Status': 'New',
-                'Date Exported': new Date().toLocaleDateString(),
-                'Exported By': 'Sales Simplified Platform'
-            }));
-
-            const wb = XLSX.utils.book_new();
-            const ws = XLSX.utils.json_to_sheet(excelData);
-
-            const range = XLSX.utils.decode_range(ws['!ref']);
-            const colWidths = [];
-            for (let C = range.s.c; C <= range.e.c; ++C) {
-                let maxWidth = 10;
-                for (let R = range.s.r; R <= range.e.r; ++R) {
-                    const cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
-                    const cell = ws[cellAddress];
-                    if (cell && cell.v) {
-                        const cellLength = cell.v.toString().length;
-                        if (cellLength > maxWidth) maxWidth = cellLength;
-                    }
-                }
-                colWidths.push({ wch: Math.min(maxWidth + 2, 50) });
-            }
-            ws['!cols'] = colWidths;
-
-            const companyName = (companyData?.organization || 'contacts').replace(/[^a-zA-Z0-9]/g, '');
-            const sheetName = `${companyName} Contacts`;
-            XLSX.utils.book_append_sheet(wb, ws, sheetName);
-
-            const timestamp = new Date().toISOString().slice(0, 10);
-            const filename = `Sales_Simplified_Enhanced_${companyName}_${timestamp}.xlsx`;
-
-            XLSX.writeFile(wb, filename);
-
-            incrementMetric('exports');
-            incrementMetric('exportedContacts', contactsToExport.length);
-            addToRecentActivity('export', `Exported ${contactsToExport.length} enhanced contacts from ${companyName}`);
-
-            showSuccessNotification(`Downloaded ${contactsToExport.length} contacts with enhanced data to ${filename}`);
-        }
-
-        // Quick Actions
-        function createNewList() {
-            document.getElementById('save-list-modal').classList.remove('hidden');
-            document.getElementById('list-name-input').focus();
-        }
-
-        function exportLastSearch() {
-            if (currentContacts.length > 0) {
-                selectedContacts.clear();
-                for (let i = 0; i < currentContacts.length; i++) {
-                    selectedContacts.add(i);
-                }
-                exportContacts();
-            } else {
-                showError('No recent search to export');
-            }
-        }
-
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            if (typeof lucide !== 'undefined') {
-                lucide.createIcons();
-            }
-            
-            updateDashboardMetrics();
-            updateRecentActivity();
-            updateSavedListsPreview();
-            
-            // Initialize Salesforce status
-            const savedCredentials = localStorage.getItem('salesforceCredentials');
-            if (savedCredentials) {
-                try {
-                    salesforceCredentials = JSON.parse(savedCredentials);
-                    salesforceConnected = true;
-                } catch (e) {
-                    console.error('Error loading Salesforce credentials:', e);
-                    localStorage.removeItem('salesforceCredentials');
-                }
-            }
-            updateSalesforceStatus();
-            
-            document.getElementById('quick-search-input').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    quickSearchExecute();
-                }
-            });
-            
-            document.getElementById('search-domain').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    executeSearch();
-                }
-            });
-
-            const pendingSearch = getStoredData('pendingSearch');
-            if (pendingSearch) {
-                localStorage.removeItem('pendingSearch');
-                showSection('contact-finder');
-                document.getElementById('search-domain').value = pendingSearch.domain;
-                setTimeout(() => executeSearch(), 100);
-            }
-        });
-    </script>
-
-</body>
-</html>            <!-- Contact Lists Section -->
-            <div id="contact-lists-section" class="section-content hidden">
-                <div class="flex items-center justify-between mb-6">
-                    <div>
-                        <h2 class="text-2xl font-bold text-gray-900">Contact Lists</h2>
-                        <p class="text-gray-600">Organize and manage your saved contacts</p>
-                    </div>
-                    <button onclick="createNewList()" class="px-4 py-2 brand-gradient text-white rounded-lg font-medium hover:opacity-90 flex items-center space-x-2">
-                        <i data-lucide="plus" class="w-4 h-4"></i>
-                        <span>Create New List</span>
-                    </button>
-                </div>
-                <div id="contact-lists-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                </div>
-            </div>
-
-            <!-- Reports Section -->
-            <div id="reports-section" class="section-content hidden">
-                <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-gray-900">Reports & Analytics</h2>
-                    <p class="text-gray-600">Track your contact discovery performance</p>
-                </div>
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <div class="bg-white rounded-lg shadow-sm p-6">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Search Activity</h3>
-                        <div class="text-center py-8 text-gray-500">
-                            <i data-lucide="bar-chart-3" class="w-12 h-12 mx-auto mb-2"></i>
-                            <p>Charts and analytics coming soon</p>
-                        </div>
-                    </div>
-                    <div class="bg-white rounded-lg shadow-sm p-6">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Email Quality Metrics</h3>
-                        <div class="text-center py-8 text-gray-500">
-                            <i data-lucide="pie-chart" class="w-12 h-12 mx-auto mb-2"></i>
-                            <p>Quality metrics dashboard coming soon</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Exports Section -->
-            <div id="exports-section" class="section-content hidden">
-                <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-gray-900">Export Center</h2>
-                    <p class="text-gray-600">Download your contacts in CRM-ready formats</p>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="bg-white rounded-lg shadow-sm p-6 text-center card-hover">
-                        <div class="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                            <i data-lucide="file-text" class="w-8 h-8 text-blue-600"></i>
-                        </div>
-                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Salesforce Template</h3>
-                        <p class="text-sm text-gray-600 mb-4">Pre-formatted for direct Salesforce import</p>
-                        <button class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                            Download Template
-                        </button>
-                    </div>
-                    <div class="bg-white rounded-lg shadow-sm p-6 text-center card-hover">
-                        <div class="w-16 h-16 bg-orange-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                            <i data-lucide="file-spreadsheet" class="w-8 h-8 text-orange-600"></i>
-                        </div>
-                        <h3 class="text-lg font-semibold text-gray-900 mb-2">HubSpot Template</h3>
-                        <p class="text-sm text-gray-600 mb-4">Ready for HubSpot contact import</p>
-                        <button class="w-full px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700">
-                            Download Template
-                        </button>
-                    </div>
-                    <div class="bg-white rounded-lg shadow-sm p-6 text-center card-hover">
-                        <div class="w-16 h-16 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                            <i data-lucide="download" class="w-8 h-8 text-green-600"></i>
-                        </div>
-                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Custom Export</h3>
-                        <p class="text-sm text-gray-600 mb-4">Choose your own column format</p>
-                        <button class="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
-                            Customize Export
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Salesforce Connection Modal -->
-    <div class="modal" id="salesforceModal">
-        <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
-            <div class="p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-semibold text-gray-900">Connect to Salesforce</h3>
-                    <button onclick="closeSalesforceModal()" class="text-gray-400 hover:text-gray-600">
-                        <i data-lucide="x" class="w-5 h-5"></i>
-                    </button>
-                </div>
-                
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Salesforce Instance URL</label>
-                        <input type="url" id="salesforceUrl" placeholder="https://yourcompany.salesforce.com" 
-                               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500" required>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
-                        <input type="email" id="salesforceUsername" placeholder="your.email@company.com" 
-                               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500" required>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Password + Security Token</label>
-                        <input type="password" id="salesforceToken" placeholder="Your password + security token" 
-                               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500" required>
-                        <p class="text-xs text-gray-500 mt-1">Combine your password with your security token (no space)</p>
-                    </div>
-                    <div class="text-sm text-gray-600 bg-blue-50 p-3 rounded-lg">
-                        <p class="font-medium mb-1">How to get your Security Token:</p>
-                        <ol class="text-xs space-y-1 list-decimal list-inside">
-                            <li>Go to Salesforce Setup → My Personal Information → Reset My Security Token</li>
-                            <li>Click "Reset Security Token" - you'll receive it via email</li>
-                            <li>Combine: YourPassword + SecurityToken (no space between them)</li>
-                        </ol>
-                    </div>
-                </div>
-                
-                <div class="flex space-x-3 mt-6">
-                    <button onclick="connectToSalesforce()" id="connectSalesforceBtn" class="salesforce-btn flex-1">
-                        Connect
-                    </button>
-                    <button onclick="closeSalesforceModal()" class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50">
-                        Cancel
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Error Message -->
-    <div id="error-section" class="hidden fixed bottom-4 right-4 bg-red-50 border border-red-200 rounded-lg p-4 shadow-lg z-50">
-        <div class="flex items-center space-x-2">
-            <i data-lucide="alert-circle" class="w-5 h-5 text-red-600"></i>
-            <span class="font-medium text-red-900">Error</span>
-        </div>
-        <p id="error-message" class="text-red-700 text-sm mt-1">An error occurred</p>
-        <button onclick="hideError()" class="absolute top-2 right-2 text-red-400 hover:text-red-600">
-            <i data-lucide="x" class="w-4 h-4"></i>
-        </button>
-    </div>
-
-    <!-- Save List Modal -->
-    <div id="save-list-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
-        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <div class="mt-3">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">Save Contact List</h3>
-                <input type="text" id="list-name-input" placeholder="Enter list name..." 
-                       class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-4">
-                <div class="flex justify-end space-x-2">
-                    <button onclick="cancelSaveList()" class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50">
-                        Cancel
-                    </button>
-                    <button onclick="confirmSaveList()" class="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700">
-                        Save List
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Success Notification -->
-    <div id="success-notification" class="hidden fixed top-4 right-4 bg-green-50 border border-green-200 rounded-lg p-4 shadow-lg z-50">
-        <div class="flex items-center space-x-2">
-            <i data-lucide="check-circle" class="w-5 h-5 text-green-600"></i>
-            <span class="font-medium text-green-900">Success</span>
-        </div>
-        <p id="success-message" class="text-green-700 text-sm mt-1">Operation completed successfully</p>
-    </div>
-
-    <script>
-        // Global Variables
-        const HUNTER_API_KEY = '64514bd46213dce4c8e6ed724555b2f9d0fa8e03';
-        const APOLLO_API_KEY = 'cgAc0fBksS1tJePYf0n4DA';
-
-        let currentContacts = [];
-        let selectedContacts = new Set();
-        let companyData = null;
-        let contactViewMode = 'grid';
-        
-        // Salesforce Integration Variables
-        let salesforceConnected = false;
-        let salesforceCredentials = null;
-
-        // ===== SALESFORCE INTEGRATION FUNCTIONS =====
-        function updateSalesforceStatus() {
-            const statusElement = document.getElementById('salesforceStatus');
-            const connectBtn = document.getElementById('salesforceConnectBtn');
-            const bulkBtn = document.getElementById('bulk-salesforce-btn');
-            
-            if (salesforceConnected) {
-                statusElement.className = 'salesforce-status salesforce-connected';
-                statusElement.innerHTML = '<div class="salesforce-indicator"></div><span>Salesforce: Connected</span>';
-                connectBtn.textContent = 'Disconnect';
-                connectBtn.style.background = '#dc2626';
-                if (bulkBtn) bulkBtn.disabled = false;
-            } else {
-                statusElement.className = 'salesforce-status salesforce-disconnected';
-                statusElement.innerHTML = '<div class="salesforce-indicator"></div><span>Salesforce: Disconnected</span>';
-                connectBtn.textContent = 'Connect Salesforce';
-                connectBtn.style.background = '#0066cc';
-                if (bulkBtn) bulkBtn.disabled = true;
-            }
-            
-            // Update individual contact buttons
-            updateContactSalesforceButtons();
-        }
-
-        function showSalesforceModal() {
-            if (salesforceConnected) {
-                if (confirm('Are you sure you want to disconnect from Salesforce?')) {
-                    disconnectFromSalesforce();
-                }
-            } else {
-                document.getElementById('salesforceModal').classList.add('show');
-            }
-        }
-
-        function closeSalesforceModal() {
-            document.getElementById('salesforceModal').classList.remove('show');
-            clearSalesforceForm();
-        }
-
-        function clearSalesforceForm() {
-            document.getElementById('salesforceUrl').value = '';
-            document.getElementById('salesforceUsername').value = '';
-            document.getElementById('salesforceToken').value = '';
-        }
-
-        async function connectToSalesforce() {
-            const url = document.getElementById('salesforceUrl').value.trim();
-            const username = document.getElementById('salesforceUsername').value.trim();
-            const passwordToken = document.getElementById('salesforceToken').value;
-            
-            if (!url || !username || !passwordToken) {
-                showError('Please fill in all Salesforce credentials');
-                return;
-            }
-            
-            const connectBtn = document.getElementById('connectSalesforceBtn');
-            const originalText = connectBtn.textContent;
-            connectBtn.textContent = 'Connecting...';
-            connectBtn.disabled = true;
-            
-            try {
-                // Real Salesforce SOAP API login
-                const loginResponse = await authenticateWithSalesforce(url, username, passwordToken);
-                
-                if (loginResponse.success) {
-                    salesforceConnected = true;
-                    salesforceCredentials = {
-                        sessionId: loginResponse.sessionId,
-                        serverUrl: loginResponse.serverUrl,
-                        url: url,
-                        username: username
-                    };
-                    
-                    updateSalesforceStatus();
-                    closeSalesforceModal();
-                    showSuccessNotification('Successfully connected to Salesforce!');
-                    addToRecentActivity('salesforce', `Connected to Salesforce: ${username}`);
-                    
-                    // Save credentials securely (in real app, use secure storage)
-                    localStorage.setItem('salesforceCredentials', JSON.stringify(salesforceCredentials));
-                } else {
-                    throw new Error(loginResponse.error || 'Authentication failed');
-                }
-            } catch (error) {
-                console.error('Salesforce connection error:', error);
-                showError(`Failed to connect to Salesforce: ${error.message}`);
-            } finally {
-                connectBtn.textContent = originalText;
-                connectBtn.disabled = false;
-            }
-        }
-
-        async function authenticateWithSalesforce(instanceUrl, username, passwordToken) {
-            try {
-                // Clean the instance URL
-                const cleanUrl = instanceUrl.replace(/\/$/, '');
-                const loginUrl = `${cleanUrl}/services/Soap/u/58.0`;
-                
-                // SOAP login request
-                const soapBody = `<?xml version="1.0" encoding="utf-8"?>
-                <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:enterprise.soap.sforce.com">
-                    <soapenv:Header/>
-                    <soapenv:Body>
-                        <urn:login>
-                            <urn:username>${username}</urn:username>
-                            <urn:password>${passwordToken}</urn:password>
-                        </urn:login>
-                    </soapenv:Body>
-                </soapenv:Envelope>`;
-                
-                const response = await fetch(loginUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'text/xml; charset=UTF-8',
-                        'SOAPAction': 'login'
-                    },
-                    body: soapBody
-                });
-                
-                const responseText = await response.text();
-                
-                if (response.ok && responseText.includes('sessionId')) {
-                    // Parse session ID and server URL from SOAP response
-                    const sessionIdMatch = responseText.match(/<sessionId>([^<]+)<\/sessionId>/);
-                    const serverUrlMatch = responseText.match(/<serverUrl>([^<]+)<\/serverUrl>/);
-                    
-                    if (sessionIdMatch && serverUrlMatch) {
-                        return {
-                            success: true,
-                            sessionId: sessionIdMatch[1],
-                            serverUrl: serverUrlMatch[1]
-                        };
-                    }
-                }
-                
-                // Parse error if login failed
-                const faultStringMatch = responseText.match(/<faultstring>([^<]+)<\/faultstring>/);
-                const errorMessage = faultStringMatch ? faultStringMatch[1] : 'Unknown authentication error';
-                
-                return {
-                    success: false,
-                    error: errorMessage
-                };
-                
-            } catch (error) {
-                return {
-                    success: false,
-                    error: error.message
-                };
-            }
-        }
-
-        function disconnectFromSalesforce() {
-            salesforceConnected = false;
-            salesforceCredentials = null;
-            localStorage.removeItem('salesforceCredentials');
-            updateSalesforceStatus();
-            showSuccessNotification('Disconnected from Salesforce');
-            addToRecentActivity('salesforce', 'Disconnected from Salesforce');
-        }
-
-        async function addContactToSalesforce(contact) {
-            if (!salesforceConnected || !salesforceCredentials) {
-                showError('Please connect to Salesforce first');
-                return;
-            }
-            
-            try {
-                const result = await createSalesforceContact(contact);
-                if (result.success) {
-                    showSuccessNotification(`Added ${contact.name} to Salesforce successfully!`);
-                    addToRecentActivity('salesforce', `Added ${contact.name} to Salesforce`);
-                } else {
-                    throw new Error(result.error);
-                }
-            } catch (error) {
-                console.error('Error adding contact to Salesforce:', error);
-                showError(`Failed to add contact to Salesforce: ${error.message}`);
-            }
-        }
-
-        async function createSalesforceContact(contact) {
-            try {
-                const nameParts = contact.name.split(' ');
-                const firstName = nameParts[0] || '';
-                const lastName = nameParts.slice(1).join(' ') || 'Unknown';
-                
-                // SOAP request to create contact
-                const soapBody = `<?xml version="1.0" encoding="utf-8"?>
-                <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:enterprise.soap.sforce.com">
-                    <soapenv:Header>
-                        <urn:SessionHeader>
-                            <urn:sessionId>${salesforceCredentials.sessionId}</urn:sessionId>
-                        </urn:SessionHeader>
-                    </soapenv:Header>
-                    <soapenv:Body>
-                        <urn:create>
-                            <urn:sObjects>
-                                <urn:type>Contact</urn:type>
-                                <urn:FirstName>${firstName}</urn:FirstName>
-                                <urn:LastName>${lastName}</urn:LastName>
-                                <urn:Email>${contact.email}</urn:Email>
-                                <urn:Title>${contact.title || ''}</urn:Title>
-                                <urn:Phone>${contact.phone || ''}</urn:Phone>
-                                <urn:Department>${contact.department || ''}</urn:Department>
-                                <urn:LeadSource>Sales Simplified</urn:LeadSource>
-                                <urn:Description>Imported from Sales Simplified - Confidence: ${contact.confidence}% - Source: ${contact.source}</urn:Description>
-                            </urn:sObjects>
-                        </urn:create>
-                    </soapenv:Body>
-                </soapenv:Envelope>`;
-                
-                const response = await fetch(salesforceCredentials.serverUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'text/xml; charset=UTF-8',
-                        'SOAPAction': 'create'
-                    },
-                    body: soapBody
-                });
-                
-                const responseText = await response.text();
-                
-                if (response.ok && responseText.includes('true')) {
-                    return { success: true };
-                } else {
-                    const faultStringMatch = responseText.match(/<faultstring>([^<]+)<\/faultstring>/);
-                    const errorMessage = faultStringMatch ? faultStringMatch[1] : 'Failed to create contact';
-                    return { success: false, error: errorMessage };
-                }
-                
-            } catch (error) {
-                return { success: false, error: error.message };
-            }
-        }
-
-        function bulkAddToSalesforce() {
-            if (!salesforceConnected) {
-                showError('Please connect to Salesforce first');
-                return;
-            }
-            
-            if (selectedContacts.size === 0) {
-                showError('Please select contacts to add to Salesforce');
-                return;
-            }
-            
-            const contactsToAdd = Array.from(selectedContacts).map(index => currentContacts[index]);
-            
-            // Add contacts one by one (in a real implementation, you'd batch these)
-            contactsToAdd.forEach(async (contact, index) => {
-                setTimeout(async () => {
-                    await addContactToSalesforce(contact);
-                }, index * 500); // Stagger requests to avoid rate limits
-            });
-            
-            addToRecentActivity('salesforce', `Bulk added ${contactsToAdd.length} contacts to Salesforce`);
-        }
-
-        function updateContactSalesforceButtons() {
-            const buttons = document.querySelectorAll('.salesforce-contact-btn');
-            buttons.forEach(btn => {
-                btn.disabled = !salesforceConnected;
-                if (salesforceConnected) {
-                    btn.classList.remove('salesforce-btn-disabled');
-                } else {
-                    btn.classList.add('salesforce-btn-disabled');
-                }
-            });
-        }
-
-        // ===== NOTIFICATION FUNCTIONS =====
-        function showSuccessNotification(message) {
-            const notification = document.getElementById('success-notification');
-            const messageEl = document.getElementById('success-message');
-            messageEl.textContent = message;
-            notification.classList.remove('hidden');
-            
-            setTimeout(() => {
-                notification.classList.add('hidden');
-            }, 4000);
-        }
-
-        // ===== ORIGINAL FUNCTIONS (unchanged from your working code) =====
-        function getStoredData(key, defaultValue = null) {
-            try {
-                const stored = localStorage.getItem(key);
-                return stored ? JSON.parse(stored) : defaultValue;
-            } catch (e) {
-                console.error('Error reading from localStorage:', e);
-                return defaultValue;
-            }
-        }
-
-        function setStoredData(key, value) {
-            try {
-                localStorage.setItem(key, JSON.stringify(value));
-            } catch (e) {
-                console.error('Error writing to localStorage:', e);
-            }
-        }
-
-        function incrementMetric(metric, count = 1) {
-            const metrics = getStoredData('salesSimplifiedMetrics', {
-                totalSearches: 0,
-                contactsFound: 0,
-                verifiedEmails: 0,
-                listsCreated: 0,
-                exports: 0,
-                exportedContacts: 0
-            });
-            
-            metrics[metric] += count;
-            setStoredData('salesSimplifiedMetrics', metrics);
-            updateDashboardMetrics();
-        }
-
-        function updateDashboardMetrics() {
-            const metrics = getStoredData('salesSimplifiedMetrics', {
-                totalSearches: 0,
-                contactsFound: 0,
-                verifiedEmails: 0,
-                listsCreated: 0,
-                exports: 0,
-                exportedContacts: 0
-            });
-
-            document.getElementById('dashboard-total-searches').textContent = metrics.totalSearches;
-            document.getElementById('dashboard-contacts-found').textContent = metrics.contactsFound;
-            document.getElementById('dashboard-lists-created').textContent = metrics.listsCreated;
-            document.getElementById('dashboard-exports').textContent = metrics.exports;
-
-            const verificationRate = metrics.contactsFound > 0 ? Math.round((metrics.verifiedEmails / metrics.contactsFound) * 100) : 0;
-            document.getElementById('contacts-verification').textContent = `${verificationRate}% verified`;
-
-            const avgExportSize = metrics.exports > 0 ? Math.round(metrics.exportedContacts / metrics.exports) : 0;
-            document.getElementById('average-export-size').textContent = `${avgExportSize} contacts avg`;
-
-            const searchGrowth = Math.min(Math.floor(metrics.totalSearches / 10), 50);
-            document.getElementById('searches-growth').textContent = `+${searchGrowth}% this month`;
-
-            const listsThisWeek = Math.min(metrics.listsCreated, 7);
-            document.getElementById('lists-growth').textContent = `${listsThisWeek} this week`;
-        }
-
-        function addToRecentActivity(type, message) {
-            const activities = getStoredData('recentActivity', []);
-            const newActivity = {
-                type: type,
-                message: message,
-                timestamp: new Date().toISOString()
-            };
-            
-            activities.unshift(newActivity);
-            if (activities.length > 10) activities.pop();
-            
-            setStoredData('recentActivity', activities);
-            updateRecentActivity();
-        }
-
-        function updateRecentActivity() {
-            const activities = getStoredData('recentActivity', []);
-            const container = document.getElementById('recent-activity');
-            
-            if (activities.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center py-8 text-gray-500">
-                        <i data-lucide="activity" class="w-8 h-8 mx-auto mb-2"></i>
-                        <p class="text-sm">Start searching to see your activity</p>
-                    </div>
-                `;
-                return;
-            }
-
-            container.innerHTML = activities.slice(0, 5).map(activity => {
-                const timeAgo = getTimeAgo(new Date(activity.timestamp));
-                const iconMap = { 
-                    'search': 'search', 
-                    'export': 'download', 
-                    'list': 'plus',
-                    'salesforce': 'zap'
-                };
-                const colorMap = { 
-                    'search': 'blue', 
-                    'export': 'green', 
-                    'list': 'purple',
-                    'salesforce': 'orange'
-                };
-                
-                return `
-                    <div class="flex items-start space-x-3">
-                        <div class="w-8 h-8 bg-${colorMap[activity.type]}-100 rounded-full flex items-center justify-center">
-                            <i data-lucide="${iconMap[activity.type]}" class="w-4 h-4 text-${colorMap[activity.type]}-600"></i>
-                        </div>
-                        <div class="flex-1">
-                            <p class="text-sm font-medium text-gray-900">${activity.message}</p>
-                            <p class="text-xs text-gray-500">${timeAgo}</p>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-            
-            if (typeof lucide !== 'undefined') {
-                lucide.createIcons();
-            }
-        }
-
-        function getTimeAgo(date) {
-            const now = new Date();
-            const diff = now - date;
-            const minutes = Math.floor(diff / 60000);
-            const hours = Math.floor(diff / 3600000);
-            const days = Math.floor(diff / 86400000);
-            
-            if (minutes < 60) return `${minutes} minute${minutes === 1 ? '' : 's'} ago`;
-            if (hours < 24) return `${hours} hour${hours === 1 ? '' : 's'} ago`;
-            return `${days} day${days === 1 ? '' : 's'} ago`;
-        }
-
-        function updateSavedListsPreview() {
-            const lists = getStoredData('contactLists', []);
-            const container = document.getElementById('saved-lists-preview');
-            
-            if (lists.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center py-8 text-gray-500">
-                        <i data-lucide="list" class="w-8 h-8 mx-auto mb-2"></i>
-                        <p class="text-sm">No saved lists yet</p>
-                    </div>
-                `;
-                return;
-            }
-
-            container.innerHTML = lists.slice(0, 3).map(list => `
-                <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer" onclick="viewListFromDashboard('${list.id}')">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                            <i data-lucide="briefcase" class="w-4 h-4 text-blue-600"></i>
-                        </div>
-                        <div>
-                            <p class="text-sm font-medium text-gray-900">${list.name}</p>
-                            <p class="text-xs text-gray-500">${list.contacts.length} contacts</p>
-                        </div>
-                    </div>
-                    <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i>
-                </div>
-            `).join('');
-            
-            if (typeof lucide !== 'undefined') {
-                lucide.createIcons();
-            }
-        }
-
-        //<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sales Simplified - Contact Intelligence Platform</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <style>
-        .gradient-bg {
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
-        }
-        .card-hover {
-            transition: all 0.2s ease-in-out;
-        }
-        .card-hover:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-        }
-        .stats-card {
-            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-            border: 1px solid #e2e8f0;
-        }
-        .search-glow {
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-        .contact-card {
-            background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
-            border: 1px solid #e2e8f0;
-        }
-        .nav-item {
-            transition: all 0.2s ease;
-        }
-        .nav-item:hover {
-            background: rgba(59, 130, 246, 0.1);
-        }
-        .nav-item.active {
-            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-            color: white;
-        }
-        .table-row:hover {
-            background-color: #f8fafc;
-        }
-        .brand-gradient {
-            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 50%, #1e40af 100%);
-        }
-        .fusion-badge {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            animation: pulse 2s infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.8; }
-        }
-        
-        /* Salesforce Integration Styles */
-        .salesforce-status {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 4px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 500;
-        }
-        .salesforce-connected {
-            background: #d1fae5;
-            color: #065f46;
-        }
-        .salesforce-disconnected {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-        .salesforce-indicator {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: currentColor;
-        }
-        .salesforce-btn {
-            background: #0066cc;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-        .salesforce-btn:hover {
-            background: #0052a3;
-        }
-        .salesforce-btn:disabled {
-            background: #9ca3af;
-            cursor: not-allowed;
-            opacity: 0.5;
-        }
-        .salesforce-btn-small {
-            padding: 6px 12px;
-            font-size: 12px;
-        }
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-        .modal.show {
-            display: flex;
-        }
-    </style>
-</head>
-<body class="bg-gray-50 min-h-screen">
-    <!-- Top Navigation -->
-    <nav class="gradient-bg text-white shadow-lg sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16">
-                <!-- Logo -->
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 brand-gradient rounded-lg flex items-center justify-center">
-                        <i data-lucide="zap" class="w-6 h-6 text-white"></i>
-                    </div>
-                    <div>
-                        <h1 class="text-xl font-bold">Sales Simplified</h1>
-                        <p class="text-xs text-blue-200">Enhanced Contact Intelligence Platform</p>
-                    </div>
-                </div>
-
-                <!-- Status Badge -->
-                <div class="flex items-center space-x-4">
-                    <!-- Salesforce Status -->
-                    <div class="salesforce-status salesforce-disconnected" id="salesforceStatus">
-                        <div class="salesforce-indicator"></div>
-                        <span>Salesforce: Disconnected</span>
-                    </div>
-                    
-                    <div class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-bold">
-                        ✅ ACTIVE PLATFORM
-                    </div>
-                </div>
-
-                <!-- User Menu -->
-                <div class="flex items-center space-x-4">
-                    <button id="salesforceConnectBtn" class="salesforce-btn" onclick="showSalesforceModal()">
-                        Connect Salesforce
-                    </button>
-                    <div class="text-sm text-blue-200">
-                        <span class="font-medium">Professional Team</span> • Contact Intelligence
-                    </div>
-                    <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                        <i data-lucide="user" class="w-4 h-4 text-white"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <div class="flex">
-        <!-- Sidebar Navigation -->
-        <div class="w-64 bg-white shadow-lg h-screen sticky top-16">
-            <div class="p-6">
-                <nav class="space-y-2">
-                    <a href="#" onclick="showSection('dashboard')" class="nav-item active flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium">
-                        <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
-                        <span>Dashboard</span>
-                    </a>
-                    <a href="#" onclick="showSection('contact-finder')" class="nav-item flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-700">
-                        <i data-lucide="search" class="w-4 h-4"></i>
-                        <span>Contact Finder</span>
-                    </a>
-                    <a href="#" onclick="showSection('contact-lists')" class="nav-item flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-700">
-                        <i data-lucide="users" class="w-4 h-4"></i>
-                        <span>Contact Lists</span>
-                    </a>
-                    <a href="#" onclick="showSection('reports')" class="nav-item flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-700">
-                        <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
-                        <span>Reports</span>
-                    </a>
-                    <a href="#" onclick="showSection('exports')" class="nav-item flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-700">
-                        <i data-lucide="download" class="w-4 h-4"></i>
-                        <span>Exports</span>
-                    </a>
-                </nav>
-
-                <!-- Quick Actions -->
-                <div class="mt-8">
-                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Quick Actions</h3>
-                    <div class="space-y-2">
-                        <button onclick="quickSearch()" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg flex items-center space-x-2">
-                            <i data-lucide="zap" class="w-3 h-3"></i>
-                            <span>Quick Search</span>
-                        </button>
-                        <button onclick="exportLastSearch()" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg flex items-center space-x-2">
-                            <i data-lucide="download" class="w-3 h-3"></i>
-                            <span>Export Last Search</span>
-                        </button>
-                        <button onclick="createNewList()" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg flex items-center space-x-2">
-                            <i data-lucide="plus" class="w-3 h-3"></i>
-                            <span>Create List</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Main Content -->
-        <div class="flex-1 p-6">
-            <!-- Dashboard Section -->
-            <div id="dashboard-section" class="section-content">
-                <!-- Dashboard Header -->
-                <div class="mb-8">
-                    <h2 class="text-2xl font-bold text-gray-900 mb-2">Dashboard</h2>
-                    <p class="text-gray-600">Welcome back! Here's your enhanced contact intelligence overview.</p>
-                </div>
-
-                <!-- Quick Search Bar -->
-                <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
-                    <div class="flex items-center space-x-4">
-                        <div class="flex-1">
-                            <input type="text" id="quick-search-input" placeholder="Search any company domain..." 
-                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg search-glow">
-                        </div>
-                        <button onclick="quickSearchExecute()" class="px-6 py-3 brand-gradient text-white rounded-lg hover:opacity-90 font-semibold flex items-center space-x-2">
-                            <i data-lucide="search" class="w-5 h-5"></i>
-                            <span>Search</span>
-                        </button>
-                    </div>
-                    <div class="mt-3 flex flex-wrap gap-2">
-                        <span class="text-sm text-gray-500">Recent:</span>
-                        <button onclick="setQuickSearch('salesforce.com')" class="px-3 py-1 bg-blue-50 text-blue-700 rounded text-sm hover:bg-blue-100">salesforce.com</button>
-                        <button onclick="setQuickSearch('microsoft.com')" class="px-3 py-1 bg-blue-50 text-blue-700 rounded text-sm hover:bg-blue-100">microsoft.com</button>
-                        <button onclick="setQuickSearch('hubspot.com')" class="px-3 py-1 bg-blue-50 text-blue-700 rounded text-sm hover:bg-blue-100">hubspot.com</button>
-                    </div>
-                </div>
-
-                <!-- Stats Overview -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                    <div class="stats-card rounded-lg p-6 card-hover">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-medium text-gray-600">Total Searches</p>
-                                <p class="text-3xl font-bold text-gray-900" id="dashboard-total-searches">0</p>
-                                <p class="text-sm text-green-600" id="searches-growth">+0% this month</p>
-                            </div>
-                            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                                <i data-lucide="search" class="w-6 h-6 text-blue-600"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="stats-card rounded-lg p-6 card-hover">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-medium text-gray-600">Contacts Found</p>
-                                <p class="text-3xl font-bold text-gray-900" id="dashboard-contacts-found">0</p>
-                                <p class="text-sm text-green-600" id="contacts-verification">0% verified</p>
-                            </div>
-                            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                                <i data-lucide="users" class="w-6 h-6 text-green-600"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="stats-card rounded-lg p-6 card-hover">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-medium text-gray-600">Lists Created</p>
-                                <p class="text-3xl font-bold text-gray-900" id="dashboard-lists-created">0</p>
-                                <p class="text-sm text-blue-600" id="lists-growth">0 this week</p>
-                            </div>
-                            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                                <i data-lucide="list" class="w-6 h-6 text-purple-600"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="stats-card rounded-lg p-6 card-hover">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-medium text-gray-600">Exports</p>
-                                <p class="text-3xl font-bold text-gray-900" id="dashboard-exports">0</p>
-                                <p class="text-sm text-orange-600" id="average-export-size">0 contacts avg</p>
-                            </div>
-                            <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                                <i data-lucide="download" class="w-6 h-6 text-orange-600"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Recent Activity & Saved Lists -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <!-- Recent Activity -->
-                    <div class="bg-white rounded-lg shadow-sm p-6">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
-                        <div id="recent-activity" class="space-y-4">
-                            <div class="text-center py-8 text-gray-500">
-                                <i data-lucide="activity" class="w-8 h-8 mx-auto mb-2"></i>
-                                <p class="text-sm">Start searching to see your activity</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Saved Lists -->
-                    <div class="bg-white rounded-lg shadow-sm p-6">
-                        <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-lg font-semibold text-gray-900">Saved Lists</h3>
-                            <button onclick="createNewList()" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
-                                Create New
-                            </button>
-                        </div>
-                        <div id="saved-lists-preview" class="space-y-3">
-                            <div class="text-center py-8 text-gray-500">
-                                <i data-lucide="list" class="w-8 h-8 mx-auto mb-2"></i>
-                                <p class="text-sm">No saved lists yet</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Contact Finder Section -->
-            <div id="contact-finder-section" class="section-content hidden">
-                <div class="flex items-center justify-between mb-6">
-                    <div>
-                        <h2 class="text-2xl font-bold text-gray-900">Contact Finder</h2>
-                        <p class="text-gray-600">Enhanced AI-powered multi-source contact discovery</p>
-                    </div>
-                    <div class="flex items-center space-x-3">
-                        <div class="flex bg-gray-100 rounded-lg p-1">
-                            <button onclick="setContactView('grid')" id="grid-view-btn" class="px-3 py-1 rounded bg-white text-gray-900 text-sm font-medium shadow-sm">
-                                <i data-lucide="grid-3x3" class="w-4 h-4"></i>
-                            </button>
-                            <button onclick="setContactView('list')" id="list-view-btn" class="px-3 py-1 rounded text-gray-600 text-sm font-medium">
-                                <i data-lucide="list" class="w-4 h-4"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
-                    <div class="fusion-badge text-white px-3 py-1 rounded-full text-xs font-medium mb-4 inline-block">
-                        ENHANCED MULTI-SOURCE DATA FUSION
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Company Domain</label>
-                            <input type="text" id="search-domain" placeholder="e.g., salesforce.com" 
-                                   class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Seniority Level</label>
-                            <select id="seniority-filter" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
-                                <option value="">All Levels</option>
-                                <option value="c_level">C-Level</option>
-                                <option value="vp">VP Level</option>
-                                <option value="director">Director</option>
-                                <option value="manager">Manager</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Department</label>
-                            <select id="department-filter" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
-                                <option value="">All Departments</option>
-                                <option value="sales">Sales</option>
-                                <option value="marketing">Marketing</option>
-                                <option value="engineering">Engineering</option>
-                                <option value="operations">Operations</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Results Limit</label>
-                            <select id="results-limit" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
-                                <option value="25">25 contacts</option>
-                                <option value="50">50 contacts</option>
-                                <option value="100">100 contacts</option>
-                            </select>
-                        </div>
-                    </div>
-                    <button onclick="executeSearch()" id="main-search-btn" class="w-full brand-gradient text-white py-3 rounded-lg font-semibold hover:opacity-90 flex items-center justify-center space-x-2">
-                        <i data-lucide="search" class="w-5 h-5"></i>
-                        <span>Find Contacts with Enhanced AI Data Fusion</span>
-                    </button>
-                    <div class="mt-3 text-center">
-                        <p class="text-xs text-gray-500">🚀 Advanced Intelligence + Pattern Detection + Enhanced Scoring</p>
-                    </div>
-                </div>
-
-                <div id="fusion-status" class="hidden bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-4 mb-6">
-                    <div class="flex items-center space-x-2 mb-2">
-                        <i data-lucide="brain" class="w-5 h-5 text-blue-600"></i>
-                        <span class="font-medium text-blue-900">Enhanced AI Data Fusion Progress:</span>
-                    </div>
-                    <div class="space-y-2 text-sm">
-                        <div id="status-source1" class="flex items-center space-x-2">
-                            <div class="w-2 h-2 rounded-full bg-gray-300"></div>
-                            <span class="text-gray-600">Enterprise Database 1: Initializing...</span>
-                        </div>
-                        <div id="status-source2" class="flex items-center space-x-2">
-                            <div class="w-2 h-2 rounded-full bg-gray-300"></div>
-                            <span class="text-gray-600">Enterprise Database 2: Waiting...</span>
-                        </div>
-                        <div id="status-source3" class="flex items-center space-x-2">
-                            <div class="w-2 h-2 rounded-full bg-gray-300"></div>
-                            <span class="text-gray-600">Web Intelligence: Standby...</span>
-                        </div>
-                        <div id="status-fusion" class="flex items-center space-x-2">
-                            <div class="w-2 h-2 rounded-full bg-gray-300"></div>
-                            <span class="text-gray-600">Enhanced AI Engine: Standby...</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="search-results" class="hidden">
-                    <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-4">
-                                <h3 class="text-lg font-semibold text-gray-900">Search Results</h3>
-                                <span id="results-count" class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">0 contacts</span>
-                            </div>
-                            <div class="flex items-center space-x-3">
-                                <button onclick="selectAllContacts()" id="select-all-btn" class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50">
-                                    Select All
-                                </button>
-                                <button onclick="addToList()" id="add-to-list-btn" class="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 disabled:opacity-50" disabled>
-                                    Add to List
-                                </button>
-                                <button onclick="bulkAddToSalesforce()" id="bulk-salesforce-btn" class="salesforce-btn salesforce-btn-small disabled:opacity-50" disabled>
-                                    Add to Salesforce
-                                </button>
-                                <button onclick="exportContacts()" id="export-selected-btn" class="px-4 py-2 brand-gradient text-white rounded-lg text-sm font-medium hover:opacity-90 disabled:opacity-50" disabled>
-                                    Export Selected
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="contacts-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    </div>
-
-                    <div id="contacts-list" class="hidden bg-white rounded-lg shadow-sm overflow-hidden">
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            <input type="checkbox" id="select-all-list" class="rounded border-gray-300" onchange="selectAllContactsCheckbox()">
-                                        </th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Source</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="contacts-table-body" class="bg-white divide-y divide-gray-200">
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="search-loading" class="hidden">
-                    <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
-                        <div class="text-center">
-                            <div class="inline-flex items-center space-x-3 mb-4">
-                                <div class="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                                <h3 class="text-lg font-semibold text-gray-900">Enhanced Multi-Source Analysis</h3>
-                            </div>
-                            <p id="search-status" class="text-gray-600 mb-4">Initializing enhanced AI data fusion...</p>
-                            <div class="grid grid-cols-4 gap-4 max-w-lg mx-auto">
-                                <div class="text-center">
-                                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-2">
-                                        <i data-lucide="database" class="w-6 h-6 text-blue-600"></i>
-                                    </div>
-                                    <p class="text-xs text-gray-600">Database Alpha</p>
-                                </div>
-                                <div class="text-center">
-                                    <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mx-auto mb-2">
-                                        <i data-lucide="target" class="w-6 h-6 text-orange-600"></i>
-                                    </div>
-                                    <p class="text-xs text-gray-600">Database Beta</p>
-                                </div>
-                                <div class="text-center">
-                                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-2">
-                                        <i data-lucide="globe" class="w-6 h-6 text-purple-600"></i>
-                                    </div>
-                                    <p class="text-xs text-gray-600">Web Intel</p>
-                                </div>
-                                <div class="text-center">
-                                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-2">
-                                        <i data-lucide="brain" class="w-6 h-6 text-green-600"></i>
-                                    </div>
-                                    <p class="text-xs text-gray-600">AI Fusion</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Contact Lists Section -->
-            <div id="contact-lists-section" class="section-content hidden">

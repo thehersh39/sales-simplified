@@ -553,7 +553,7 @@
                         <label class="block text-sm font-medium text-gray-700 mb-2">Instance URL</label>
                         <input type="text" id="sf-instance-url" placeholder="https://yourcompany.salesforce.com" 
                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <p class="text-xs text-gray-500 mt-1">Your Salesforce login URL</p>
+                        <p class="text-xs text-gray-500 mt-1">Your Salesforce instance URL</p>
                     </div>
                     
                     <div>
@@ -567,6 +567,20 @@
                         <input type="password" id="sf-password" placeholder="passwordSECURITYTOKEN" 
                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                         <p class="text-xs text-gray-500 mt-1">Combine your password with security token (no space)</p>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Consumer Key</label>
+                        <input type="text" id="sf-consumer-key" placeholder="Connected App Consumer Key" 
+                               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <p class="text-xs text-gray-500 mt-1">From your Connected App settings</p>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Consumer Secret</label>
+                        <input type="password" id="sf-consumer-secret" placeholder="Connected App Consumer Secret" 
+                               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <p class="text-xs text-gray-500 mt-1">From your Connected App settings</p>
                     </div>
                 </div>
                 
@@ -680,8 +694,10 @@
             const instanceUrl = document.getElementById('sf-instance-url').value.trim();
             const username = document.getElementById('sf-username').value.trim();
             const password = document.getElementById('sf-password').value.trim();
+            const consumerKey = document.getElementById('sf-consumer-key').value.trim();
+            const consumerSecret = document.getElementById('sf-consumer-secret').value.trim();
 
-            if (!instanceUrl || !username || !password) {
+            if (!instanceUrl || !username || !password || !consumerKey || !consumerSecret) {
                 showError('Please fill in all Salesforce connection fields');
                 return;
             }
@@ -691,18 +707,51 @@
             connectBtn.textContent = 'Connecting...';
 
             try {
-                // Simulate Salesforce connection
-                await new Promise(resolve => setTimeout(resolve, 2000));
+                // Make OAuth token request to Salesforce
+                const tokenResponse = await fetch(`${instanceUrl}/services/oauth2/token`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        grant_type: 'password',
+                        client_id: consumerKey,
+                        client_secret: consumerSecret,
+                        username: username,
+                        password: password
+                    })
+                });
+
+                if (!tokenResponse.ok) {
+                    const errorData = await tokenResponse.json();
+                    throw new Error(errorData.error_description || 'Authentication failed');
+                }
+
+                const tokenData = await tokenResponse.json();
                 
-                // Store connection info (in real app, this would be properly secured)
+                // Store connection info securely
                 salesforceSession = {
-                    instanceUrl: instanceUrl,
+                    instanceUrl: tokenData.instance_url,
+                    accessToken: tokenData.access_token,
                     username: username,
-                    sessionId: 'mock_session_' + Date.now(),
-                    connected: true
+                    connected: true,
+                    connectedAt: new Date().toISOString()
                 };
 
+                // Store in localStorage (in production, use more secure storage)
                 localStorage.setItem('salesforceSession', JSON.stringify(salesforceSession));
+                
+                // Test the connection by making a simple API call
+                const testResponse = await fetch(`${salesforceSession.instanceUrl}/services/data/v57.0/sobjects/Contact/describe`, {
+                    headers: {
+                        'Authorization': `Bearer ${salesforceSession.accessToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!testResponse.ok) {
+                    throw new Error('Connection test failed');
+                }
                 
                 updateSalesforceStatus(true);
                 closeSalesforceModal();
@@ -712,11 +761,18 @@
                 document.getElementById('sf-instance-url').value = '';
                 document.getElementById('sf-username').value = '';
                 document.getElementById('sf-password').value = '';
+                document.getElementById('sf-consumer-key').value = '';
+                document.getElementById('sf-consumer-secret').value = '';
 
                 addToRecentActivity('salesforce', 'Connected to Salesforce CRM');
 
             } catch (error) {
+                console.error('Salesforce connection error:', error);
                 showError('Failed to connect to Salesforce: ' + error.message);
+                
+                // Clear any partial session data
+                salesforceSession = null;
+                localStorage.removeItem('salesforceSession');
             } finally {
                 connectBtn.disabled = false;
                 connectBtn.textContent = 'Connect';
@@ -746,13 +802,29 @@
             const contactsToAdd = Array.from(selectedContacts).map(index => currentContacts[index]);
             
             try {
-                // Simulate adding contacts to Salesforce
+                let successCount = 0;
+                let errorCount = 0;
+                const errors = [];
+
                 for (const contact of contactsToAdd) {
-                    await simulateAddContactToSalesforce(contact);
+                    try {
+                        await createContactInSalesforce(contact);
+                        successCount++;
+                    } catch (error) {
+                        errorCount++;
+                        errors.push(`${contact.name}: ${error.message}`);
+                    }
                 }
 
-                showSuccess(`Successfully added ${contactsToAdd.length} contacts to Salesforce!`);
-                addToRecentActivity('salesforce', `Added ${contactsToAdd.length} contacts to Salesforce CRM`);
+                if (successCount > 0) {
+                    showSuccess(`Successfully added ${successCount} contacts to Salesforce!`);
+                    addToRecentActivity('salesforce', `Added ${successCount} contacts to Salesforce CRM`);
+                }
+
+                if (errorCount > 0) {
+                    console.error('Some contacts failed to add:', errors);
+                    showError(`${errorCount} contacts failed to add. Check console for details.`);
+                }
                 
                 // Clear selection
                 selectedContacts.clear();
@@ -772,7 +844,7 @@
             }
 
             try {
-                await simulateAddContactToSalesforce(contact);
+                await createContactInSalesforce(contact);
                 showSuccess(`Added ${contact.name} to Salesforce!`);
                 addToRecentActivity('salesforce', `Added ${contact.name} to Salesforce CRM`);
             } catch (error) {
@@ -780,22 +852,64 @@
             }
         }
 
-        async function simulateAddContactToSalesforce(contact) {
-            // Simulate API call delay
-            await new Promise(resolve => setTimeout(resolve, 500));
-            
-            // In a real implementation, this would make actual Salesforce API calls
-            console.log('Adding contact to Salesforce:', contact);
-            
-            // Simulate potential errors
-            if (Math.random() < 0.05) { // 5% chance of error
-                throw new Error('Duplicate contact detected');
+        async function createContactInSalesforce(contact) {
+            if (!salesforceSession || !salesforceSession.accessToken) {
+                throw new Error('No valid Salesforce session');
             }
-            
-            return {
-                id: 'sf_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
-                success: true
+
+            // Parse name into first and last name
+            const nameParts = contact.name.split(' ');
+            const firstName = nameParts[0];
+            const lastName = nameParts.slice(1).join(' ') || firstName;
+
+            // Prepare contact data for Salesforce
+            const contactData = {
+                FirstName: firstName,
+                LastName: lastName,
+                Email: contact.email,
+                Title: contact.title,
+                Phone: contact.phone || null,
+                AccountId: null, // Could be enhanced to find/create account
+                Department: contact.department,
+                LeadSource: 'Sales Simplified',
+                Description: `Added from Sales Simplified. Source: ${contact.source}. Confidence: ${contact.confidence}%`
             };
+
+            // Remove null values
+            Object.keys(contactData).forEach(key => {
+                if (contactData[key] === null || contactData[key] === '') {
+                    delete contactData[key];
+                }
+            });
+
+            const response = await fetch(`${salesforceSession.instanceUrl}/services/data/v57.0/sobjects/Contact`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${salesforceSession.accessToken}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(contactData)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error('Salesforce API error:', errorData);
+                
+                // Handle specific error cases
+                if (response.status === 401) {
+                    // Token expired, clear session
+                    salesforceSession = null;
+                    localStorage.removeItem('salesforceSession');
+                    updateSalesforceStatus(false);
+                    throw new Error('Session expired. Please reconnect to Salesforce.');
+                }
+                
+                const errorMessage = errorData[0]?.message || 'Unknown error';
+                throw new Error(errorMessage);
+            }
+
+            const result = await response.json();
+            return result;
         }
 
         // ===== DATA PERSISTENCE FUNCTIONS =====

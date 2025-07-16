@@ -349,10 +349,18 @@
                 item.classList.add('text-gray-700');
             });
             
-            document.getElementById(sectionName + '-section').classList.remove('hidden');
+            const targetSection = document.getElementById(sectionName + '-section');
+            if (targetSection) {
+                targetSection.classList.remove('hidden');
+            }
             
-            event.target.closest('.nav-item').classList.add('active');
-            event.target.closest('.nav-item').classList.remove('text-gray-700');
+            if (event && event.target) {
+                const navItem = event.target.closest('.nav-item');
+                if (navItem) {
+                    navItem.classList.add('active');
+                    navItem.classList.remove('text-gray-700');
+                }
+            }
             
             if (sectionName === 'contact-lists') {
                 loadContactListsPage();

@@ -93,7 +93,7 @@
                         </span>
                     </div>
                     
-                    <button id="connect-salesforce-btn" onclick="showSalesforceModal()" 
+                    <button id="connect-salesforce-btn" 
                             class="salesforce-button text-white px-3 py-1 rounded-full text-xs font-bold hover:opacity-90">
                         Connect Salesforce
                     </button>
@@ -117,23 +117,23 @@
         <div class="w-64 bg-white shadow-lg h-screen sticky top-16">
             <div class="p-6">
                 <nav class="space-y-2">
-                    <a href="#" onclick="showSection('dashboard')" class="nav-item active flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium">
+                    <a href="#" class="nav-item active flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium" data-section="dashboard">
                         <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
                         <span>Dashboard</span>
                     </a>
-                    <a href="#" onclick="showSection('contact-finder')" class="nav-item flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-700">
+                    <a href="#" class="nav-item flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-700" data-section="contact-finder">
                         <i data-lucide="search" class="w-4 h-4"></i>
                         <span>Contact Finder</span>
                     </a>
-                    <a href="#" onclick="showSection('contact-lists')" class="nav-item flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-700">
+                    <a href="#" class="nav-item flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-700" data-section="contact-lists">
                         <i data-lucide="users" class="w-4 h-4"></i>
                         <span>Contact Lists</span>
                     </a>
-                    <a href="#" onclick="showSection('reports')" class="nav-item flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-700">
+                    <a href="#" class="nav-item flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-700" data-section="reports">
                         <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
                         <span>Reports</span>
                     </a>
-                    <a href="#" onclick="showSection('exports')" class="nav-item flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-700">
+                    <a href="#" class="nav-item flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-700" data-section="exports">
                         <i data-lucide="download" class="w-4 h-4"></i>
                         <span>Exports</span>
                     </a>
@@ -143,15 +143,15 @@
                 <div class="mt-8">
                     <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Quick Actions</h3>
                     <div class="space-y-2">
-                        <button onclick="quickSearch()" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg flex items-center space-x-2">
+                        <button class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg flex items-center space-x-2 quick-search-btn">
                             <i data-lucide="zap" class="w-3 h-3"></i>
                             <span>Quick Search</span>
                         </button>
-                        <button onclick="exportLastSearch()" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg flex items-center space-x-2">
+                        <button class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg flex items-center space-x-2 export-last-btn">
                             <i data-lucide="download" class="w-3 h-3"></i>
                             <span>Export Last Search</span>
                         </button>
-                        <button onclick="createNewList()" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg flex items-center space-x-2">
+                        <button class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg flex items-center space-x-2 create-list-btn">
                             <i data-lucide="plus" class="w-3 h-3"></i>
                             <span>Create List</span>
                         </button>
@@ -177,16 +177,16 @@
                             <input type="text" id="quick-search-input" placeholder="Search any company domain..." 
                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg search-glow">
                         </div>
-                        <button onclick="quickSearchExecute()" class="px-6 py-3 brand-gradient text-white rounded-lg hover:opacity-90 font-semibold flex items-center space-x-2">
+                        <button id="quick-search-execute" class="px-6 py-3 brand-gradient text-white rounded-lg hover:opacity-90 font-semibold flex items-center space-x-2">
                             <i data-lucide="search" class="w-5 h-5"></i>
                             <span>Search</span>
                         </button>
                     </div>
                     <div class="mt-3 flex flex-wrap gap-2">
                         <span class="text-sm text-gray-500">Recent:</span>
-                        <button onclick="setQuickSearch('salesforce.com')" class="px-3 py-1 bg-blue-50 text-blue-700 rounded text-sm hover:bg-blue-100">salesforce.com</button>
-                        <button onclick="setQuickSearch('microsoft.com')" class="px-3 py-1 bg-blue-50 text-blue-700 rounded text-sm hover:bg-blue-100">microsoft.com</button>
-                        <button onclick="setQuickSearch('hubspot.com')" class="px-3 py-1 bg-blue-50 text-blue-700 rounded text-sm hover:bg-blue-100">hubspot.com</button>
+                        <button class="px-3 py-1 bg-blue-50 text-blue-700 rounded text-sm hover:bg-blue-100 quick-domain-btn" data-domain="salesforce.com">salesforce.com</button>
+                        <button class="px-3 py-1 bg-blue-50 text-blue-700 rounded text-sm hover:bg-blue-100 quick-domain-btn" data-domain="microsoft.com">microsoft.com</button>
+                        <button class="px-3 py-1 bg-blue-50 text-blue-700 rounded text-sm hover:bg-blue-100 quick-domain-btn" data-domain="hubspot.com">hubspot.com</button>
                     </div>
                 </div>
 
@@ -245,239 +245,6 @@
                 <!-- Recent Activity & Saved Lists -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <!-- Recent Activity -->
-                    <div class="bg-white rounded-lg shadow-sm p-6">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
-                        <div id="recent-activity" class="space-y-4">
-                            <div class="text-center py-8 text-gray-500">
-                                <i data-lucide="activity" class="w-8 h-8 mx-auto mb-2"></i>
-                                <p class="text-sm">Start searching to see your activity</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Saved Lists -->
-                    <div class="bg-white rounded-lg shadow-sm p-6">
-                        <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-lg font-semibold text-gray-900">Saved Lists</h3>
-                            <button onclick="createNewList()" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
-                                Create New
-                            </button>
-                        </div>
-                        <div id="saved-lists-preview" class="space-y-3">
-                            <div class="text-center py-8 text-gray-500">
-                                <i data-lucide="list" class="w-8 h-8 mx-auto mb-2"></i>
-                                <p class="text-sm">No saved lists yet</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Contact Finder Section -->
-            <div id="contact-finder-section" class="section-content hidden">
-                <div class="flex items-center justify-between mb-6">
-                    <div>
-                        <h2 class="text-2xl font-bold text-gray-900">Contact Finder</h2>
-                        <p class="text-gray-600">Enhanced AI-powered multi-source contact discovery</p>
-                    </div>
-                    <div class="flex items-center space-x-3">
-                        <div class="flex bg-gray-100 rounded-lg p-1">
-                            <button onclick="setContactView('grid')" id="grid-view-btn" class="px-3 py-1 rounded bg-white text-gray-900 text-sm font-medium shadow-sm">
-                                <i data-lucide="grid-3x3" class="w-4 h-4"></i>
-                            </button>
-                            <button onclick="setContactView('list')" id="list-view-btn" class="px-3 py-1 rounded text-gray-600 text-sm font-medium">
-                                <i data-lucide="list" class="w-4 h-4"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
-                    <div class="fusion-badge text-white px-3 py-1 rounded-full text-xs font-medium mb-4 inline-block">
-                        ENHANCED MULTI-SOURCE DATA FUSION
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Company Domain</label>
-                            <input type="text" id="search-domain" placeholder="e.g., salesforce.com" 
-                                   class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Seniority Level</label>
-                            <select id="seniority-filter" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
-                                <option value="">All Levels</option>
-                                <option value="c_level">C-Level</option>
-                                <option value="vp">VP Level</option>
-                                <option value="director">Director</option>
-                                <option value="manager">Manager</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Department</label>
-                            <select id="department-filter" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
-                                <option value="">All Departments</option>
-                                <option value="sales">Sales</option>
-                                <option value="marketing">Marketing</option>
-                                <option value="engineering">Engineering</option>
-                                <option value="operations">Operations</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Results Limit</label>
-                            <select id="results-limit" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
-                                <option value="25">25 contacts</option>
-                                <option value="50">50 contacts</option>
-                                <option value="100">100 contacts</option>
-                            </select>
-                        </div>
-                    </div>
-                    <button onclick="executeSearch()" id="main-search-btn" class="w-full brand-gradient text-white py-3 rounded-lg font-semibold hover:opacity-90 flex items-center justify-center space-x-2">
-                        <i data-lucide="search" class="w-5 h-5"></i>
-                        <span>Find Contacts with Enhanced AI Data Fusion</span>
-                    </button>
-                    <div class="mt-3 text-center">
-                        <p class="text-xs text-gray-500">🚀 Advanced Intelligence + Pattern Detection + Enhanced Scoring</p>
-                    </div>
-                </div>
-
-                <div id="fusion-status" class="hidden bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-4 mb-6">
-                    <div class="flex items-center space-x-2 mb-2">
-                        <i data-lucide="brain" class="w-5 h-5 text-blue-600"></i>
-                        <span class="font-medium text-blue-900">Enhanced AI Data Fusion Progress:</span>
-                    </div>
-                    <div class="space-y-2 text-sm">
-                        <div id="status-source1" class="flex items-center space-x-2">
-                            <div class="w-2 h-2 rounded-full bg-gray-300"></div>
-                            <span class="text-gray-600">Enterprise Database 1: Initializing...</span>
-                        </div>
-                        <div id="status-source2" class="flex items-center space-x-2">
-                            <div class="w-2 h-2 rounded-full bg-gray-300"></div>
-                            <span class="text-gray-600">Enterprise Database 2: Waiting...</span>
-                        </div>
-                        <div id="status-source3" class="flex items-center space-x-2">
-                            <div class="w-2 h-2 rounded-full bg-gray-300"></div>
-                            <span class="text-gray-600">Web Intelligence: Standby...</span>
-                        </div>
-                        <div id="status-fusion" class="flex items-center space-x-2">
-                            <div class="w-2 h-2 rounded-full bg-gray-300"></div>
-                            <span class="text-gray-600">Enhanced AI Engine: Standby...</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="search-results" class="hidden">
-                    <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-4">
-                                <h3 class="text-lg font-semibold text-gray-900">Search Results</h3>
-                                <span id="results-count" class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">0 contacts</span>
-                            </div>
-                            <div class="flex items-center space-x-3">
-                                <button onclick="selectAllContacts()" id="select-all-btn" class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50">
-                                    Select All
-                                </button>
-                                <button onclick="addToList()" id="add-to-list-btn" class="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 disabled:opacity-50" disabled>
-                                    Add to List
-                                </button>
-                                <button onclick="addToSalesforce()" id="add-to-salesforce-btn" class="px-4 py-2 salesforce-button text-white rounded-lg text-sm font-medium hover:opacity-90 disabled:opacity-50" disabled>
-                                    Add to Salesforce
-                                </button>
-                                <button onclick="exportContacts()" id="export-selected-btn" class="px-4 py-2 brand-gradient text-white rounded-lg text-sm font-medium hover:opacity-90 disabled:opacity-50" disabled>
-                                    Export Selected
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="contacts-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    </div>
-
-                    <div id="contacts-list" class="hidden bg-white rounded-lg shadow-sm overflow-hidden">
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            <input type="checkbox" id="select-all-list" class="rounded border-gray-300" onchange="selectAllContactsCheckbox()">
-                                        </th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Source</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="contacts-table-body" class="bg-white divide-y divide-gray-200">
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="search-loading" class="hidden">
-                    <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
-                        <div class="text-center">
-                            <div class="inline-flex items-center space-x-3 mb-4">
-                                <div class="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                                <h3 class="text-lg font-semibold text-gray-900">Enhanced Multi-Source Analysis</h3>
-                            </div>
-                            <p id="search-status" class="text-gray-600 mb-4">Initializing enhanced AI data fusion...</p>
-                            <div class="grid grid-cols-4 gap-4 max-w-lg mx-auto">
-                                <div class="text-center">
-                                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-2">
-                                        <i data-lucide="database" class="w-6 h-6 text-blue-600"></i>
-                                    </div>
-                                    <p class="text-xs text-gray-600">Database Alpha</p>
-                                </div>
-                                <div class="text-center">
-                                    <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mx-auto mb-2">
-                                        <i data-lucide="target" class="w-6 h-6 text-orange-600"></i>
-                                    </div>
-                                    <p class="text-xs text-gray-600">Database Beta</p>
-                                </div>
-                                <div class="text-center">
-                                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-2">
-                                        <i data-lucide="globe" class="w-6 h-6 text-purple-600"></i>
-                                    </div>
-                                    <p class="text-xs text-gray-600">Web Intel</p>
-                                </div>
-                                <div class="text-center">
-                                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-2">
-                                        <i data-lucide="brain" class="w-6 h-6 text-green-600"></i>
-                                    </div>
-                                    <p class="text-xs text-gray-600">AI Fusion</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Contact Lists Section -->
-            <div id="contact-lists-section" class="section-content hidden">
-                <div class="flex items-center justify-between mb-6">
-                    <div>
-                        <h2 class="text-2xl font-bold text-gray-900">Contact Lists</h2>
-                        <p class="text-gray-600">Organize and manage your saved contacts</p>
-                    </div>
-                    <button onclick="createNewList()" class="px-4 py-2 brand-gradient text-white rounded-lg font-medium hover:opacity-90 flex items-center space-x-2">
-                        <i data-lucide="plus" class="w-4 h-4"></i>
-                        <span>Create New List</span>
-                    </button>
-                </div>
-                <div id="contact-lists-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                </div>
-            </div>
-
-            <!-- Reports Section -->
-            <div id="reports-section" class="section-content hidden">
-                <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-gray-900">Reports & Analytics</h2>
-                    <p class="text-gray-600">Track your contact discovery performance</p>
-                </div>
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <div class="bg-white rounded-lg shadow-sm p-6">
                         <h3 class="text-lg font-semibold text-gray-900 mb-4">Search Activity</h3>
                         <div class="text-center py-8 text-gray-500">
@@ -585,10 +352,10 @@
                 </div>
                 
                 <div class="flex justify-end space-x-2 mt-6">
-                    <button onclick="closeSalesforceModal()" class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50">
+                    <button id="cancel-salesforce-btn" class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50">
                         Cancel
                     </button>
-                    <button onclick="connectToSalesforce()" id="sf-connect-btn" class="px-4 py-2 salesforce-button text-white rounded-lg text-sm font-medium hover:opacity-90">
+                    <button id="sf-connect-btn" class="px-4 py-2 salesforce-button text-white rounded-lg text-sm font-medium hover:opacity-90">
                         Connect
                     </button>
                 </div>
@@ -603,7 +370,7 @@
             <span class="font-medium text-red-900">Error</span>
         </div>
         <p id="error-message" class="text-red-700 text-sm mt-1">An error occurred</p>
-        <button onclick="hideError()" class="absolute top-2 right-2 text-red-400 hover:text-red-600">
+        <button id="close-error-btn" class="absolute top-2 right-2 text-red-400 hover:text-red-600">
             <i data-lucide="x" class="w-4 h-4"></i>
         </button>
     </div>
@@ -615,7 +382,7 @@
             <span class="font-medium text-green-900">Success</span>
         </div>
         <p id="success-message" class="text-green-700 text-sm mt-1">Operation completed successfully</p>
-        <button onclick="hideSuccess()" class="absolute top-2 right-2 text-green-400 hover:text-green-600">
+        <button id="close-success-btn" class="absolute top-2 right-2 text-green-400 hover:text-green-600">
             <i data-lucide="x" class="w-4 h-4"></i>
         </button>
     </div>
@@ -628,10 +395,10 @@
                 <input type="text" id="list-name-input" placeholder="Enter list name..." 
                        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-4">
                 <div class="flex justify-end space-x-2">
-                    <button onclick="cancelSaveList()" class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50">
+                    <button id="cancel-save-list-btn" class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50">
                         Cancel
                     </button>
-                    <button onclick="confirmSaveList()" class="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700">
+                    <button id="confirm-save-list-btn" class="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700">
                         Save List
                     </button>
                 </div>
@@ -687,6 +454,16 @@
                 disconnectedSpan.classList.remove('hidden');
                 connectBtn.textContent = 'Connect Salesforce';
                 connectBtn.onclick = showSalesforceModal;
+            }
+        }
+
+        function disconnectFromSalesforce() {
+            if (confirm('Are you sure you want to disconnect from Salesforce?')) {
+                salesforceSession = null;
+                localStorage.removeItem('salesforceSession');
+                updateSalesforceStatus(false);
+                showSuccess('Disconnected from Salesforce successfully.');
+                addToRecentActivity('salesforce', 'Disconnected from Salesforce CRM');
             }
         }
 
@@ -878,6 +655,72 @@
             }
             
             console.log('Demo mode enabled successfully!'); // Debug log
+        }
+
+        async function addSingleContactToSalesforce(contact) {
+            console.log('Adding single contact to Salesforce:', contact);
+            
+            if (!salesforceSession || !salesforceSession.connected) {
+                showError('Please connect to Salesforce first');
+                return;
+            }
+
+            try {
+                const result = await createContactInSalesforce(contact);
+                showSuccess(`Contact "${contact.name}" added to Salesforce successfully!`);
+                addToRecentActivity('salesforce', `Added ${contact.name} to Salesforce CRM`);
+            } catch (error) {
+                console.error('Failed to add contact to Salesforce:', error);
+                showError(`Failed to add contact: ${error.message}`);
+            }
+        }
+
+        async function addToSalesforce() {
+            if (selectedContacts.size === 0) {
+                showError('Please select contacts to add to Salesforce');
+                return;
+            }
+
+            if (!salesforceSession || !salesforceSession.connected) {
+                showError('Please connect to Salesforce first');
+                return;
+            }
+
+            const contactsToAdd = Array.from(selectedContacts).map(index => currentContacts[index]);
+            let successCount = 0;
+            let failCount = 0;
+
+            const button = document.getElementById('add-to-salesforce-btn');
+            const originalText = button.textContent;
+            button.disabled = true;
+            button.textContent = 'Adding to Salesforce...';
+
+            for (const contact of contactsToAdd) {
+                try {
+                    await createContactInSalesforce(contact);
+                    successCount++;
+                } catch (error) {
+                    console.error(`Failed to add ${contact.name}:`, error);
+                    failCount++;
+                }
+            }
+
+            button.disabled = false;
+            button.textContent = originalText;
+
+            if (successCount > 0) {
+                showSuccess(`Successfully added ${successCount} contact(s) to Salesforce!`);
+                addToRecentActivity('salesforce', `Bulk added ${successCount} contacts to Salesforce CRM`);
+                
+                // Clear selection
+                selectedContacts.clear();
+                document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+                updateSelectionUI();
+            }
+
+            if (failCount > 0) {
+                showError(`Failed to add ${failCount} contact(s). Check console for details.`);
+            }
         }
 
         async function createContactInSalesforce(contact) {
@@ -1103,7 +946,7 @@
             }
 
             container.innerHTML = lists.slice(0, 3).map(list => `
-                <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer" onclick="viewListFromDashboard('${list.id}')">
+                <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer view-list-preview" data-list-id="${list.id}">
                     <div class="flex items-center space-x-3">
                         <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
                             <i data-lucide="briefcase" class="w-4 h-4 text-blue-600"></i>
@@ -1116,6 +959,14 @@
                     <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i>
                 </div>
             `).join('');
+            
+            // Add event listeners to preview items
+            container.querySelectorAll('.view-list-preview').forEach(item => {
+                item.addEventListener('click', () => {
+                    const listId = item.dataset.listId;
+                    viewListFromDashboard(listId);
+                });
+            });
             
             if (typeof lucide !== 'undefined') {
                 lucide.createIcons();
@@ -1135,8 +986,12 @@
             
             document.getElementById(sectionName + '-section').classList.remove('hidden');
             
-            event.target.closest('.nav-item').classList.add('active');
-            event.target.closest('.nav-item').classList.remove('text-gray-700');
+            // Find and activate the correct nav item
+            const activeNavItem = document.querySelector(`[data-section="${sectionName}"]`);
+            if (activeNavItem) {
+                activeNavItem.classList.add('active');
+                activeNavItem.classList.remove('text-gray-700');
+            }
             
             if (sectionName === 'contact-lists') {
                 loadContactListsPage();
@@ -1157,11 +1012,17 @@
                         <i data-lucide="list" class="w-16 h-16 mx-auto mb-4"></i>
                         <h3 class="text-lg font-medium text-gray-900 mb-2">No contact lists yet</h3>
                         <p class="text-gray-600 mb-4">Start by finding contacts and saving them to lists</p>
-                        <button onclick="showSection('contact-finder')" class="px-4 py-2 brand-gradient text-white rounded-lg font-medium hover:opacity-90">
+                        <button class="px-4 py-2 brand-gradient text-white rounded-lg font-medium hover:opacity-90 go-to-finder-btn">
                             Find Contacts
                         </button>
                     </div>
                 `;
+                
+                // Add event listener for the button
+                container.querySelector('.go-to-finder-btn').addEventListener('click', () => {
+                    showSection('contact-finder');
+                });
+                
                 return;
             }
 
@@ -1178,13 +1039,13 @@
                         <div class="flex items-center justify-between">
                             <span class="text-2xl font-bold text-blue-600">${list.contacts.length}</span>
                             <div class="flex space-x-2">
-                                <button onclick="viewList('${list.id}')" class="p-1 text-gray-400 hover:text-blue-600" title="View">
+                                <button class="p-1 text-gray-400 hover:text-blue-600 view-list-btn" title="View" data-list-id="${list.id}">
                                     <i data-lucide="eye" class="w-4 h-4"></i>
                                 </button>
-                                <button onclick="exportSavedList('${list.id}')" class="p-1 text-gray-400 hover:text-green-600" title="Export">
+                                <button class="p-1 text-gray-400 hover:text-green-600 export-list-btn" title="Export" data-list-id="${list.id}">
                                     <i data-lucide="download" class="w-4 h-4"></i>
                                 </button>
-                                <button onclick="deleteList('${list.id}')" class="p-1 text-gray-400 hover:text-red-600" title="Delete">
+                                <button class="p-1 text-gray-400 hover:text-red-600 delete-list-btn" title="Delete" data-list-id="${list.id}">
                                     <i data-lucide="trash-2" class="w-4 h-4"></i>
                                 </button>
                             </div>
@@ -1192,6 +1053,19 @@
                     </div>
                 `;
             }).join('');
+            
+            // Add event listeners to all buttons
+            container.querySelectorAll('.view-list-btn').forEach(btn => {
+                btn.addEventListener('click', () => viewList(btn.dataset.listId));
+            });
+            
+            container.querySelectorAll('.export-list-btn').forEach(btn => {
+                btn.addEventListener('click', () => exportSavedList(btn.dataset.listId));
+            });
+            
+            container.querySelectorAll('.delete-list-btn').forEach(btn => {
+                btn.addEventListener('click', () => deleteList(btn.dataset.listId));
+            });
             
             if (typeof lucide !== 'undefined') {
                 lucide.createIcons();
@@ -1611,8 +1485,8 @@
             card.innerHTML = `
                 <div class="flex items-start justify-between mb-3">
                     <div class="flex items-center space-x-2">
-                        <input type="checkbox" id="contact-${index}" ${isSelected ? 'checked' : ''} onchange="toggleContact(${index})" 
-                               class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                        <input type="checkbox" ${isSelected ? 'checked' : ''} 
+                               class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 contact-checkbox" data-index="${index}">
                         <div>
                             <h4 class="font-semibold text-gray-900">${contact.name}</h4>
                             <p class="text-sm text-gray-600">${contact.title}</p>
@@ -1646,8 +1520,7 @@
                         <span class="px-2 py-1 rounded-full text-xs font-medium ${getSeniorityColor(contact.seniority)}">
                             ${contact.seniority}
                         </span>
-                        <button onclick="addSingleContactToSalesforce(currentContacts[${index}])" 
-                                class="px-2 py-1 salesforce-button text-white rounded text-xs hover:opacity-90 flex items-center space-x-1">
+                        <button class="px-2 py-1 salesforce-button text-white rounded text-xs hover:opacity-90 flex items-center space-x-1 salesforce-add-single-btn" data-index="${index}">
                             <i data-lucide="cloud" class="w-3 h-3"></i>
                             <span>Salesforce</span>
                         </button>
@@ -1656,6 +1529,18 @@
             `;
             
             grid.appendChild(card);
+            
+            // Add event listeners after the card is in the DOM
+            const checkbox = card.querySelector('.contact-checkbox');
+            const salesforceBtn = card.querySelector('.salesforce-add-single-btn');
+            
+            checkbox.addEventListener('change', () => {
+                toggleContact(index);
+            });
+            
+            salesforceBtn.addEventListener('click', () => {
+                addSingleContactToSalesforce(currentContacts[index]);
+            });
         }
 
         function createContactRow(contact, index) {
@@ -1670,8 +1555,8 @@
 
             row.innerHTML = `
                 <td class="px-4 py-4 whitespace-nowrap">
-                    <input type="checkbox" id="contact-list-${index}" ${isSelected ? 'checked' : ''} onchange="toggleContact(${index})" 
-                           class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                    <input type="checkbox" ${isSelected ? 'checked' : ''} 
+                           class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 contact-checkbox-row" data-index="${index}">
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                     <div>
@@ -1696,8 +1581,7 @@
                     ${verificationBadge}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                    <button onclick="addSingleContactToSalesforce(currentContacts[${index}])" 
-                            class="px-3 py-1 salesforce-button text-white rounded text-xs hover:opacity-90 flex items-center space-x-1">
+                    <button class="px-3 py-1 salesforce-button text-white rounded text-xs hover:opacity-90 flex items-center space-x-1 salesforce-add-single-row-btn" data-index="${index}">
                         <i data-lucide="cloud" class="w-3 h-3"></i>
                         <span>Salesforce</span>
                     </button>
@@ -1705,6 +1589,18 @@
             `;
             
             tbody.appendChild(row);
+            
+            // Add event listeners after the row is in the DOM
+            const checkbox = row.querySelector('.contact-checkbox-row');
+            const salesforceBtn = row.querySelector('.salesforce-add-single-row-btn');
+            
+            checkbox.addEventListener('change', () => {
+                toggleContact(index);
+            });
+            
+            salesforceBtn.addEventListener('click', () => {
+                addSingleContactToSalesforce(currentContacts[index]);
+            });
         }
 
         function getSeniorityColor(seniority) {
@@ -1796,7 +1692,7 @@
                 document.getElementById('select-all-btn').textContent = 'Deselect All';
             }
             
-            document.querySelectorAll('#contacts-grid input[type="checkbox"], #contacts-table-body input[type="checkbox"]').forEach((checkbox, index) => {
+            document.querySelectorAll('.contact-checkbox, .contact-checkbox-row').forEach((checkbox, index) => {
                 checkbox.checked = selectedContacts.has(index);
             });
             
@@ -1823,7 +1719,7 @@
                 document.getElementById('select-all-btn').textContent = 'Select All';
             }
             
-            document.querySelectorAll('#contacts-table-body input[type="checkbox"]').forEach((checkbox, index) => {
+            document.querySelectorAll('.contact-checkbox-row').forEach((checkbox, index) => {
                 checkbox.checked = isChecked;
             });
             
@@ -1893,7 +1789,7 @@
             document.getElementById('list-name-input').value = '';
             
             selectedContacts.clear();
-            document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+            document.querySelectorAll('.contact-checkbox, .contact-checkbox-row').forEach(cb => cb.checked = false);
             updateSelectionUI();
             
             showSuccess(`List "${listName}" saved successfully with ${selectedContactsArray.length} contacts!`);
@@ -1903,7 +1799,7 @@
             showSection('contact-lists');
             
             setTimeout(() => {
-                const listElement = document.querySelector(`[onclick*="${listId}"]`);
+                const listElement = document.querySelector(`[data-list-id="${listId}"]`);
                 if (listElement) {
                     listElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     listElement.style.backgroundColor = '#dbeafe';
@@ -2071,7 +1967,7 @@
             }
         }
 
-        // Initialize
+        // Initialize Event Listeners and Load Data
         document.addEventListener('DOMContentLoaded', function() {
             if (typeof lucide !== 'undefined') {
                 lucide.createIcons();
@@ -2084,6 +1980,14 @@
                     salesforceSession = JSON.parse(savedSession);
                     if (salesforceSession && salesforceSession.connected) {
                         updateSalesforceStatus(true);
+                        
+                        // Show demo indicator if in demo mode
+                        if (salesforceSession.isDemoMode) {
+                            const connectedSpan = document.getElementById('sf-connected');
+                            if (connectedSpan) {
+                                connectedSpan.innerHTML = '🎭 Salesforce Connected (Demo)';
+                            }
+                        }
                     }
                 } catch (e) {
                     console.error('Error loading Salesforce session:', e);
@@ -2095,18 +1999,81 @@
             updateRecentActivity();
             updateSavedListsPreview();
             
+            // Navigation Event Listeners
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const section = item.dataset.section;
+                    if (section) {
+                        showSection(section);
+                    }
+                });
+            });
+            
+            // Salesforce Modal Event Listeners
+            document.getElementById('connect-salesforce-btn').addEventListener('click', showSalesforceModal);
+            document.getElementById('cancel-salesforce-btn').addEventListener('click', closeSalesforceModal);
+            document.getElementById('sf-connect-btn').addEventListener('click', connectToSalesforce);
+            
+            // Quick Search Event Listeners
+            document.getElementById('quick-search-execute').addEventListener('click', quickSearchExecute);
             document.getElementById('quick-search-input').addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     quickSearchExecute();
                 }
             });
             
+            // Quick domain buttons
+            document.querySelectorAll('.quick-domain-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    setQuickSearch(btn.dataset.domain);
+                });
+            });
+            
+            // Main search functionality
+            document.getElementById('main-search-btn').addEventListener('click', executeSearch);
             document.getElementById('search-domain').addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     executeSearch();
                 }
             });
+            
+            // View toggle buttons
+            document.getElementById('grid-view-btn').addEventListener('click', () => setContactView('grid'));
+            document.getElementById('list-view-btn').addEventListener('click', () => setContactView('list'));
+            
+            // Action buttons
+            document.getElementById('select-all-btn').addEventListener('click', selectAllContacts);
+            document.getElementById('add-to-list-btn').addEventListener('click', addToList);
+            document.getElementById('add-to-salesforce-btn').addEventListener('click', addToSalesforce);
+            document.getElementById('export-selected-btn').addEventListener('click', exportContacts);
+            
+            // List header checkbox
+            const selectAllListCheckbox = document.getElementById('select-all-list');
+            if (selectAllListCheckbox) {
+                selectAllListCheckbox.addEventListener('change', selectAllContactsCheckbox);
+            }
+            
+            // Save list modal
+            document.getElementById('cancel-save-list-btn').addEventListener('click', cancelSaveList);
+            document.getElementById('confirm-save-list-btn').addEventListener('click', confirmSaveList);
+            
+            // Quick action buttons
+            document.querySelectorAll('.quick-search-btn').forEach(btn => {
+                btn.addEventListener('click', quickSearch);
+            });
+            document.querySelectorAll('.export-last-btn').forEach(btn => {
+                btn.addEventListener('click', exportLastSearch);
+            });
+            document.querySelectorAll('.create-list-btn, .create-new-list-btn, .create-new-list-top-btn').forEach(btn => {
+                btn.addEventListener('click', createNewList);
+            });
+            
+            // Message close buttons
+            document.getElementById('close-error-btn').addEventListener('click', hideError);
+            document.getElementById('close-success-btn').addEventListener('click', hideSuccess);
 
+            // Handle pending search
             const pendingSearch = getStoredData('pendingSearch');
             if (pendingSearch) {
                 localStorage.removeItem('pendingSearch');
@@ -2115,13 +2082,240 @@
                 setTimeout(() => executeSearch(), 100);
             }
         });
-        
-        // Additional global assignments (redundant but ensures availability)
-        window.showSalesforceModal = showSalesforceModal;
-        window.closeSalesforceModal = closeSalesforceModal;
-        window.connectToSalesforce = connectToSalesforce;
-        window.disconnectFromSalesforce = disconnectFromSalesforce;
     </script>
 
 </body>
-</html>
+</html>gray-900 mb-4">Recent Activity</h3>
+                        <div id="recent-activity" class="space-y-4">
+                            <div class="text-center py-8 text-gray-500">
+                                <i data-lucide="activity" class="w-8 h-8 mx-auto mb-2"></i>
+                                <p class="text-sm">Start searching to see your activity</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Saved Lists -->
+                    <div class="bg-white rounded-lg shadow-sm p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-900">Saved Lists</h3>
+                            <button class="text-blue-600 hover:text-blue-800 text-sm font-medium create-new-list-btn">
+                                Create New
+                            </button>
+                        </div>
+                        <div id="saved-lists-preview" class="space-y-3">
+                            <div class="text-center py-8 text-gray-500">
+                                <i data-lucide="list" class="w-8 h-8 mx-auto mb-2"></i>
+                                <p class="text-sm">No saved lists yet</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Finder Section -->
+            <div id="contact-finder-section" class="section-content hidden">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-900">Contact Finder</h2>
+                        <p class="text-gray-600">Enhanced AI-powered multi-source contact discovery</p>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <div class="flex bg-gray-100 rounded-lg p-1">
+                            <button id="grid-view-btn" class="px-3 py-1 rounded bg-white text-gray-900 text-sm font-medium shadow-sm">
+                                <i data-lucide="grid-3x3" class="w-4 h-4"></i>
+                            </button>
+                            <button id="list-view-btn" class="px-3 py-1 rounded text-gray-600 text-sm font-medium">
+                                <i data-lucide="list" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+                    <div class="fusion-badge text-white px-3 py-1 rounded-full text-xs font-medium mb-4 inline-block">
+                        ENHANCED MULTI-SOURCE DATA FUSION
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Company Domain</label>
+                            <input type="text" id="search-domain" placeholder="e.g., salesforce.com" 
+                                   class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Seniority Level</label>
+                            <select id="seniority-filter" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
+                                <option value="">All Levels</option>
+                                <option value="c_level">C-Level</option>
+                                <option value="vp">VP Level</option>
+                                <option value="director">Director</option>
+                                <option value="manager">Manager</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Department</label>
+                            <select id="department-filter" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
+                                <option value="">All Departments</option>
+                                <option value="sales">Sales</option>
+                                <option value="marketing">Marketing</option>
+                                <option value="engineering">Engineering</option>
+                                <option value="operations">Operations</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Results Limit</label>
+                            <select id="results-limit" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
+                                <option value="25">25 contacts</option>
+                                <option value="50">50 contacts</option>
+                                <option value="100">100 contacts</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button id="main-search-btn" class="w-full brand-gradient text-white py-3 rounded-lg font-semibold hover:opacity-90 flex items-center justify-center space-x-2">
+                        <i data-lucide="search" class="w-5 h-5"></i>
+                        <span>Find Contacts with Enhanced AI Data Fusion</span>
+                    </button>
+                    <div class="mt-3 text-center">
+                        <p class="text-xs text-gray-500">🚀 Advanced Intelligence + Pattern Detection + Enhanced Scoring</p>
+                    </div>
+                </div>
+
+                <div id="fusion-status" class="hidden bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-4 mb-6">
+                    <div class="flex items-center space-x-2 mb-2">
+                        <i data-lucide="brain" class="w-5 h-5 text-blue-600"></i>
+                        <span class="font-medium text-blue-900">Enhanced AI Data Fusion Progress:</span>
+                    </div>
+                    <div class="space-y-2 text-sm">
+                        <div id="status-source1" class="flex items-center space-x-2">
+                            <div class="w-2 h-2 rounded-full bg-gray-300"></div>
+                            <span class="text-gray-600">Enterprise Database 1: Initializing...</span>
+                        </div>
+                        <div id="status-source2" class="flex items-center space-x-2">
+                            <div class="w-2 h-2 rounded-full bg-gray-300"></div>
+                            <span class="text-gray-600">Enterprise Database 2: Waiting...</span>
+                        </div>
+                        <div id="status-source3" class="flex items-center space-x-2">
+                            <div class="w-2 h-2 rounded-full bg-gray-300"></div>
+                            <span class="text-gray-600">Web Intelligence: Standby...</span>
+                        </div>
+                        <div id="status-fusion" class="flex items-center space-x-2">
+                            <div class="w-2 h-2 rounded-full bg-gray-300"></div>
+                            <span class="text-gray-600">Enhanced AI Engine: Standby...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="search-results" class="hidden">
+                    <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <h3 class="text-lg font-semibold text-gray-900">Search Results</h3>
+                                <span id="results-count" class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">0 contacts</span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <button id="select-all-btn" class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50">
+                                    Select All
+                                </button>
+                                <button id="add-to-list-btn" class="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 disabled:opacity-50" disabled>
+                                    Add to List
+                                </button>
+                                <button id="add-to-salesforce-btn" class="px-4 py-2 salesforce-button text-white rounded-lg text-sm font-medium hover:opacity-90 disabled:opacity-50" disabled>
+                                    Add to Salesforce
+                                </button>
+                                <button id="export-selected-btn" class="px-4 py-2 brand-gradient text-white rounded-lg text-sm font-medium hover:opacity-90 disabled:opacity-50" disabled>
+                                    Export Selected
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="contacts-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    </div>
+
+                    <div id="contacts-list" class="hidden bg-white rounded-lg shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            <input type="checkbox" id="select-all-list" class="rounded border-gray-300">
+                                        </th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Source</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="contacts-table-body" class="bg-white divide-y divide-gray-200">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="search-loading" class="hidden">
+                    <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+                        <div class="text-center">
+                            <div class="inline-flex items-center space-x-3 mb-4">
+                                <div class="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                                <h3 class="text-lg font-semibold text-gray-900">Enhanced Multi-Source Analysis</h3>
+                            </div>
+                            <p id="search-status" class="text-gray-600 mb-4">Initializing enhanced AI data fusion...</p>
+                            <div class="grid grid-cols-4 gap-4 max-w-lg mx-auto">
+                                <div class="text-center">
+                                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                                        <i data-lucide="database" class="w-6 h-6 text-blue-600"></i>
+                                    </div>
+                                    <p class="text-xs text-gray-600">Database Alpha</p>
+                                </div>
+                                <div class="text-center">
+                                    <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                                        <i data-lucide="target" class="w-6 h-6 text-orange-600"></i>
+                                    </div>
+                                    <p class="text-xs text-gray-600">Database Beta</p>
+                                </div>
+                                <div class="text-center">
+                                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                                        <i data-lucide="globe" class="w-6 h-6 text-purple-600"></i>
+                                    </div>
+                                    <p class="text-xs text-gray-600">Web Intel</p>
+                                </div>
+                                <div class="text-center">
+                                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                                        <i data-lucide="brain" class="w-6 h-6 text-green-600"></i>
+                                    </div>
+                                    <p class="text-xs text-gray-600">AI Fusion</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Lists Section -->
+            <div id="contact-lists-section" class="section-content hidden">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-900">Contact Lists</h2>
+                        <p class="text-gray-600">Organize and manage your saved contacts</p>
+                    </div>
+                    <button class="px-4 py-2 brand-gradient text-white rounded-lg font-medium hover:opacity-90 flex items-center space-x-2 create-new-list-top-btn">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                        <span>Create New List</span>
+                    </button>
+                </div>
+                <div id="contact-lists-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                </div>
+            </div>
+
+            <!-- Reports Section -->
+            <div id="reports-section" class="section-content hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-gray-900">Reports & Analytics</h2>
+                    <p class="text-gray-600">Track your contact discovery performance</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="bg-white rounded-lg shadow-sm p-6">
+                        <h3 class="text-lg font-semibold text-

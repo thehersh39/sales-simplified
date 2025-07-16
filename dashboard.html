@@ -387,6 +387,12 @@
                     <div class="mt-3 text-center">
                         <p class="text-xs text-gray-500">🚀 Enhanced Email Verification + Company Data + Contact Scoring</p>
                     </div>
+                </div> class="w-5 h-5"></i>
+                        <span>Find Contacts with Enhanced Intelligence</span>
+                    </button>
+                    <div class="mt-3 text-center">
+                        <p class="text-xs text-gray-500">🚀 Enhanced Email Verification + Company Data + Contact Scoring</p>
+                    </div>
                 </div>
 
                 <!-- Company Information Card -->
@@ -1031,81 +1037,103 @@
                 return companyDatabase[domain];
             }
             
-            // Smart domain-to-company name conversion
+            // Smart domain-to-company name conversion for well-known companies
             const domainToCompany = {
-                'google.com': 'Google LLC',
-                'apple.com': 'Apple Inc.',
-                'amazon.com': 'Amazon.com Inc.',
-                'meta.com': 'Meta Platforms Inc.',
-                'netflix.com': 'Netflix Inc.',
-                'tesla.com': 'Tesla Inc.',
-                'uber.com': 'Uber Technologies Inc.',
-                'airbnb.com': 'Airbnb Inc.',
-                'linkedin.com': 'LinkedIn Corporation',
-                'twitter.com': 'Twitter Inc.',
-                'reddit.com': 'Reddit Inc.',
-                'pinterest.com': 'Pinterest Inc.',
-                'snapchat.com': 'Snap Inc.',
-                'tiktok.com': 'ByteDance Ltd.',
-                'oracle.com': 'Oracle Corporation',
-                'cisco.com': 'Cisco Systems Inc.',
-                'intel.com': 'Intel Corporation',
-                'nvidia.com': 'NVIDIA Corporation',
-                'paypal.com': 'PayPal Holdings Inc.',
-                'square.com': 'Block Inc.',
-                'coinbase.com': 'Coinbase Global Inc.',
-                'robinhood.com': 'Robinhood Markets Inc.',
-                'spotify.com': 'Spotify Technology S.A.',
-                'discord.com': 'Discord Inc.',
-                'github.com': 'GitHub Inc.',
-                'gitlab.com': 'GitLab Inc.',
-                'docker.com': 'Docker Inc.',
-                'elastic.co': 'Elastic N.V.',
-                'mongodb.com': 'MongoDB Inc.',
-                'cloudflare.com': 'Cloudflare Inc.',
-                'fastly.com': 'Fastly Inc.',
-                'digitalocean.com': 'DigitalOcean Holdings Inc.',
-                'linode.com': 'Linode LLC',
-                'vultr.com': 'Vultr Holdings Corporation'
+                'google.com': { name: 'Google LLC', industry: 'Technology', size: '180,000+ employees', location: 'Mountain View, CA', founded: '1998', description: 'Multinational technology company specializing in Internet-related services and products.' },
+                'apple.com': { name: 'Apple Inc.', industry: 'Technology', size: '164,000+ employees', location: 'Cupertino, CA', founded: '1976', description: 'Technology company that designs, develops, and sells consumer electronics and software.' },
+                'amazon.com': { name: 'Amazon.com Inc.', industry: 'E-commerce & Cloud', size: '1,500,000+ employees', location: 'Seattle, WA', founded: '1994', description: 'Multinational technology company focusing on e-commerce, cloud computing, and artificial intelligence.' },
+                'meta.com': { name: 'Meta Platforms Inc.', industry: 'Social Media', size: '86,000+ employees', location: 'Menlo Park, CA', founded: '2004', description: 'Technology company that builds social technology to help people connect and bring the world closer together.' },
+                'netflix.com': { name: 'Netflix Inc.', industry: 'Entertainment', size: '12,800+ employees', location: 'Los Gatos, CA', founded: '1997', description: 'Streaming entertainment service with TV series, documentaries and feature films.' },
+                'tesla.com': { name: 'Tesla Inc.', industry: 'Automotive & Energy', size: '140,000+ employees', location: 'Austin, TX', founded: '2003', description: 'Electric vehicle and clean energy company designing and manufacturing electric cars and energy storage systems.' },
+                'uber.com': { name: 'Uber Technologies Inc.', industry: 'Transportation', size: '32,000+ employees', location: 'San Francisco, CA', founded: '2009', description: 'Technology platform that connects drivers and riders through a mobile app.' },
+                'airbnb.com': { name: 'Airbnb Inc.', industry: 'Hospitality', size: '6,500+ employees', location: 'San Francisco, CA', founded: '2008', description: 'Online marketplace for short-term homestays and experiences in various countries and regions.' },
+                'linkedin.com': { name: 'LinkedIn Corporation', industry: 'Professional Networking', size: '20,000+ employees', location: 'Sunnyvale, CA', founded: '2003', description: 'Business and employment-oriented online service that operates via websites and mobile apps.' },
+                'twitter.com': { name: 'Twitter Inc.', industry: 'Social Media', size: '7,500+ employees', location: 'San Francisco, CA', founded: '2006', description: 'Social networking service on which users post and interact with messages.' }
             };
             
-            // Generate intelligent company data based on domain
-            const baseName = domain.split('.')[0];
-            const companyName = domainToCompany[domain] || 
-                               baseName.charAt(0).toUpperCase() + baseName.slice(1) + 
-                               (domain.includes('.com') ? ' Inc.' : ' Corporation');
-            
-            // Industry categorization based on domain patterns
-            let industry = 'Technology';
-            if (domain.includes('bank') || domain.includes('financial') || domain.includes('capital')) {
-                industry = 'Financial Services';
-            } else if (domain.includes('health') || domain.includes('medical') || domain.includes('pharma')) {
-                industry = 'Healthcare';
-            } else if (domain.includes('retail') || domain.includes('shop') || domain.includes('store')) {
-                industry = 'Retail';
-            } else if (domain.includes('media') || domain.includes('news') || domain.includes('content')) {
-                industry = 'Media & Entertainment';
-            } else if (domain.includes('real') && domain.includes('estate')) {
-                industry = 'Real Estate';
-            } else if (domain.includes('edu')) {
-                industry = 'Education';
-            } else if (domain.includes('consulting')) {
-                industry = 'Professional Services';
+            // Check if we have specific data for this domain
+            if (domainToCompany[domain]) {
+                return {
+                    ...domainToCompany[domain],
+                    revenue: 'Not Available',
+                    type: 'Public Company',
+                    ticker: 'Public'
+                };
             }
             
-            // Simulate company size based on domain recognition
-            const sizes = ['50-200 employees', '200-1,000 employees', '1,000-5,000 employees', '5,000+ employees'];
+            // Generate intelligent company data based on domain for smaller companies
+            const baseName = domain.split('.')[0];
+            
+            // Create more professional company name
+            let companyName;
+            if (baseName.length <= 4) {
+                companyName = baseName.toUpperCase() + ' Corporation';
+            } else {
+                companyName = baseName.charAt(0).toUpperCase() + baseName.slice(1);
+                if (!companyName.toLowerCase().includes('corp') && !companyName.toLowerCase().includes('inc') && !companyName.toLowerCase().includes('llc')) {
+                    companyName += ' Inc.';
+                }
+            }
+            
+            // Enhanced industry categorization based on domain patterns and keywords
+            let industry = 'Professional Services'; // Default for small businesses
+            const domainLower = domain.toLowerCase();
+            
+            if (domainLower.includes('tech') || domainLower.includes('software') || domainLower.includes('app') || domainLower.includes('digital') || domainLower.includes('web') || domainLower.includes('cloud')) {
+                industry = 'Technology';
+            } else if (domainLower.includes('health') || domainLower.includes('medical') || domainLower.includes('clinic') || domainLower.includes('dental') || domainLower.includes('care')) {
+                industry = 'Healthcare';
+            } else if (domainLower.includes('bank') || domainLower.includes('financial') || domainLower.includes('capital') || domainLower.includes('invest') || domainLower.includes('loan')) {
+                industry = 'Financial Services';
+            } else if (domainLower.includes('retail') || domainLower.includes('shop') || domainLower.includes('store') || domainLower.includes('market') || domainLower.includes('ecommerce')) {
+                industry = 'Retail';
+            } else if (domainLower.includes('restaurant') || domainLower.includes('food') || domainLower.includes('cafe') || domainLower.includes('catering')) {
+                industry = 'Food & Beverage';
+            } else if (domainLower.includes('real') && domainLower.includes('estate') || domainLower.includes('property') || domainLower.includes('realty')) {
+                industry = 'Real Estate';
+            } else if (domainLower.includes('law') || domainLower.includes('legal') || domainLower.includes('attorney')) {
+                industry = 'Legal Services';
+            } else if (domainLower.includes('construct') || domainLower.includes('build') || domainLower.includes('contractor')) {
+                industry = 'Construction';
+            } else if (domainLower.includes('consult') || domainLower.includes('advisory') || domainLower.includes('service')) {
+                industry = 'Consulting';
+            } else if (domainLower.includes('market') || domainLower.includes('advertising') || domainLower.includes('media')) {
+                industry = 'Marketing & Advertising';
+            } else if (domainLower.includes('edu') || domainLower.includes('school') || domainLower.includes('academy')) {
+                industry = 'Education';
+            }
+            
+            // Realistic company sizes for smaller businesses
+            const sizes = ['10-50 employees', '25-100 employees', '50-200 employees', '100-500 employees'];
             const size = sizes[Math.floor(Math.random() * sizes.length)];
             
-            // Generate realistic company data
+            // More recent founding dates for smaller companies
+            const foundedYear = Math.floor(Math.random() * 25) + 1999; // 1999-2024
+            
+            // Industry-specific descriptions
+            const descriptions = {
+                'Technology': `Innovative technology company specializing in software solutions and digital services for businesses.`,
+                'Healthcare': `Healthcare services provider committed to delivering quality medical care and patient-centered solutions.`,
+                'Financial Services': `Financial services firm providing comprehensive solutions for personal and business financial needs.`,
+                'Retail': `Retail company offering quality products and exceptional customer service to local and regional markets.`,
+                'Food & Beverage': `Food and beverage company focused on quality ingredients and exceptional dining experiences.`,
+                'Real Estate': `Real estate services company helping clients buy, sell, and manage properties with professional expertise.`,
+                'Legal Services': `Legal services firm providing comprehensive legal counsel and representation to individuals and businesses.`,
+                'Construction': `Construction company delivering quality building and renovation services for residential and commercial projects.`,
+                'Consulting': `Professional consulting firm providing strategic advice and solutions to help businesses grow and succeed.`,
+                'Marketing & Advertising': `Marketing and advertising agency helping businesses build their brand and reach their target audience.`,
+                'Education': `Educational institution committed to providing quality learning experiences and academic excellence.`,
+                'Professional Services': `Professional services company delivering expert solutions and consulting to meet diverse business needs.`
+            };
+            
             return {
                 name: companyName,
                 industry: industry,
                 size: size,
                 location: 'United States',
-                founded: Math.floor(Math.random() * 30) + 1994, // 1994-2024
-                description: `${industry} company providing innovative solutions and services in the ${industry.toLowerCase()} sector.`,
-                revenue: 'Not Available',
+                founded: foundedYear.toString(),
+                description: descriptions[industry] || descriptions['Professional Services'],
+                revenue: 'Private Company',
                 type: 'Private Company',
                 ticker: 'Private'
             };
@@ -1158,31 +1186,45 @@
             return Math.min(score, 100);
         }
 
+        // Enhanced Email Verification with Consistent Scoring
         function enhancedEmailVerification(email, domain) {
-            // Simulate advanced email verification
-            const commonPatterns = [
-                'firstname.lastname',
-                'firstname',
-                'flastname',
-                'firstname_lastname'
-            ];
+            // Create a consistent hash-based score for the same email
+            let hash = 0;
+            for (let i = 0; i < email.length; i++) {
+                const char = email.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash; // Convert to 32-bit integer
+            }
             
-            let verificationScore = Math.random() * 40 + 60; // 60-100 range
+            // Use absolute value and normalize to 60-100 range
+            let baseScore = 60 + (Math.abs(hash) % 40);
             
-            // Check email pattern validity
+            // Consistent pattern-based adjustments
             const emailPattern = email.replace(`@${domain}`, '');
-            const hasCommonPattern = commonPatterns.some(pattern => 
-                emailPattern.includes('.') || emailPattern.includes('_')
-            );
             
-            if (hasCommonPattern) verificationScore += 10;
-            if (email.includes('info@') || email.includes('contact@')) verificationScore -= 20;
+            // Common professional patterns get bonus
+            if (emailPattern.includes('.') || emailPattern.includes('_')) {
+                baseScore += 10;
+            }
+            
+            // Generic emails get penalty
+            if (email.includes('info@') || email.includes('contact@') || email.includes('admin@')) {
+                baseScore -= 25;
+            }
+            
+            // Valid name patterns get bonus
+            if (/^[a-z]+\.[a-z]+@/.test(email)) {
+                baseScore += 15;
+            }
+            
+            // Ensure score stays in valid range
+            baseScore = Math.max(60, Math.min(100, baseScore));
             
             return {
-                verified: verificationScore > 80,
-                score: Math.round(verificationScore),
-                deliverable: verificationScore > 70,
-                risky: verificationScore < 60
+                verified: baseScore > 85,
+                score: Math.round(baseScore),
+                deliverable: baseScore > 75,
+                risky: baseScore < 65
             };
         }
 

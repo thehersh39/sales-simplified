@@ -340,27 +340,33 @@
 
         // Navigation Functions
         function showSection(sectionName) {
+            // Hide all sections
             document.querySelectorAll('.section-content').forEach(section => {
                 section.classList.add('hidden');
             });
             
+            // Reset all nav items
             document.querySelectorAll('.nav-item').forEach(item => {
                 item.classList.remove('active');
                 item.classList.add('text-gray-700');
             });
             
+            // Show the target section
             const targetSection = document.getElementById(sectionName + '-section');
             if (targetSection) {
                 targetSection.classList.remove('hidden');
+            } else {
+                console.error('Section not found:', sectionName + '-section');
             }
             
-            if (event && event.target) {
-                const navItem = event.target.closest('.nav-item');
-                if (navItem) {
-                    navItem.classList.add('active');
-                    navItem.classList.remove('text-gray-700');
+            // Update active nav item - use a more reliable method
+            setTimeout(() => {
+                const activeNavLink = document.querySelector(`[onclick="showSection('${sectionName}')"]`);
+                if (activeNavLink) {
+                    activeNavLink.classList.add('active');
+                    activeNavLink.classList.remove('text-gray-700');
                 }
-            }
+            }, 0);
             
             if (sectionName === 'contact-lists') {
                 loadContactListsPage();

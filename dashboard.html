@@ -2115,6 +2115,14 @@
                 setTimeout(() => executeSearch(), 100);
             }
         });
+        
+        // Make functions globally available for onclick handlers
+        window.addSingleContactToSalesforce = addSingleContactToSalesforce;
+        window.addToSalesforce = addToSalesforce;
+        window.showSalesforceModal = showSalesforceModal;
+        window.closeSalesforceModal = closeSalesforceModal;
+        window.connectToSalesforce = connectToSalesforce;
+        window.disconnectFromSalesforce = disconnectFromSalesforce;
     </script>
 
 </body>

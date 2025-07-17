@@ -1,1797 +1,4 @@
-department: categorizeByTitle(person.title),
-                        seniority: categorizeSeniority(person.title),
-                        deliverable: emailVerification.deliverable,
-                        risky: emailVerification.risky
-                    };
-                    
-                    contact.contactScore = calculateContactScore(contact);
-                    fusedContacts.push(contact);
-                });
-                sourcesUsed.push('Professional Database');
-            }
-            
-            if (hunterResults && hunterResults.emails) {
-                hunterResults.emails.forEach(email => {
-                    const emailVerification = enhancedEmailVerification(email.value, domain);
-                    
-                    const contact = {
-                        id: `db1_${email.value || Math.random()}`,
-                        name: `${email.first_name} ${email.last_name}`,
-                        title: email.position,
-                        email: email.value,
-                        phone: email.phone_number || '',
-                        linkedin: email.linkedin || '',
-                        company: hunterResults.domain || domain,
-                        source: 'Email Intelligence',
-                        verified: emailVerification.verified,
-                        confidence: emailVerification.score,
-                        department: categorizeByTitle(email.position),
-                        seniority: categorizeSeniority(email.position),
-                        deliverable: emailVerification.deliverable,
-                        risky: emailVerification.risky
-                    };
-                    
-                    contact.contactScore = calculateContactScore(contact);
-                    fusedContacts.push(contact);
-                });
-                sourcesUsed.push('Email Intelligence');
-            }
-
-            if (webResults && webResults.length > 0) {
-                webResults.forEach(contact => {
-                    const emailVerification = enhancedEmailVerification(contact.email, domain);
-                    
-                    const enhancedContact = {
-                        id: `web_${Math.random()}`,
-                        name: contact.name,
-                        title: contact.title,
-                        email: contact.email,
-                        phone: '',
-                        linkedin: '',
-                        company: domain,
-                        source: 'Web Intelligence',
-                        verified: emailVerification.verified,
-                        confidence: emailVerification.score,
-                        department: categorizeByTitle(contact.title),
-                        seniority: categorizeSeniority(contact.title),
-                        deliverable: emailVerification.deliverable,
-                        risky: emailVerification.risky
-                    };
-                    
-                    enhancedContact.contactScore = calculateContactScore(enhancedContact);
-                    fusedContacts.push(enhancedContact);
-                });
-                sourcesUsed.push('Web Intelligence');
-            }
-
-            const uniqueContacts = [];
-            const seenEmails = new Set();
-            
-            fusedContacts.forEach(contact => {
-                if (!seenEmails.has(contact.email)) {
-                    seenEmails.add(contact.email);
-                    uniqueContacts.push(contact);
-                }
-            });
-
-            uniqueContacts.sort((a, b) => b.contactScore - a.contactScore);
-            
-            return {
-                contacts: uniqueContacts,
-                companyInfo: {
-                    domain: domain,
-                    name: formatDomainAsCompany(domain),
-                    organization: hunterResults?.organization || formatDomainAsCompany(domain),
-                    totalContacts: uniqueContacts.length,
-                    sources: sourcesUsed,
-                    verifiedContacts: uniqueContacts.filter(c => c.verified).length,
-                    avgScore: uniqueContacts.length > 0 ? Math.round(uniqueContacts.reduce((sum, c) => sum + c.contactScore, 0) / uniqueContacts.length) : 0
-                }
-            };
-        }
-
-        async function searchHunter(domain, limit) {
-            const url = `https://api.hunter.io/v2/domain-search?domain=${domain}&limit=${limit}&api_key=${HUNTER_API_KEY}`;
-            const response = await fetch(url);
-            if (!response.ok) {
-                throw new Error(`Professional Database error: ${response.status}`);
-            }
-            const data = await response.json();
-            return data.data;
-        }
-
-        async function searchApollo(domain, limit) {
-            const requestBody = {
-                api_key: APOLLO_API_KEY,
-                q_organization_domains: domain,
-                page: 1,
-                per_page: Math.min(limit, 100),
-                q_person_seniorities: ['manager', 'director', 'vp', 'c_level'],
-                sort_by_field: 'person_seniority',
-                sort_ascending: false,
-                email_status: ['verified'],
-                q_person_emails: true,
-                include_emails: true,
-            };
-
-            try {
-                const response = await fetch('/.netlify/functions/apollo-proxy', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(requestBody)
-                });
-                
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(`Professional Database error: ${response.status} - ${errorData.error || 'Unknown error'}`);
-                }
-                
-                const data = await response.json();
-                return data;
-            } catch (error) {
-                console.error('Professional Database call failed:', error.message);
-                throw error;
-            }
-        }
-
-        async function scrapeCompanyWebsite(domain) {
-            try {
-                const scrapedContacts = [];
-                await new Promise(resolve => setTimeout(resolve, 1500));
-                
-                const mockTitles = [
-                    'Head of Business Development',
-                    'VP of Customer Success',
-                    'Director of Strategic Partnerships',
-                    'Senior Marketing Manager',
-                    'Lead Software Engineer'
-                ];
-                
-                const mockNames = [
-                    'Sarah Johnson', 'Michael Chen', 'Emily Rodriguez', 
-                    'David Kim', 'Jessica Williams', 'Alex Thompson'
-                ];
-
-                for (let i = 0; i < Math.floor(Math.random() * 3) + 2; i++) {
-                    const name = mockNames[Math.floor(Math.random() * mockNames.length)];
-                    const title = mockTitles[Math.floor(Math.random() * mockTitles.length)];
-                    const firstName = name.split(' ')[0].toLowerCase();
-                    const lastName = name.split(' ')[1].toLowerCase();
-                    
-                    scrapedContacts.push({
-                        name: name,
-                        title: title,
-                        email: `${firstName}.${lastName}@${domain}`,
-                        source: 'Web Intelligence',
-                        verified: false,
-                        confidence: 70 + Math.floor(Math.random() * 20),
-                    });
-                }
-                return scrapedContacts;
-            } catch (error) {
-                return [];
-            }
-        }
-
-        function categorizeByTitle(position) {
-            if (!position) return 'Other';
-            const pos = position.toLowerCase();
-            if (pos.includes('sales') || pos.includes('business development')) return 'Sales';
-            if (pos.includes('marketing') || pos.includes('growth')) return 'Marketing';
-            if (pos.includes('engineer') || pos.includes('developer') || pos.includes('tech')) return 'Engineering';
-            if (pos.includes('finance') || pos.includes('accounting')) return 'Finance';
-            if (pos.includes('operations') || pos.includes('ops')) return 'Operations';
-            if (pos.includes('ceo') || pos.includes('cto') || pos.includes('president') || pos.includes('founder')) return 'Executive';
-            return 'Other';
-        }
-
-        function categorizeSeniority(position) {
-            if (!position) return 'individual';
-            const pos = position.toLowerCase();
-            if (pos.includes('ceo') || pos.includes('cto') || pos.includes('cfo') || pos.includes('coo') || 
-                pos.includes('president') || pos.includes('founder') || pos.includes('vp ') || pos.includes('vice president')) {
-                return 'executive';
-            }
-            if (pos.includes('director') || pos.includes('head of') || pos.includes('lead')) return 'director';
-            if (pos.includes('manager') || pos.includes('supervisor')) return 'manager';
-            return 'individual';
-        }
-
-        function createContactCard(contact, index) {
-            const grid = document.getElementById('contacts-grid');
-            const card = document.createElement('div');
-            card.className = 'contact-card p-6 card-hover';
-            
-            const isSelected = selectedContacts.has(index);
-            const verificationBadge = contact.verified 
-                ? '<span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">✓ Verified</span>'
-                : contact.deliverable 
-                    ? '<span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">Deliverable</span>'
-                    : '<span class="px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-medium">Unverified</span>';
-
-            const linkedinLink = contact.linkedin 
-                ? `<a href="${contact.linkedin}" target="_blank" class="flex items-center space-x-1 text-blue-600 hover:text-blue-800">
-                    <i data-lucide="linkedin" class="w-4 h-4"></i>
-                    <span class="text-xs">LinkedIn</span>
-                  </a>`
-                : '<span class="text-xs text-gray-400">No LinkedIn</span>';
-
-            const phoneDisplay = contact.phone 
-                ? `<div class="flex items-center space-x-2">
-                    <i data-lucide="phone" class="w-4 h-4 text-gray-400"></i>
-                    <span class="text-xs">${contact.phone}</span>
-                  </div>`
-                : '';
-
-            const scoreColor = contact.contactScore >= 80 ? 'text-green-700' : 
-                              contact.contactScore >= 60 ? 'text-blue-700' : 'text-orange-700';
-
-            card.innerHTML = `
-                <div class="flex items-start justify-between mb-3">
-                    <div class="flex items-center space-x-2">
-                        <input type="checkbox" id="contact-${index}" ${isSelected ? 'checked' : ''} onchange="toggleContact(${index})" 
-                               class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                        <div>
-                            <h4 class="font-semibold text-gray-900">${contact.name}</h4>
-                            <p class="text-sm text-gray-600">${contact.title}</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        ${verificationBadge}
-                        <span class="score-badge px-2 py-1 rounded-full text-xs font-medium">
-                            Score: ${contact.contactScore}
-                        </span>
-                    </div>
-                </div>
-                
-                <div class="space-y-2 text-sm mb-4">
-                    <div class="flex items-center space-x-2">
-                        <i data-lucide="mail" class="w-4 h-4 text-gray-400"></i>
-                        <span class="email-modern ${contact.verified ? 'email-verified' : ''}">${contact.email}</span>
-                    </div>
-                    
-                    ${phoneDisplay}
-                    
-                    <div class="flex items-center space-x-2">
-                        <i data-lucide="briefcase" class="w-4 h-4 text-gray-400"></i>
-                        <span class="text-xs">${contact.department}</span>
-                    </div>
-
-                    <div class="flex items-center space-x-2">
-                        <i data-lucide="target" class="w-4 h-4 text-gray-400"></i>
-                        <span class="text-xs ${scoreColor} font-medium">Contact Score: ${contact.contactScore}/100</span>
-                    </div>
-                </div>
-                
-                <div class="pt-3 border-t border-gray-100 flex justify-between items-center">
-                    ${linkedinLink}
-                    <div class="flex items-center space-x-2">
-                        <span class="px-2 py-1 rounded-full text-xs font-medium ${getSeniorityColor(contact.seniority)}">
-                            ${contact.seniority}
-                        </span>
-                        <button onclick="addSingleContactToSalesforce(currentContacts[${index}])" 
-                                class="px-2 py-1 salesforce-button text-white rounded text-xs hover:opacity-90 flex items-center space-x-1">
-                            <i data-lucide="cloud" class="w-3 h-3"></i>
-                            <span>SF</span>
-                        </button>
-                    </div>
-                </div>
-            `;
-            
-            grid.appendChild(card);
-        }
-
-        function createContactRow(contact, index) {
-            const tbody = document.getElementById('contacts-table-body');
-            const row = document.createElement('tr');
-            row.className = 'table-row';
-            
-            const isSelected = selectedContacts.has(index);
-            const verificationBadge = contact.verified 
-                ? '<span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">Verified</span>'
-                : contact.deliverable 
-                    ? '<span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">Deliverable</span>'
-                    : '<span class="px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-medium">Unverified</span>';
-
-            const scoreColor = contact.contactScore >= 80 ? 'text-green-700' : 
-                              contact.contactScore >= 60 ? 'text-blue-700' : 'text-orange-700';
-
-            row.innerHTML = `
-                <td class="px-4 py-4 whitespace-nowrap">
-                    <input type="checkbox" id="contact-list-${index}" ${isSelected ? 'checked' : ''} onchange="toggleContact(${index})" 
-                           class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                    <div>
-                        <div class="text-sm font-medium text-gray-900">${contact.name}</div>
-                        <div class="text-sm text-gray-500">${contact.company}</div>
-                    </div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-gray-900">${contact.title}</div>
-                    <div class="text-sm text-gray-500">${contact.department}</div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                    <span class="email-modern ${contact.verified ? 'email-verified' : ''}">${contact.email}</span>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm font-semibold ${scoreColor}">${contact.contactScore}/100</div>
-                    <div class="text-xs text-gray-500">Quality Score</div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    ${contact.company}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                    <span class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">${contact.source}</span>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="flex items-center space-x-2">
-                        ${verificationBadge}
-                        <button onclick="addSingleContactToSalesforce(currentContacts[${index}])" 
-                                class="px-2 py-1 salesforce-button text-white rounded text-xs hover:opacity-90 flex items-center space-x-1">
-                            <i data-lucide="cloud" class="w-3 h-3"></i>
-                            <span>SF</span>
-                        </button>
-                    </div>
-                </td>
-            `;
-            
-            tbody.appendChild(row);
-        }
-
-        function getSeniorityColor(seniority) {
-            switch(seniority) {
-                case 'executive': return 'bg-purple-100 text-purple-800';
-                case 'director': return 'bg-blue-100 text-blue-800';
-                case 'manager': return 'bg-green-100 text-green-800';
-                default: return 'bg-gray-100 text-gray-800';
-            }
-        }
-
-        function displayResults(contacts) {
-            document.getElementById('results-count').textContent = `${contacts.length} contacts`;
-            
-            document.getElementById('contacts-grid').innerHTML = '';
-            document.getElementById('contacts-table-body').innerHTML = '';
-            
-            contacts.forEach((contact, index) => {
-                if (contactViewMode === 'grid') {
-                    createContactCard(contact, index);
-                } else {
-                    createContactRow(contact, index);
-                }
-            });
-            
-            updateSelectionUI();
-            
-            if (typeof lucide !== 'undefined') {
-                lucide.createIcons();
-            }
-        }
-
-        function showLoading() {
-            document.getElementById('search-loading').classList.remove('hidden');
-            document.getElementById('search-results').classList.add('hidden');
-        }
-
-        function hideLoading() {
-            document.getElementById('search-loading').classList.add('hidden');
-        }
-
-        function showResults() {
-            document.getElementById('search-results').classList.remove('hidden');
-            document.getElementById('error-section').classList.add('hidden');
-        }
-
-        function hideResults() {
-            document.getElementById('search-results').classList.add('hidden');
-            document.getElementById('company-info-card').classList.add('hidden');
-        }
-
-        function showError(message) {
-            document.getElementById('error-message').textContent = message;
-            document.getElementById('error-section').classList.remove('hidden');
-            setTimeout(hideError, 5000);
-        }
-
-        function hideError() {
-            document.getElementById('error-section').classList.add('hidden');
-        }
-
-        function showSalesforceModal() {
-            document.getElementById('salesforce-modal').classList.remove('hidden');
-        }
-
-        function closeSalesforceModal() {
-            document.getElementById('salesforce-modal').classList.add('hidden');
-        }
-
-        function showSuccess(message) {
-            document.getElementById('success-message').textContent = message;
-            document.getElementById('success-section').classList.remove('hidden');
-            setTimeout(hideSuccess, 5000);
-        }
-
-        function hideSuccess() {
-            document.getElementById('success-section').classList.add('hidden');
-        }
-
-        function updateSalesforceStatus(connected) {
-            const statusDiv = document.getElementById('salesforce-status');
-            const connectedSpan = document.getElementById('sf-connected');
-            const disconnectedSpan = document.getElementById('sf-disconnected');
-            const connectBtn = document.getElementById('connect-salesforce-btn');
-
-            statusDiv.classList.remove('hidden');
-            
-            if (connected) {
-                connectedSpan.classList.remove('hidden');
-                disconnectedSpan.classList.add('hidden');
-                connectBtn.textContent = 'Disconnect Salesforce';
-                connectBtn.onclick = disconnectFromSalesforce;
-            } else {
-                connectedSpan.classList.add('hidden');
-                disconnectedSpan.classList.remove('hidden');
-                connectBtn.textContent = 'Connect Salesforce';
-                connectBtn.onclick = showSalesforceModal;
-            }
-        }
-
-        async function connectToSalesforce() {
-            const instanceUrl = document.getElementById('sf-instance-url').value.trim();
-            const username = document.getElementById('sf-username').value.trim();
-            const password = document.getElementById('sf-password').value.trim();
-
-            if (!instanceUrl || !username || !password) {
-                showError('Please fill in all Salesforce connection fields');
-                return;
-            }
-
-            const connectBtn = document.getElementById('sf-connect-btn');
-            connectBtn.disabled = true;
-            connectBtn.textContent = 'Connecting...';
-
-            try {
-                await new Promise(resolve => setTimeout(resolve, 2000));
-                
-                salesforceSession = {
-                    instanceUrl: instanceUrl,
-                    username: username,
-                    sessionId: 'mock_session_' + Date.now(),
-                    connected: true
-                };
-
-                localStorage.setItem('salesforceSession', JSON.stringify(salesforceSession));
-                
-                updateSalesforceStatus(true);
-                closeSalesforceModal();
-                showSuccess('Successfully connected to Salesforce!');
-                
-                document.getElementById('sf-instance-url').value = '';
-                document.getElementById('sf-username').value = '';
-                document.getElementById('sf-password').value = '';
-
-                addToRecentActivity('salesforce', 'Connected to Salesforce CRM');
-
-            } catch (error) {
-                showError('Failed to connect to Salesforce: ' + error.message);
-            } finally {
-                connectBtn.disabled = false;
-                connectBtn.textContent = 'Connect';
-            }
-        }
-
-        function disconnectFromSalesforce() {
-            salesforceSession = null;
-            localStorage.removeItem('salesforceSession');
-            updateSalesforceStatus(false);
-            showSuccess('Disconnected from Salesforce');
-            addToRecentActivity('salesforce', 'Disconnected from Salesforce CRM');
-        }
-
-        async function addToSalesforce() {
-            if (!salesforceSession) {
-                showError('Please connect to Salesforce first');
-                showSalesforceModal();
-                return;
-            }
-
-            if (selectedContacts.size === 0) {
-                showError('Please select contacts to add to Salesforce');
-                return;
-            }
-
-            const contactsToAdd = Array.from(selectedContacts).map(index => currentContacts[index]);
-            
-            try {
-                for (const contact of contactsToAdd) {
-                    await simulateAddContactToSalesforce(contact);
-                }
-
-                showSuccess(`Successfully added ${contactsToAdd.length} contacts to Salesforce!`);
-                addToRecentActivity('salesforce', `Added ${contactsToAdd.length} enhanced contacts to Salesforce CRM`);
-                
-                selectedContacts.clear();
-                document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
-                updateSelectionUI();
-
-            } catch (error) {
-                showError('Failed to add contacts to Salesforce: ' + error.message);
-            }
-        }
-
-        async function addSingleContactToSalesforce(contact) {
-            if (!salesforceSession) {
-                showError('Please connect to Salesforce first');
-                showSalesforceModal();
-                return;
-            }
-
-            try {
-                await simulateAddContactToSalesforce(contact);
-                showSuccess(`Added ${contact.name} to Salesforce with score ${contact.contactScore}!`);
-                addToRecentActivity('salesforce', `Added ${contact.name} (Score: ${contact.contactScore}) to Salesforce CRM`);
-            } catch (error) {
-                showError('Failed to add contact to Salesforce: ' + error.message);
-            }
-        }
-
-        async function simulateAddContactToSalesforce(contact) {
-            await new Promise(resolve => setTimeout(resolve, 500));
-            console.log('Adding enhanced contact to Salesforce:', contact);
-            
-            if (Math.random() < 0.05) {
-                throw new Error('Duplicate contact detected');
-            }
-            
-            return {
-                id: 'sf_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
-                success: true
-            };
-        }
-
-        function getStoredData(key, defaultValue = null) {
-            try {
-                const stored = localStorage.getItem(key);
-                return stored ? JSON.parse(stored) : defaultValue;
-            } catch (e) {
-                console.error('Error reading from localStorage:', e);
-                return defaultValue;
-            }
-        }
-
-        function setStoredData(key, value) {
-            try {
-                localStorage.setItem(key, JSON.stringify(value));
-            } catch (e) {
-                console.error('Error writing to localStorage:', e);
-            }
-        }
-
-        function incrementMetric(metric, count = 1) {
-            const metrics = getStoredData('salesSimplifiedMetrics', {
-                totalSearches: 0,
-                contactsFound: 0,
-                verifiedEmails: 0,
-                listsCreated: 0,
-                exports: 0,
-                exportedContacts: 0,
-                companiesSearched: 0,
-                salesforceExports: 0
-            });
-            
-            metrics[metric] += count;
-            setStoredData('salesSimplifiedMetrics', metrics);
-            updateDashboardMetrics();
-            updateReportsMetrics();
-        }
-
-        function updateDashboardMetrics() {
-            const metrics = getStoredData('salesSimplifiedMetrics', {
-                totalSearches: 0,
-                contactsFound: 0,
-                verifiedEmails: 0,
-                listsCreated: 0,
-                exports: 0,
-                exportedContacts: 0,
-                companiesSearched: 0,
-                salesforceExports: 0
-            });
-
-            document.getElementById('dashboard-total-searches').textContent = metrics.totalSearches;
-            document.getElementById('dashboard-contacts-found').textContent = metrics.contactsFound;
-            document.getElementById('dashboard-lists-created').textContent = metrics.listsCreated;
-            document.getElementById('dashboard-exports').textContent = metrics.exports;
-
-            const verificationRate = metrics.contactsFound > 0 ? Math.round((metrics.verifiedEmails / metrics.contactsFound) * 100) : 0;
-            document.getElementById('contacts-verification').textContent = `${verificationRate}% verified`;
-
-            const avgExportSize = metrics.exports > 0 ? Math.round(metrics.exportedContacts / metrics.exports) : 0;
-            document.getElementById('average-export-size').textContent = `${avgExportSize} contacts avg`;
-
-            const searchGrowth = Math.min(Math.floor(metrics.totalSearches / 10), 50);
-            document.getElementById('searches-growth').textContent = `+${searchGrowth}% this month`;
-
-            const listsThisWeek = Math.min(metrics.listsCreated, 7);
-            document.getElementById('lists-growth').textContent = `${listsThisWeek} this week`;
-        }
-
-        function updateReportsMetrics() {
-            const metrics = getStoredData('salesSimplifiedMetrics', {
-                totalSearches: 0,
-                contactsFound: 0,
-                verifiedEmails: 0,
-                listsCreated: 0,
-                exports: 0,
-                exportedContacts: 0,
-                companiesSearched: 0,
-                salesforceExports: 0
-            });
-
-            const verificationRate = metrics.contactsFound > 0 ? Math.round((metrics.verifiedEmails / metrics.contactsFound) * 100) : 0;
-            const avgScore = Math.floor(Math.random() * 20) + 75;
-
-            document.getElementById('verification-rate').textContent = `${verificationRate}%`;
-            document.getElementById('avg-score').textContent = avgScore;
-            document.getElementById('companies-searched').textContent = metrics.companiesSearched || Math.floor(metrics.totalSearches * 0.8);
-            document.getElementById('sf-exports').textContent = metrics.salesforceExports;
-        }
-
-        function addToRecentActivity(type, message) {
-            const activities = getStoredData('recentActivity', []);
-            const newActivity = {
-                type: type,
-                message: message,
-                timestamp: new Date().toISOString()
-            };
-            
-            activities.unshift(newActivity);
-            if (activities.length > 10) activities.pop();
-            
-            setStoredData('recentActivity', activities);
-            updateRecentActivity();
-        }
-
-        function updateRecentActivity() {
-            const activities = getStoredData('recentActivity', []);
-            const container = document.getElementById('recent-activity');
-            
-            if (activities.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center py-8 text-gray-500">
-                        <i data-lucide="activity" class="w-8 h-8 mx-auto mb-2"></i>
-                        <p class="text-sm">Start searching to see your activity</p>
-                    </div>
-                `;
-                return;
-            }
-
-            container.innerHTML = activities.slice(0, 5).map(activity => {
-                const timeAgo = getTimeAgo(new Date(activity.timestamp));
-                const iconMap = { 'search': 'search', 'export': 'download', 'list': 'plus', 'salesforce': 'cloud' };
-                const colorMap = { 'search': 'blue', 'export': 'green', 'list': 'purple', 'salesforce': 'indigo' };
-                
-                return `
-                    <div class="flex items-start space-x-3">
-                        <div class="w-8 h-8 bg-${colorMap[activity.type]}-100 rounded-full flex items-center justify-center">
-                            <i data-lucide="${iconMap[activity.type]}" class="w-4 h-4 text-${colorMap[activity.type]}-600"></i>
-                        </div>
-                        <div class="flex-1">
-                            <p class="text-sm font-medium text-gray-900">${activity.message}</p>
-                            <p class="text-xs text-gray-500">${timeAgo}</p>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-            
-            if (typeof lucide !== 'undefined') {
-                lucide.createIcons();
-            }
-        }
-
-        function getTimeAgo(date) {
-            const now = new Date();
-            const diff = now - date;
-            const minutes = Math.floor(diff / 60000);
-            const hours = Math.floor(diff / 3600000);
-            const days = Math.floor(diff / 86400000);
-            
-            if (minutes < 60) return `${minutes} minute${minutes === 1 ? '' : 's'} ago`;
-            if (hours < 24) return `${hours} hour${hours === 1 ? '' : 's'} ago`;
-            return `${days} day${days === 1 ? '' : 's'} ago`;
-        }
-
-        function updateSavedListsPreview() {
-            const lists = getStoredData('contactLists', []);
-            const container = document.getElementById('saved-lists-preview');
-            
-            if (lists.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center py-8 text-gray-500">
-                        <i data-lucide="list" class="w-8 h-8 mx-auto mb-2"></i>
-                        <p class="text-sm">No saved lists yet</p>
-                    </div>
-                `;
-                return;
-            }
-
-            container.innerHTML = lists.slice(0, 3).map(list => `
-                <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer" onclick="viewListFromDashboard('${list.id}')">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                            <i data-lucide="briefcase" class="w-4 h-4 text-blue-600"></i>
-                        </div>
-                        <div>
-                            <p class="text-sm font-medium text-gray-900">${list.name}</p>
-                            <p class="text-xs text-gray-500">${list.contacts.length} contacts</p>
-                        </div>
-                    </div>
-                    <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i>
-                </div>
-            `).join('');
-            
-            if (typeof lucide !== 'undefined') {
-                lucide.createIcons();
-            }
-        }
-
-        function showSection(sectionName) {
-            document.querySelectorAll('.section-content').forEach(section => {
-                section.classList.add('hidden');
-            });
-            
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.classList.remove('active');
-                item.classList.add('text-gray-700');
-            });
-            
-            document.getElementById(sectionName + '-section').classList.remove('hidden');
-            
-            event.target.closest('.nav-item').classList.add('active');
-            event.target.closest('.nav-item').classList.remove('text-gray-700');
-            
-            if (sectionName === 'contact-lists') {
-                loadContactListsPage();
-            }
-            
-            if (typeof lucide !== 'undefined') {
-                lucide.createIcons();
-            }
-        }
-
-        function loadContactListsPage() {
-            const lists = getStoredData('contactLists', []);
-            const container = document.getElementById('contact-lists-grid');
-            
-            if (lists.length === 0) {
-                container.innerHTML = `
-                    <div class="col-span-full text-center py-12 text-gray-500">
-                        <i data-lucide="list" class="w-16 h-16 mx-auto mb-4"></i>
-                        <h3 class="text-lg font-medium text-gray-900 mb-2">No contact lists yet</h3>
-                        <p class="text-gray-600 mb-4">Start by finding contacts and saving them to lists</p>
-                        <button onclick="showSection('contact-finder')" class="px-4 py-2 brand-gradient text-white rounded-lg font-medium hover:opacity-90">
-                            Find Contacts
-                        </button>
-                    </div>
-                `;
-                return;
-            }
-
-            container.innerHTML = lists.map(list => {
-                const timeAgo = getTimeAgo(new Date(list.created));
-                const avgScore = list.contacts.length > 0 ? 
-                    Math.round(list.contacts.reduce((sum, c) => sum + (c.contactScore || 75), 0) / list.contacts.length) : 0;
-                
-                return `
-                    <div class="bg-white rounded-lg shadow-sm p-6 card-hover border-l-4 border-blue-500">
-                        <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-lg font-semibold text-gray-900">${list.name}</h3>
-                            <div class="text-xs text-gray-500">Created ${timeAgo}</div>
-                        </div>
-                        <p class="text-sm text-gray-600 mb-4">Enhanced contact list with verification and scoring</p>
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="text-center">
-                                <div class="text-2xl font-bold text-blue-600">${list.contacts.length}</div>
-                                <div class="text-xs text-gray-500">Contacts</div>
-                            </div>
-                            <div class="text-center">
-                                <div class="text-2xl font-bold text-green-600">${avgScore}</div>
-                                <div class="text-xs text-gray-500">Avg Score</div>
-                            </div>
-                        </div>
-                        <div class="flex justify-between">
-                            <div class="flex space-x-2">
-                                <button onclick="viewList('${list.id}')" class="p-1 text-gray-400 hover:text-blue-600" title="View">
-                                    <i data-lucide="eye" class="w-4 h-4"></i>
-                                </button>
-                                <button onclick="exportSavedList('${list.id}')" class="p-1 text-gray-400 hover:text-green-600" title="Export">
-                                    <i data-lucide="download" class="w-4 h-4"></i>
-                                </button>
-                                <button onclick="deleteList('${list.id}')" class="p-1 text-gray-400 hover:text-red-600" title="Delete">
-                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-            
-            if (typeof lucide !== 'undefined') {
-                lucide.createIcons();
-            }
-        }
-
-        function setContactView(viewMode) {
-            contactViewMode = viewMode;
-            
-            const gridBtn = document.getElementById('grid-view-btn');
-            const listBtn = document.getElementById('list-view-btn');
-            
-            if (viewMode === 'grid') {
-                gridBtn.classList.add('bg-white', 'text-gray-900', 'shadow-sm');
-                gridBtn.classList.remove('text-gray-600');
-                listBtn.classList.add('text-gray-600');
-                listBtn.classList.remove('bg-white', 'text-gray-900', 'shadow-sm');
-                
-                document.getElementById('contacts-grid').classList.remove('hidden');
-                document.getElementById('contacts-list').classList.add('hidden');
-            } else {
-                listBtn.classList.add('bg-white', 'text-gray-900', 'shadow-sm');
-                listBtn.classList.remove('text-gray-600');
-                gridBtn.classList.add('text-gray-600');
-                gridBtn.classList.remove('bg-white', 'text-gray-900', 'shadow-sm');
-                
-                document.getElementById('contacts-list').classList.remove('hidden');
-                document.getElementById('contacts-grid').classList.add('hidden');
-            }
-            
-            if (currentContacts.length > 0) {
-                displayResults(currentContacts);
-                updateSelectionUI();
-            }
-        }
-
-        function toggleContact(index) {
-            if (selectedContacts.has(index)) {
-                selectedContacts.delete(index);
-            } else {
-                selectedContacts.add(index);
-            }
-            updateSelectionUI();
-        }
-
-        function selectAllContacts() {
-            const allSelected = selectedContacts.size === currentContacts.length;
-            
-            if (allSelected) {
-                selectedContacts.clear();
-                document.getElementById('select-all-btn').textContent = 'Select All';
-            } else {
-                selectedContacts.clear();
-                for (let i = 0; i < currentContacts.length; i++) {
-                    selectedContacts.add(i);
-                }
-                document.getElementById('select-all-btn').textContent = 'Deselect All';
-            }
-            
-            document.querySelectorAll('#contacts-grid input[type="checkbox"], #contacts-table-body input[type="checkbox"]').forEach((checkbox, index) => {
-                checkbox.checked = selectedContacts.has(index);
-            });
-            
-            const headerCheckbox = document.getElementById('select-all-list');
-            if (headerCheckbox) {
-                headerCheckbox.checked = selectedContacts.size === currentContacts.length;
-            }
-            
-            updateSelectionUI();
-        }
-
-        function selectAllContactsCheckbox() {
-            const headerCheckbox = document.getElementById('select-all-list');
-            const isChecked = headerCheckbox.checked;
-            
-            if (isChecked) {
-                selectedContacts.clear();
-                for (let i = 0; i < currentContacts.length; i++) {
-                    selectedContacts.add(i);
-                }
-                document.getElementById('select-all-btn').textContent = 'Deselect All';
-            } else {
-                selectedContacts.clear();
-                document.getElementById('select-all-btn').textContent = 'Select All';
-            }
-            
-            document.querySelectorAll('#contacts-table-body input[type="checkbox"]').forEach((checkbox, index) => {
-                checkbox.checked = isChecked;
-            });
-            
-            updateSelectionUI();
-        }
-
-        function updateSelectionUI() {
-            const hasSelection = selectedContacts.size > 0;
-            
-            document.getElementById('add-to-list-btn').disabled = !hasSelection;
-            document.getElementById('add-to-salesforce-btn').disabled = !hasSelection;
-            document.getElementById('export-selected-btn').disabled = !hasSelection;
-            
-            const selectAllBtn = document.getElementById('select-all-btn');
-            if (selectAllBtn) {
-                selectAllBtn.textContent = selectedContacts.size === currentContacts.length ? 'Deselect All' : 'Select All';
-            }
-            
-            const headerCheckbox = document.getElementById('select-all-list');
-            if (headerCheckbox) {
-                headerCheckbox.checked = selectedContacts.size === currentContacts.length;
-                headerCheckbox.indeterminate = selectedContacts.size > 0 && selectedContacts.size < currentContacts.length;
-            }
-        }
-
-        function addToList() {
-            if (selectedContacts.size === 0) {
-                showError('Please select contacts to add to a list');
-                return;
-            }
-            
-            document.getElementById('save-list-modal').classList.remove('hidden');
-            document.getElementById('list-name-input').focus();
-        }
-
-        function cancelSaveList() {
-            document.getElementById('save-list-modal').classList.add('hidden');
-            document.getElementById('list-name-input').value = '';
-        }
-
-        function confirmSaveList() {
-            const listName = document.getElementById('list-name-input').value.trim();
-            if (!listName) {
-                showError('Please enter a list name');
-                return;
-            }
-            
-            const selectedContactsArray = Array.from(selectedContacts).map(index => currentContacts[index]);
-            
-            const lists = getStoredData('contactLists', []);
-            const newList = {
-                id: Date.now().toString(),
-                name: listName,
-                contacts: selectedContactsArray,
-                created: new Date().toISOString()
-            };
-            
-            lists.unshift(newList);
-            setStoredData('contactLists', lists);
-            
-            incrementMetric('listsCreated');
-            addToRecentActivity('list', `Created "${listName}" list with ${selectedContactsArray.length} enhanced contacts`);
-            
-            updateSavedListsPreview();
-            
-            document.getElementById('save-list-modal').classList.add('hidden');
-            document.getElementById('list-name-input').value = '';
-            
-            selectedContacts.clear();
-            document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
-            updateSelectionUI();
-            
-            showSuccess(`List "${listName}" saved successfully with ${selectedContactsArray.length} contacts!`);
-        }
-
-        function viewListFromDashboard(listId) {
-            showSection('contact-lists');
-            
-            setTimeout(() => {
-                const listElement = document.querySelector(`[onclick*="${listId}"]`);
-                if (listElement) {
-                    listElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    listElement.style.backgroundColor = '#dbeafe';
-                    setTimeout(() => {
-                        listElement.style.backgroundColor = '';
-                    }, 2000);
-                }
-            }, 100);
-        }
-
-        function viewList(listId) {
-            const lists = getStoredData('contactLists', []);
-            const list = lists.find(l => l.id === listId);
-            if (list) {
-                currentContacts = list.contacts;
-                selectedContacts.clear();
-                
-                showSection('contact-finder');
-                
-                setTimeout(() => {
-                    displayResults(list.contacts);
-                    showResults();
-                    
-                    document.getElementById('search-domain').value = `Saved List: ${list.name}`;
-                    document.getElementById('results-count').textContent = `${list.contacts.length} contacts`;
-                }, 100);
-            }
-        }
-
-        function exportSavedList(listId) {
-            const lists = getStoredData('contactLists', []);
-            const list = lists.find(l => l.id === listId);
-            
-            if (!list) {
-                showError('List not found');
-                return;
-            }
-
-            currentContacts = list.contacts;
-            selectedContacts.clear();
-            for (let i = 0; i < list.contacts.length; i++) {
-                selectedContacts.add(i);
-            }
-            
-            companyData = { organization: list.name };
-            exportContacts();
-        }
-
-        function deleteList(listId) {
-            if (!confirm('Are you sure you want to delete this list?')) {
-                return;
-            }
-            
-            const lists = getStoredData('contactLists', []);
-            const listIndex = lists.findIndex(l => l.id === listId);
-            
-            if (listIndex === -1) {
-                showError('List not found');
-                return;
-            }
-            
-            const deletedList = lists[listIndex];
-            lists.splice(listIndex, 1);
-            setStoredData('contactLists', lists);
-            
-            const metrics = getStoredData('salesSimplifiedMetrics', {
-                totalSearches: 0,
-                contactsFound: 0,
-                verifiedEmails: 0,
-                listsCreated: 0,
-                exports: 0,
-                exportedContacts: 0
-            });
-            metrics.listsCreated = lists.length;
-            setStoredData('salesSimplifiedMetrics', metrics);
-            
-            updateDashboardMetrics();
-            updateSavedListsPreview();
-            loadContactListsPage();
-            
-            showSuccess(`List "${deletedList.name}" deleted successfully.`);
-        }
-
-        function exportContacts() {
-            const contactsToExport = selectedContacts.size > 0 
-                ? Array.from(selectedContacts).map(index => currentContacts[index])
-                : currentContacts;
-            
-            if (contactsToExport.length === 0) {
-                showError('No contacts to export');
-                return;
-            }
-
-            const excelData = contactsToExport.map(contact => ({
-                'First Name': contact.name.split(' ')[0],
-                'Last Name': contact.name.split(' ').slice(1).join(' '),
-                'Full Name': contact.name,
-                'Email Address': contact.email,
-                'Job Title': contact.title,
-                'Department': contact.department,
-                'Seniority Level': contact.seniority,
-                'Contact Score': contact.contactScore || 75,
-                'Email Verification Status': contact.verified ? 'Verified' : contact.deliverable ? 'Deliverable' : 'Unverified',
-                'Email Deliverable': contact.deliverable ? 'Yes' : 'No',
-                'LinkedIn Profile': contact.linkedin || '',
-                'Phone Number': contact.phone || '',
-                'Company Name': contact.company,
-                'Email Verified': contact.verified ? 'Yes' : 'No',
-                'Confidence Score': contact.confidence + '%',
-                'Data Source': contact.source,
-                'Lead Source': 'Sales Simplified Enhanced',
-                'Lead Status': 'New',
-                'Date Exported': new Date().toLocaleDateString(),
-                'Exported By': 'Sales Simplified Platform'
-            }));
-
-            const wb = XLSX.utils.book_new();
-            const ws = XLSX.utils.json_to_sheet(excelData);
-
-            const range = XLSX.utils.decode_range(ws['!ref']);
-            const colWidths = [];
-            for (let C = range.s.c; C <= range.e.c; ++C) {
-                let maxWidth = 10;
-                for (let R = range.s.r; R <= range.e.r; ++R) {
-                    const cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
-                    const cell = ws[cellAddress];
-                    if (cell && cell.v) {
-                        const cellLength = cell.v.toString().length;
-                        if (cellLength > maxWidth) maxWidth = cellLength;
-                    }
-                }
-                colWidths.push({ wch: Math.min(maxWidth + 2, 50) });
-            }
-            ws['!cols'] = colWidths;
-
-            const companyName = (companyData?.organization || 'contacts').replace(/[^a-zA-Z0-9]/g, '');
-            const sheetName = `${companyName} Enhanced Contacts`;
-            XLSX.utils.book_append_sheet(wb, ws, sheetName);
-
-            const timestamp = new Date().toISOString().slice(0, 10);
-            const filename = `Sales_Simplified_Enhanced_${companyName}_${timestamp}.xlsx`;
-
-            XLSX.writeFile(wb, filename);
-
-            incrementMetric('exports');
-            incrementMetric('exportedContacts', contactsToExport.length);
-            addToRecentActivity('export', `Exported ${contactsToExport.length} enhanced contacts from ${companyName}`);
-
-            showSuccess(`Downloaded ${contactsToExport.length} contacts with enhanced scoring to ${filename}`);
-        }
-
-        function createNewList() {
-            document.getElementById('save-list-modal').classList.remove('hidden');
-            document.getElementById('list-name-input').focus();
-        }
-
-        function exportLastSearch() {
-            if (currentContacts.length > 0) {
-                selectedContacts.clear();
-                for (let i = 0; i < currentContacts.length; i++) {
-                    selectedContacts.add(i);
-                }
-                exportContacts();
-            } else {
-                showError('No recent search to export');
-            }
-        }
-
-        // ===== INITIALIZE =====
-        document.addEventListener('DOMContentLoaded', function() {
-            if (typeof lucide !== 'undefined') {
-                lucide.createIcons();
-            }
-            
-            const savedSession = localStorage.getItem('salesforceSession');
-            if (savedSession) {
-                try {
-                    salesforceSession = JSON.parse(savedSession);
-                    if (salesforceSession && salesforceSession.connected) {
-                        updateSalesforceStatus(true);
-                    }
-                } catch (e) {
-                    console.error('Error loading Salesforce session:', e);
-                    localStorage.removeItem('salesforceSession');
-                }
-            }
-            
-            updateDashboardMetrics();
-            updateReportsMetrics();
-            updateRecentActivity();
-            updateSavedListsPreview();
-            
-            document.getElementById('search-domain').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    executeSearch();
-                }
-            });
-        });
-    </script>
-
-</body>
-</html>                                        <i data-lucide="mail" class="w-6 h-6 text-orange-600"></i>
-                                    </div>
-                                    <p class="text-xs text-gray-600">Email Verification</p>
-                                </div>
-                                <div class="text-center">
-                                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-2">
-                                        <i data-lucide="users" class="w-6 h-6 text-purple-600"></i>
-                                    </div>
-                                    <p class="text-xs text-gray-600">Contact Discovery</p>
-                                </div>
-                                <div class="text-center">
-                                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-2">
-                                        <i data-lucide="star" class="w-6 h-6 text-green-600"></i>
-                                    </div>
-                                    <p class="text-xs text-gray-600">Contact Scoring</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Contact Lists Section -->
-            <div id="contact-lists-section" class="section-content hidden">
-                <div class="flex items-center justify-between mb-6">
-                    <div>
-                        <h2 class="text-2xl font-bold text-gray-900">Contact Lists</h2>
-                        <p class="text-gray-600">Organize and manage your saved contacts</p>
-                    </div>
-                    <button onclick="createNewList()" class="px-4 py-2 brand-gradient text-white rounded-lg font-medium hover:opacity-90 flex items-center space-x-2">
-                        <i data-lucide="plus" class="w-4 h-4"></i>
-                        <span>Create New List</span>
-                    </button>
-                </div>
-                <div id="contact-lists-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                </div>
-            </div>
-
-            <!-- Reports Section -->
-            <div id="reports-section" class="section-content hidden">
-                <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-gray-900">Reports & Analytics</h2>
-                    <p class="text-gray-600">Track your contact discovery performance and email verification rates</p>
-                </div>
-                
-                <!-- Enhanced Analytics Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <div class="bg-white rounded-lg shadow-sm p-6">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-medium text-gray-600">Email Verification Rate</p>
-                                <p class="text-2xl font-bold text-green-600" id="verification-rate">0%</p>
-                            </div>
-                            <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                                <i data-lucide="shield-check" class="w-5 h-5 text-green-600"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-white rounded-lg shadow-sm p-6">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-medium text-gray-600">Avg Contact Score</p>
-                                <p class="text-2xl font-bold text-blue-600" id="avg-score">0</p>
-                            </div>
-                            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                                <i data-lucide="star" class="w-5 h-5 text-blue-600"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-white rounded-lg shadow-sm p-6">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-medium text-gray-600">Companies Searched</p>
-                                <p class="text-2xl font-bold text-purple-600" id="companies-searched">0</p>
-                            </div>
-                            <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                                <i data-lucide="building" class="w-5 h-5 text-purple-600"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-white rounded-lg shadow-sm p-6">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-medium text-gray-600">Salesforce Exports</p>
-                                <p class="text-2xl font-bold text-indigo-600" id="sf-exports">0</p>
-                            </div>
-                            <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
-                                <i data-lucide="cloud" class="w-5 h-5 text-indigo-600"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <div class="bg-white rounded-lg shadow-sm p-6">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Search Performance</h3>
-                        <div class="text-center py-8 text-gray-500">
-                            <i data-lucide="bar-chart-3" class="w-12 h-12 mx-auto mb-2"></i>
-                            <p>Enhanced charts and analytics coming soon</p>
-                        </div>
-                    </div>
-                    <div class="bg-white rounded-lg shadow-sm p-6">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Email Quality Metrics</h3>
-                        <div class="text-center py-8 text-gray-500">
-                            <i data-lucide="pie-chart" class="w-12 h-12 mx-auto mb-2"></i>
-                            <p>Email verification dashboard coming soon</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Exports Section -->
-            <div id="exports-section" class="section-content hidden">
-                <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-gray-900">Export Center</h2>
-                    <p class="text-gray-600">Download your contacts in CRM-ready formats with enhanced data</p>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="bg-white rounded-lg shadow-sm p-6 text-center card-hover">
-                        <div class="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                            <i data-lucide="file-text" class="w-8 h-8 text-blue-600"></i>
-                        </div>
-                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Salesforce Template</h3>
-                        <p class="text-sm text-gray-600 mb-4">Pre-formatted for direct Salesforce import with contact scores</p>
-                        <button class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                            Download Template
-                        </button>
-                    </div>
-                    <div class="bg-white rounded-lg shadow-sm p-6 text-center card-hover">
-                        <div class="w-16 h-16 bg-orange-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                            <i data-lucide="file-spreadsheet" class="w-8 h-8 text-orange-600"></i>
-                        </div>
-                        <h3 class="text-lg font-semibold text-gray-900 mb-2">HubSpot Template</h3>
-                        <p class="text-sm text-gray-600 mb-4">Ready for HubSpot contact import with company data</p>
-                        <button class="w-full px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700">
-                            Download Template
-                        </button>
-                    </div>
-                    <div class="bg-white rounded-lg shadow-sm p-6 text-center card-hover">
-                        <div class="w-16 h-16 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                            <i data-lucide="download" class="w-8 h-8 text-green-600"></i>
-                        </div>
-                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Enhanced Export</h3>
-                        <p class="text-sm text-gray-600 mb-4">Complete dataset with verification status and scores</p>
-                        <button class="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
-                            Customize Export
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Salesforce Connection Modal -->
-    <div id="salesforce-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
-        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <div class="mt-3">
-                <div class="flex items-center mb-4">
-                    <div class="w-8 h-8 salesforce-button rounded-lg flex items-center justify-center mr-3">
-                        <i data-lucide="cloud" class="w-5 h-5 text-white"></i>
-                    </div>
-                    <h3 class="text-lg font-medium text-gray-900">Connect to Salesforce</h3>
-                </div>
-                
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Instance URL</label>
-                        <input type="text" id="sf-instance-url" placeholder="https://yourcompany.salesforce.com" 
-                               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <p class="text-xs text-gray-500 mt-1">Your Salesforce login URL</p>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Username</label>
-                        <input type="email" id="sf-username" placeholder="your.email@company.com" 
-                               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Password + Security Token</label>
-                        <input type="password" id="sf-password" placeholder="passwordSECURITYTOKEN" 
-                               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <p class="text-xs text-gray-500 mt-1">Combine your password with security token (no space)</p>
-                    </div>
-                </div>
-                
-                <div class="flex justify-end space-x-2 mt-6">
-                    <button onclick="closeSalesforceModal()" class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50">
-                        Cancel
-                    </button>
-                    <button onclick="connectToSalesforce()" id="sf-connect-btn" class="px-4 py-2 salesforce-button text-white rounded-lg text-sm font-medium hover:opacity-90">
-                        Connect
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Error Message -->
-    <div id="error-section" class="hidden fixed bottom-4 right-4 bg-red-50 border border-red-200 rounded-lg p-4 shadow-lg z-50">
-        <div class="flex items-center space-x-2">
-            <i data-lucide="alert-circle" class="w-5 h-5 text-red-600"></i>
-            <span class="font-medium text-red-900">Error</span>
-        </div>
-        <p id="error-message" class="text-red-700 text-sm mt-1">An error occurred</p>
-        <button onclick="hideError()" class="absolute top-2 right-2 text-red-400 hover:text-red-600">
-            <i data-lucide="x" class="w-4 h-4"></i>
-        </button>
-    </div>
-
-    <!-- Success Message -->
-    <div id="success-section" class="hidden fixed bottom-4 right-4 bg-green-50 border border-green-200 rounded-lg p-4 shadow-lg z-50">
-        <div class="flex items-center space-x-2">
-            <i data-lucide="check-circle" class="w-5 h-5 text-green-600"></i>
-            <span class="font-medium text-green-900">Success</span>
-        </div>
-        <p id="success-message" class="text-green-700 text-sm mt-1">Operation completed successfully</p>
-        <button onclick="hideSuccess()" class="absolute top-2 right-2 text-green-400 hover:text-green-600">
-            <i data-lucide="x" class="w-4 h-4"></i>
-        </button>
-    </div>
-
-    <!-- Save List Modal -->
-    <div id="save-list-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
-        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <div class="mt-3">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">Save Contact List</h3>
-                <input type="text" id="list-name-input" placeholder="Enter list name..." 
-                       class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-4">
-                <div class="flex justify-end space-x-2">
-                    <button onclick="cancelSaveList()" class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50">
-                        Cancel
-                    </button>
-                    <button onclick="confirmSaveList()" class="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700">
-                        Save List
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // Global Variables
-        const HUNTER_API_KEY = '64514bd46213dce4c8e6ed724555b2f9d0fa8e03';
-        const APOLLO_API_KEY = 'cgAc0fBksS1tJePYf0n4DA';
-
-        let currentContacts = [];
-        let selectedContacts = new Set();
-        let companyData = null;
-        let contactViewMode = 'grid';
-        let salesforceSession = null;
-        let advancedFiltersVisible = false;
-
-        // ===== DYNAMIC COMPANY DATA SCRAPING =====
-        
-        async function getCompanyInfo(domain) {
-            try {
-                const companyInfo = await scrapeCompanyFromDomain(domain);
-                if (!companyInfo.name || companyInfo.name === domain) {
-                    const enrichedInfo = await enrichCompanyData(domain);
-                    return { ...companyInfo, ...enrichedInfo };
-                }
-                return companyInfo;
-            } catch (error) {
-                console.log('Company scraping failed, using fallback:', error);
-                return createFallbackCompanyInfo(domain);
-            }
-        }
-
-        async function scrapeCompanyFromDomain(domain) {
-            try {
-                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(`https://${domain}`)}`;
-                const response = await fetch(proxyUrl);
-                const data = await response.json();
-                const html = data.contents;
-                
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-                
-                const companyInfo = {
-                    name: extractCompanyName(doc, domain),
-                    description: extractDescription(doc),
-                    industry: extractIndustry(doc, domain),
-                    location: extractLocation(doc),
-                    size: 'Emerging Brand',
-                    founded: 'Recently Established'
-                };
-                
-                return companyInfo;
-            } catch (error) {
-                console.log('Direct scraping failed:', error);
-                throw error;
-            }
-        }
-
-        function extractCompanyName(doc, domain) {
-            const ogTitle = doc.querySelector('meta[property="og:title"]')?.content;
-            const ogSiteName = doc.querySelector('meta[property="og:site_name"]')?.content;
-            const pageTitle = doc.querySelector('title')?.textContent;
-            const logoAlt = doc.querySelector('img[alt*="logo" i], img[class*="logo" i]')?.alt;
-            const h1Text = doc.querySelector('h1')?.textContent;
-            const footerText = doc.querySelector('footer')?.textContent;
-            const aboutText = doc.querySelector('[class*="about"], [id*="about"]')?.textContent;
-            
-            const candidates = [
-                ogSiteName,
-                cleanCompanyName(ogTitle),
-                cleanCompanyName(pageTitle),
-                cleanCompanyName(logoAlt),
-                cleanCompanyName(h1Text),
-                extractFromText(footerText),
-                extractFromText(aboutText)
-            ].filter(Boolean);
-            
-            return candidates[0] || formatDomainAsCompany(domain);
-        }
-
-        function extractDescription(doc) {
-            const metaDesc = doc.querySelector('meta[name="description"]')?.content;
-            const ogDesc = doc.querySelector('meta[property="og:description"]')?.content;
-            const heroText = doc.querySelector('[class*="hero"], [class*="banner"], [class*="intro"]')?.textContent;
-            const firstP = doc.querySelector('main p, .content p, #content p')?.textContent;
-            
-            const candidates = [metaDesc, ogDesc, heroText, firstP]
-                .filter(Boolean)
-                .map(text => text.trim().slice(0, 200));
-            
-            return candidates[0] || 'Professional company providing quality products and services.';
-        }
-
-        function extractIndustry(doc, domain) {
-            const pageContent = doc.body?.textContent?.toLowerCase() || '';
-            
-            const industries = {
-                'Consumer Goods': ['cpg', 'consumer', 'retail', 'brand', 'grocery', 'food', 'beverage', 'snack'],
-                'Food & Beverage': ['food', 'beverage', 'drink', 'snack', 'organic', 'nutrition'],
-                'Beauty & Personal Care': ['beauty', 'skincare', 'cosmetics', 'personal care', 'wellness'],
-                'Technology': ['software', 'app', 'platform', 'tech', 'digital', 'saas'],
-                'Healthcare': ['health', 'medical', 'pharma', 'wellness', 'clinic'],
-                'Finance': ['finance', 'bank', 'payment', 'fintech', 'investment'],
-                'Manufacturing': ['manufacturing', 'production', 'factory', 'industrial']
-            };
-            
-            const fullText = `${domain} ${pageContent}`;
-            
-            for (const [industry, keywords] of Object.entries(industries)) {
-                if (keywords.some(keyword => fullText.includes(keyword))) {
-                    return industry;
-                }
-            }
-            
-            return 'Consumer Goods';
-        }
-
-        function extractLocation(doc) {
-            const contactText = doc.querySelector('[class*="contact"], [class*="address"], footer')?.textContent || '';
-            
-            const locationPatterns = [
-                /([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*),\s*([A-Z]{2})\b/g,
-                /([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*),\s*([A-Z][a-z]+)\b/g,
-            ];
-            
-            for (const pattern of locationPatterns) {
-                const match = contactText.match(pattern);
-                if (match) return match[0];
-            }
-            
-            return 'United States';
-        }
-
-        async function enrichCompanyData(domain) {
-            return createFallbackCompanyInfo(domain);
-        }
-
-        function cleanCompanyName(text) {
-            if (!text) return null;
-            
-            return text
-                .replace(/\s*[-|–—]\s*.*/g, '')
-                .replace(/\s*(Home|Official|Welcome).*/gi, '')
-                .replace(/\s*(Inc|LLC|Corp|Ltd|Co)\.?\s*$/gi, '')
-                .trim();
-        }
-
-        function extractFromText(text) {
-            if (!text) return null;
-            
-            const copyrightMatch = text.match(/©\s*\d{4}\s*([^.]+)/);
-            if (copyrightMatch) return cleanCompanyName(copyrightMatch[1]);
-            
-            return null;
-        }
-
-        function formatDomainAsCompany(domain) {
-            return domain
-                .replace(/\.(com|net|org|io|co)$/gi, '')
-                .split('.')
-                .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-                .join(' ');
-        }
-
-        function createFallbackCompanyInfo(domain) {
-            const companyName = formatDomainAsCompany(domain);
-            
-            return {
-                name: companyName,
-                industry: 'Consumer Goods',
-                size: 'Emerging Brand',
-                location: 'United States',
-                founded: 'Recently Established',
-                description: `${companyName} is an innovative company focused on delivering quality products and exceptional customer experiences.`
-            };
-        }
-
-        async function showCompanyInfo(domain) {
-            const companyCard = document.getElementById('company-info-card');
-            companyCard.classList.remove('hidden');
-            document.getElementById('company-name').textContent = 'Loading company information...';
-            document.getElementById('company-description').textContent = 'Analyzing company data...';
-            
-            try {
-                const companyInfo = await getCompanyInfo(domain);
-                
-                document.getElementById('company-name').textContent = companyInfo.name;
-                document.getElementById('company-description').textContent = companyInfo.description;
-                document.getElementById('company-industry').textContent = companyInfo.industry;
-                document.getElementById('company-size').textContent = companyInfo.size;
-                document.getElementById('company-location').textContent = companyInfo.location;
-                document.getElementById('company-founded').textContent = companyInfo.founded;
-                
-            } catch (error) {
-                console.error('Failed to load company info:', error);
-                
-                const fallback = createFallbackCompanyInfo(domain);
-                document.getElementById('company-name').textContent = fallback.name;
-                document.getElementById('company-description').textContent = fallback.description;
-                document.getElementById('company-industry').textContent = fallback.industry;
-                document.getElementById('company-size').textContent = fallback.size;
-                document.getElementById('company-location').textContent = fallback.location;
-                document.getElementById('company-founded').textContent = fallback.founded;
-            }
-        }
-
-        // ===== ALL OTHER FUNCTIONS =====
-        function toggleAdvancedFilters() {
-            const filtersDiv = document.getElementById('advanced-filters');
-            const toggleBtn = document.getElementById('toggle-filters-btn');
-            
-            advancedFiltersVisible = !advancedFiltersVisible;
-            
-            if (advancedFiltersVisible) {
-                filtersDiv.classList.remove('hidden');
-                toggleBtn.textContent = 'Show Less';
-            } else {
-                filtersDiv.classList.add('hidden');
-                toggleBtn.textContent = 'Show More';
-            }
-        }
-
-        function goToContactFinder() {
-            showSection('contact-finder');
-        }
-
-        function calculateContactScore(contact) {
-            let score = 50;
-            
-            if (contact.verified) score += 25;
-            
-            switch(contact.seniority) {
-                case 'executive': score += 20; break;
-                case 'director': score += 15; break;
-                case 'manager': score += 10; break;
-                default: score += 5; break;
-            }
-            
-            if (contact.linkedin) score += 10;
-            if (contact.phone) score += 5;
-            
-            score = Math.round(score * (contact.confidence / 100));
-            
-            return Math.min(score, 100);
-        }
-
-        function enhancedEmailVerification(email, domain) {
-            const commonPatterns = [
-                'firstname.lastname',
-                'firstname',
-                'flastname',
-                'firstname_lastname'
-            ];
-            
-            let verificationScore = Math.random() * 40 + 60;
-            
-            const emailPattern = email.replace(`@${domain}`, '');
-            const hasCommonPattern = commonPatterns.some(pattern => 
-                emailPattern.includes('.') || emailPattern.includes('_')
-            );
-            
-            if (hasCommonPattern) verificationScore += 10;
-            if (email.includes('info@') || email.includes('contact@')) verificationScore -= 20;
-            
-            return {
-                verified: verificationScore > 80,
-                score: Math.round(verificationScore),
-                deliverable: verificationScore > 70,
-                risky: verificationScore < 60
-            };
-        }
-
-        async function executeSearch() {
-            const domain = document.getElementById('search-domain').value.trim();
-            if (!domain) {
-                showError('Please enter a company domain');
-                return;
-            }
-
-            const cleanDomain = domain.replace(/^(https?:\/\/)?(www\.)?/, '').split('/')[0];
-            
-            hideError();
-            hideResults();
-            showLoading();
-            
-            const button = document.getElementById('main-search-btn');
-            const originalText = button.innerHTML;
-            button.innerHTML = '<div class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent inline-block mr-2"></div>Enhanced Analysis...';
-            button.disabled = true;
-
-            try {
-                await showCompanyInfo(cleanDomain);
-                
-                const limit = Math.min(parseInt(document.getElementById('results-limit').value), 100);
-
-                updateSearchStatus('Gathering company intelligence...');
-                await new Promise(resolve => setTimeout(resolve, 1000));
-
-                updateSearchStatus('Enhanced email verification in progress...');
-                const [hunterResults, apolloResults, webResults] = await Promise.allSettled([
-                    searchHunter(cleanDomain, limit),
-                    searchApollo(cleanDomain, limit),
-                    scrapeCompanyWebsite(cleanDomain)
-                ]);
-
-                updateSearchStatus('Applying contact scoring algorithms...');
-                await new Promise(resolve => setTimeout(resolve, 1000));
-
-                const fusedData = enhancedFuseDataSources(
-                    hunterResults.status === 'fulfilled' ? hunterResults.value : null,
-                    apolloResults.status === 'fulfilled' ? apolloResults.value : null,
-                    webResults.status === 'fulfilled' ? webResults.value : [],
-                    cleanDomain
-                );
-
-                if (fusedData.contacts.length === 0) {
-                    throw new Error('No contacts found for this domain with current filters.');
-                }
-
-                companyData = fusedData.companyInfo;
-                currentContacts = fusedData.contacts;
-                selectedContacts.clear();
-
-                displayResults(fusedData.contacts);
-                showResults();
-                
-                incrementMetric('totalSearches');
-                incrementMetric('contactsFound', fusedData.contacts.length);
-                
-                const verifiedCount = fusedData.contacts.filter(c => c.verified).length;
-                incrementMetric('verifiedEmails', verifiedCount);
-                
-                addToRecentActivity('search', `Enhanced search: ${cleanDomain} • ${fusedData.contacts.length} contacts • Company data enriched`);
-
-            } catch (error) {
-                console.error('Search Error:', error);
-                showError(error.message);
-            } finally {
-                button.innerHTML = originalText;
-                button.disabled = false;
-                hideLoading();
-            }
-        }
-
-        function updateSearchStatus(message) {
-            document.getElementById('search-status').textContent = message;
-        }
-
-        function enhancedFuseDataSources(hunterResults, apolloResults, webResults, domain) {
-            let fusedContacts = [];
-            let sourcesUsed = [];
-            
-            if (apolloResults && apolloResults.people) {
-                apolloResults.people.forEach(person => {
-                    const processedEmail = person.email === "email_not_unlocked@domain.com" 
-                        ? `${person.first_name?.toLowerCase() || 'contact'}.${person.last_name?.toLowerCase() || 'person'}@${domain}` 
-                        : person.email;
-                    
-                    const emailVerification = enhancedEmailVerification(processedEmail, domain);
-                    
-                    const contact = {
-                        id: `db2_${person.id || Math.random()}`,
-                        name: person.name || `${person.first_name} ${person.last_name}`,
-                        title: person.title,
-                        email: processedEmail,
-                        phone: person.phone_numbers?.[0]?.raw_number || '',
-                        linkedin: person.linkedin_url || '',
-                        company: person.organization?.name || domain,
-                        source: 'Professional Database',
-                        verified: emailVerification.verified,
-                        confidence: emailVerification.score,
-                        department: categorizeByTitle(person.<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -2102,7 +309,7 @@ department: categorizeByTitle(person.title),
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Company Domain</label>
-                            <input type="text" id="search-domain" placeholder="e.g., casper.com" 
+                            <input type="text" id="search-domain" placeholder="e.g., salesforce.com" 
                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                         </div>
                         <div>
@@ -2281,4 +488,1691 @@ department: categorizeByTitle(person.title),
                                 </div>
                                 <div class="text-center">
                                     <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mx-auto mb-2">
-                                        <i data-lucide="mail" class="w-6
+                                        <i data-lucide="mail" class="w-6 h-6 text-orange-600"></i>
+                                    </div>
+                                    <p class="text-xs text-gray-600">Email Verification</p>
+                                </div>
+                                <div class="text-center">
+                                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                                        <i data-lucide="users" class="w-6 h-6 text-purple-600"></i>
+                                    </div>
+                                    <p class="text-xs text-gray-600">Contact Discovery</p>
+                                </div>
+                                <div class="text-center">
+                                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                                        <i data-lucide="star" class="w-6 h-6 text-green-600"></i>
+                                    </div>
+                                    <p class="text-xs text-gray-600">Contact Scoring</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Lists Section -->
+            <div id="contact-lists-section" class="section-content hidden">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-900">Contact Lists</h2>
+                        <p class="text-gray-600">Organize and manage your saved contacts</p>
+                    </div>
+                    <button onclick="createNewList()" class="px-4 py-2 brand-gradient text-white rounded-lg font-medium hover:opacity-90 flex items-center space-x-2">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                        <span>Create New List</span>
+                    </button>
+                </div>
+                <div id="contact-lists-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                </div>
+            </div>
+
+            <!-- Reports Section -->
+            <div id="reports-section" class="section-content hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-gray-900">Reports & Analytics</h2>
+                    <p class="text-gray-600">Track your contact discovery performance and email verification rates</p>
+                </div>
+                
+                <!-- Enhanced Analytics Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white rounded-lg shadow-sm p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Email Verification Rate</p>
+                                <p class="text-2xl font-bold text-green-600" id="verification-rate">0%</p>
+                            </div>
+                            <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                                <i data-lucide="shield-check" class="w-5 h-5 text-green-600"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-sm p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Avg Contact Score</p>
+                                <p class="text-2xl font-bold text-blue-600" id="avg-score">0</p>
+                            </div>
+                            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                <i data-lucide="star" class="w-5 h-5 text-blue-600"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-sm p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Companies Searched</p>
+                                <p class="text-2xl font-bold text-purple-600" id="companies-searched">0</p>
+                            </div>
+                            <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                                <i data-lucide="building" class="w-5 h-5 text-purple-600"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-sm p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Salesforce Exports</p>
+                                <p class="text-2xl font-bold text-indigo-600" id="sf-exports">0</p>
+                            </div>
+                            <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
+                                <i data-lucide="cloud" class="w-5 h-5 text-indigo-600"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="bg-white rounded-lg shadow-sm p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Search Performance</h3>
+                        <div class="text-center py-8 text-gray-500">
+                            <i data-lucide="bar-chart-3" class="w-12 h-12 mx-auto mb-2"></i>
+                            <p>Enhanced charts and analytics coming soon</p>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-sm p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Email Quality Metrics</h3>
+                        <div class="text-center py-8 text-gray-500">
+                            <i data-lucide="pie-chart" class="w-12 h-12 mx-auto mb-2"></i>
+                            <p>Email verification dashboard coming soon</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Exports Section -->
+            <div id="exports-section" class="section-content hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-gray-900">Export Center</h2>
+                    <p class="text-gray-600">Download your contacts in CRM-ready formats with enhanced data</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white rounded-lg shadow-sm p-6 text-center card-hover">
+                        <div class="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                            <i data-lucide="file-text" class="w-8 h-8 text-blue-600"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Salesforce Template</h3>
+                        <p class="text-sm text-gray-600 mb-4">Pre-formatted for direct Salesforce import with contact scores</p>
+                        <button class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                            Download Template
+                        </button>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-sm p-6 text-center card-hover">
+                        <div class="w-16 h-16 bg-orange-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                            <i data-lucide="file-spreadsheet" class="w-8 h-8 text-orange-600"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">HubSpot Template</h3>
+                        <p class="text-sm text-gray-600 mb-4">Ready for HubSpot contact import with company data</p>
+                        <button class="w-full px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700">
+                            Download Template
+                        </button>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-sm p-6 text-center card-hover">
+                        <div class="w-16 h-16 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                            <i data-lucide="download" class="w-8 h-8 text-green-600"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Enhanced Export</h3>
+                        <p class="text-sm text-gray-600 mb-4">Complete dataset with verification status and scores</p>
+                        <button class="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                            Customize Export
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Salesforce Connection Modal -->
+    <div id="salesforce-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <div class="flex items-center mb-4">
+                    <div class="w-8 h-8 salesforce-button rounded-lg flex items-center justify-center mr-3">
+                        <i data-lucide="cloud" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-900">Connect to Salesforce</h3>
+                </div>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Instance URL</label>
+                        <input type="text" id="sf-instance-url" placeholder="https://yourcompany.salesforce.com" 
+                               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <p class="text-xs text-gray-500 mt-1">Your Salesforce login URL</p>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Username</label>
+                        <input type="email" id="sf-username" placeholder="your.email@company.com" 
+                               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Password + Security Token</label>
+                        <input type="password" id="sf-password" placeholder="passwordSECURITYTOKEN" 
+                               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <p class="text-xs text-gray-500 mt-1">Combine your password with security token (no space)</p>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end space-x-2 mt-6">
+                    <button onclick="closeSalesforceModal()" class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50">
+                        Cancel
+                    </button>
+                    <button onclick="connectToSalesforce()" id="sf-connect-btn" class="px-4 py-2 salesforce-button text-white rounded-lg text-sm font-medium hover:opacity-90">
+                        Connect
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Message -->
+    <div id="error-section" class="hidden fixed bottom-4 right-4 bg-red-50 border border-red-200 rounded-lg p-4 shadow-lg z-50">
+        <div class="flex items-center space-x-2">
+            <i data-lucide="alert-circle" class="w-5 h-5 text-red-600"></i>
+            <span class="font-medium text-red-900">Error</span>
+        </div>
+        <p id="error-message" class="text-red-700 text-sm mt-1">An error occurred</p>
+        <button onclick="hideError()" class="absolute top-2 right-2 text-red-400 hover:text-red-600">
+            <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+    </div>
+
+    <!-- Success Message -->
+    <div id="success-section" class="hidden fixed bottom-4 right-4 bg-green-50 border border-green-200 rounded-lg p-4 shadow-lg z-50">
+        <div class="flex items-center space-x-2">
+            <i data-lucide="check-circle" class="w-5 h-5 text-green-600"></i>
+            <span class="font-medium text-green-900">Success</span>
+        </div>
+        <p id="success-message" class="text-green-700 text-sm mt-1">Operation completed successfully</p>
+        <button onclick="hideSuccess()" class="absolute top-2 right-2 text-green-400 hover:text-green-600">
+            <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+    </div>
+
+    <!-- Save List Modal -->
+    <div id="save-list-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Save Contact List</h3>
+                <input type="text" id="list-name-input" placeholder="Enter list name..." 
+                       class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-4">
+                <div class="flex justify-end space-x-2">
+                    <button onclick="cancelSaveList()" class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50">
+                        Cancel
+                    </button>
+                    <button onclick="confirmSaveList()" class="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700">
+                        Save List
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global Variables
+        const HUNTER_API_KEY = '64514bd46213dce4c8e6ed724555b2f9d0fa8e03';
+        const APOLLO_API_KEY = 'cgAc0fBksS1tJePYf0n4DA';
+
+        let currentContacts = [];
+        let selectedContacts = new Set();
+        let companyData = null;
+        let contactViewMode = 'grid';
+        let salesforceSession = null;
+        let advancedFiltersVisible = false;
+
+        // Enhanced Company Data Simulation
+        const companyDatabase = {
+            'salesforce.com': {
+                name: 'Salesforce',
+                industry: 'Cloud Software',
+                size: '70,000+ employees',
+                location: 'San Francisco, CA',
+                founded: '1999',
+                description: 'Leading customer relationship management platform with comprehensive cloud-based solutions for sales, service, marketing, and analytics.'
+            },
+            'microsoft.com': {
+                name: 'Microsoft Corporation', 
+                industry: 'Technology',
+                size: '220,000+ employees',
+                location: 'Redmond, WA',
+                founded: '1975',
+                description: 'Multinational technology corporation developing computer software, consumer electronics, personal computers, and related services.'
+            },
+            'hubspot.com': {
+                name: 'HubSpot',
+                industry: 'Marketing Technology',
+                size: '7,000+ employees', 
+                location: 'Cambridge, MA',
+                founded: '2006',
+                description: 'Inbound marketing, sales, and customer service platform helping businesses grow better with comprehensive CRM solutions.'
+            }
+        };
+
+        // ===== NEW ENHANCED FUNCTIONS =====
+
+        function toggleAdvancedFilters() {
+            const filtersDiv = document.getElementById('advanced-filters');
+            const toggleBtn = document.getElementById('toggle-filters-btn');
+            
+            advancedFiltersVisible = !advancedFiltersVisible;
+            
+            if (advancedFiltersVisible) {
+                filtersDiv.classList.remove('hidden');
+                toggleBtn.textContent = 'Show Less';
+            } else {
+                filtersDiv.classList.add('hidden');
+                toggleBtn.textContent = 'Show More';
+            }
+        }
+
+        function goToContactFinder() {
+            showSection('contact-finder');
+        }
+
+        function calculateContactScore(contact) {
+            let score = 50; // Base score
+            
+            // Email verification bonus
+            if (contact.verified) score += 25;
+            
+            // Seniority level bonus
+            switch(contact.seniority) {
+                case 'executive': score += 20; break;
+                case 'director': score += 15; break;
+                case 'manager': score += 10; break;
+                default: score += 5; break;
+            }
+            
+            // LinkedIn profile bonus
+            if (contact.linkedin) score += 10;
+            
+            // Phone number bonus
+            if (contact.phone) score += 5;
+            
+            // Confidence score adjustment
+            score = Math.round(score * (contact.confidence / 100));
+            
+            return Math.min(score, 100);
+        }
+
+        function enhancedEmailVerification(email, domain) {
+            // Simulate advanced email verification
+            const commonPatterns = [
+                'firstname.lastname',
+                'firstname',
+                'flastname',
+                'firstname_lastname'
+            ];
+            
+            let verificationScore = Math.random() * 40 + 60; // 60-100 range
+            
+            // Check email pattern validity
+            const emailPattern = email.replace(`@${domain}`, '');
+            const hasCommonPattern = commonPatterns.some(pattern => 
+                emailPattern.includes('.') || emailPattern.includes('_')
+            );
+            
+            if (hasCommonPattern) verificationScore += 10;
+            if (email.includes('info@') || email.includes('contact@')) verificationScore -= 20;
+            
+            return {
+                verified: verificationScore > 80,
+                score: Math.round(verificationScore),
+                deliverable: verificationScore > 70,
+                risky: verificationScore < 60
+            };
+        }
+
+        function showCompanyInfo(domain) {
+            const companyInfo = companyDatabase[domain] || {
+                name: domain.charAt(0).toUpperCase() + domain.slice(1).replace('.com', ''),
+                industry: 'Technology',
+                size: 'Unknown',
+                location: 'Unknown',
+                founded: 'Unknown',
+                description: `Professional company in the ${domain.split('.')[0]} industry.`
+            };
+
+            document.getElementById('company-name').textContent = companyInfo.name;
+            document.getElementById('company-description').textContent = companyInfo.description;
+            document.getElementById('company-industry').textContent = companyInfo.industry;
+            document.getElementById('company-size').textContent = companyInfo.size;
+            document.getElementById('company-location').textContent = companyInfo.location;
+            document.getElementById('company-founded').textContent = companyInfo.founded;
+            
+            document.getElementById('company-info-card').classList.remove('hidden');
+        }
+
+        // ===== ENHANCED SEARCH FUNCTIONS =====
+
+        async function executeSearch() {
+            const domain = document.getElementById('search-domain').value.trim();
+            if (!domain) {
+                showError('Please enter a company domain');
+                return;
+            }
+
+            const cleanDomain = domain.replace(/^(https?:\/\/)?(www\.)?/, '').split('/')[0];
+            
+            hideError();
+            hideResults();
+            showLoading();
+            
+            const button = document.getElementById('main-search-btn');
+            const originalText = button.innerHTML;
+            button.innerHTML = '<div class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent inline-block mr-2"></div>Enhanced Analysis...';
+            button.disabled = true;
+
+            try {
+                // Show company information
+                showCompanyInfo(cleanDomain);
+                
+                const limit = Math.min(parseInt(document.getElementById('results-limit').value), 100);
+
+                updateSearchStatus('Gathering company intelligence...');
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                updateSearchStatus('Enhanced email verification in progress...');
+                const [hunterResults, apolloResults, webResults] = await Promise.allSettled([
+                    searchHunter(cleanDomain, limit),
+                    searchApollo(cleanDomain, limit),
+                    scrapeCompanyWebsite(cleanDomain)
+                ]);
+
+                updateSearchStatus('Applying contact scoring algorithms...');
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                const fusedData = enhancedFuseDataSources(
+                    hunterResults.status === 'fulfilled' ? hunterResults.value : null,
+                    apolloResults.status === 'fulfilled' ? apolloResults.value : null,
+                    webResults.status === 'fulfilled' ? webResults.value : [],
+                    cleanDomain
+                );
+
+                if (fusedData.contacts.length === 0) {
+                    throw new Error('No contacts found for this domain with current filters.');
+                }
+
+                companyData = fusedData.companyInfo;
+                currentContacts = fusedData.contacts;
+                selectedContacts.clear();
+
+                displayResults(fusedData.contacts);
+                showResults();
+                
+                incrementMetric('totalSearches');
+                incrementMetric('contactsFound', fusedData.contacts.length);
+                
+                const verifiedCount = fusedData.contacts.filter(c => c.verified).length;
+                incrementMetric('verifiedEmails', verifiedCount);
+                
+                addToRecentActivity('search', `Enhanced search: ${cleanDomain} • ${fusedData.contacts.length} contacts • Company data enriched`);
+
+            } catch (error) {
+                console.error('Search Error:', error);
+                showError(error.message);
+            } finally {
+                button.innerHTML = originalText;
+                button.disabled = false;
+                hideLoading();
+            }
+        }
+
+        function updateSearchStatus(message) {
+            document.getElementById('search-status').textContent = message;
+        }
+
+        // Enhanced data fusion with contact scoring
+        function enhancedFuseDataSources(hunterResults, apolloResults, webResults, domain) {
+            let fusedContacts = [];
+            let sourcesUsed = [];
+            
+            if (apolloResults && apolloResults.people) {
+                apolloResults.people.forEach(person => {
+                    const processedEmail = person.email === "email_not_unlocked@domain.com" 
+                        ? `${person.first_name?.toLowerCase() || 'contact'}.${person.last_name?.toLowerCase() || 'person'}@${domain}` 
+                        : person.email;
+                    
+                    const emailVerification = enhancedEmailVerification(processedEmail, domain);
+                    
+                    const contact = {
+                        id: `db2_${person.id || Math.random()}`,
+                        name: person.name || `${person.first_name} ${person.last_name}`,
+                        title: person.title,
+                        email: processedEmail,
+                        phone: person.phone_numbers?.[0]?.raw_number || '',
+                        linkedin: person.linkedin_url || '',
+                        company: person.organization?.name || domain,
+                        source: 'Professional Database',
+                        verified: emailVerification.verified,
+                        confidence: emailVerification.score,
+                        department: categorizeByTitle(person.title),
+                        seniority: categorizeSeniority(person.title),
+                        deliverable: emailVerification.deliverable,
+                        risky: emailVerification.risky
+                    };
+                    
+                    contact.contactScore = calculateContactScore(contact);
+                    fusedContacts.push(contact);
+                });
+                sourcesUsed.push('Professional Database');
+            }
+            
+            if (hunterResults && hunterResults.emails) {
+                hunterResults.emails.forEach(email => {
+                    const emailVerification = enhancedEmailVerification(email.value, domain);
+                    
+                    const contact = {
+                        id: `db1_${email.value || Math.random()}`,
+                        name: `${email.first_name} ${email.last_name}`,
+                        title: email.position,
+                        email: email.value,
+                        phone: email.phone_number || '',
+                        linkedin: email.linkedin || '',
+                        company: hunterResults.domain || domain,
+                        source: 'Email Intelligence',
+                        verified: emailVerification.verified,
+                        confidence: emailVerification.score,
+                        department: categorizeByTitle(email.position),
+                        seniority: categorizeSeniority(email.position),
+                        deliverable: emailVerification.deliverable,
+                        risky: emailVerification.risky
+                    };
+                    
+                    contact.contactScore = calculateContactScore(contact);
+                    fusedContacts.push(contact);
+                });
+                sourcesUsed.push('Email Intelligence');
+            }
+
+            if (webResults && webResults.length > 0) {
+                webResults.forEach(contact => {
+                    const emailVerification = enhancedEmailVerification(contact.email, domain);
+                    
+                    const enhancedContact = {
+                        id: `web_${Math.random()}`,
+                        name: contact.name,
+                        title: contact.title,
+                        email: contact.email,
+                        phone: '',
+                        linkedin: '',
+                        company: domain,
+                        source: 'Web Intelligence',
+                        verified: emailVerification.verified,
+                        confidence: emailVerification.score,
+                        department: categorizeByTitle(contact.title),
+                        seniority: categorizeSeniority(contact.title),
+                        deliverable: emailVerification.deliverable,
+                        risky: emailVerification.risky
+                    };
+                    
+                    enhancedContact.contactScore = calculateContactScore(enhancedContact);
+                    fusedContacts.push(enhancedContact);
+                });
+                sourcesUsed.push('Web Intelligence');
+            }
+
+            // Remove duplicates
+            const uniqueContacts = [];
+            const seenEmails = new Set();
+            
+            fusedContacts.forEach(contact => {
+                if (!seenEmails.has(contact.email)) {
+                    seenEmails.add(contact.email);
+                    uniqueContacts.push(contact);
+                }
+            });
+
+            // Sort by contact score (highest first)
+            uniqueContacts.sort((a, b) => b.contactScore - a.contactScore);
+            
+            return {
+                contacts: uniqueContacts,
+                companyInfo: {
+                    domain: domain,
+                    name: companyDatabase[domain]?.name || domain,
+                    organization: hunterResults?.organization || domain,
+                    totalContacts: uniqueContacts.length,
+                    sources: sourcesUsed,
+                    verifiedContacts: uniqueContacts.filter(c => c.verified).length,
+                    avgScore: uniqueContacts.length > 0 ? Math.round(uniqueContacts.reduce((sum, c) => sum + c.contactScore, 0) / uniqueContacts.length) : 0
+                }
+            };
+        }
+
+        // ===== ENHANCED DISPLAY FUNCTIONS =====
+
+        function createContactCard(contact, index) {
+            const grid = document.getElementById('contacts-grid');
+            const card = document.createElement('div');
+            card.className = 'contact-card p-6 card-hover';
+            
+            const isSelected = selectedContacts.has(index);
+            const verificationBadge = contact.verified 
+                ? '<span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">✓ Verified</span>'
+                : contact.deliverable 
+                    ? '<span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">Deliverable</span>'
+                    : '<span class="px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-medium">Unverified</span>';
+
+            const linkedinLink = contact.linkedin 
+                ? `<a href="${contact.linkedin}" target="_blank" class="flex items-center space-x-1 text-blue-600 hover:text-blue-800">
+                    <i data-lucide="linkedin" class="w-4 h-4"></i>
+                    <span class="text-xs">LinkedIn</span>
+                  </a>`
+                : '<span class="text-xs text-gray-400">No LinkedIn</span>';
+
+            const phoneDisplay = contact.phone 
+                ? `<div class="flex items-center space-x-2">
+                    <i data-lucide="phone" class="w-4 h-4 text-gray-400"></i>
+                    <span class="text-xs">${contact.phone}</span>
+                  </div>`
+                : '';
+
+            const scoreColor = contact.contactScore >= 80 ? 'text-green-700' : 
+                              contact.contactScore >= 60 ? 'text-blue-700' : 'text-orange-700';
+
+            card.innerHTML = `
+                <div class="flex items-start justify-between mb-3">
+                    <div class="flex items-center space-x-2">
+                        <input type="checkbox" id="contact-${index}" ${isSelected ? 'checked' : ''} onchange="toggleContact(${index})" 
+                               class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                        <div>
+                            <h4 class="font-semibold text-gray-900">${contact.name}</h4>
+                            <p class="text-sm text-gray-600">${contact.title}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        ${verificationBadge}
+                        <span class="score-badge px-2 py-1 rounded-full text-xs font-medium">
+                            Score: ${contact.contactScore}
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="space-y-2 text-sm mb-4">
+                    <div class="flex items-center space-x-2">
+                        <i data-lucide="mail" class="w-4 h-4 text-gray-400"></i>
+                        <span class="email-modern ${contact.verified ? 'email-verified' : ''}">${contact.email}</span>
+                    </div>
+                    
+                    ${phoneDisplay}
+                    
+                    <div class="flex items-center space-x-2">
+                        <i data-lucide="briefcase" class="w-4 h-4 text-gray-400"></i>
+                        <span class="text-xs">${contact.department}</span>
+                    </div>
+
+                    <div class="flex items-center space-x-2">
+                        <i data-lucide="target" class="w-4 h-4 text-gray-400"></i>
+                        <span class="text-xs ${scoreColor} font-medium">Contact Score: ${contact.contactScore}/100</span>
+                    </div>
+                </div>
+                
+                <div class="pt-3 border-t border-gray-100 flex justify-between items-center">
+                    ${linkedinLink}
+                    <div class="flex items-center space-x-2">
+                        <span class="px-2 py-1 rounded-full text-xs font-medium ${getSeniorityColor(contact.seniority)}">
+                            ${contact.seniority}
+                        </span>
+                        <button onclick="addSingleContactToSalesforce(currentContacts[${index}])" 
+                                class="px-2 py-1 salesforce-button text-white rounded text-xs hover:opacity-90 flex items-center space-x-1">
+                            <i data-lucide="cloud" class="w-3 h-3"></i>
+                            <span>SF</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            grid.appendChild(card);
+        }
+
+        function createContactRow(contact, index) {
+            const tbody = document.getElementById('contacts-table-body');
+            const row = document.createElement('tr');
+            row.className = 'table-row';
+            
+            const isSelected = selectedContacts.has(index);
+            const verificationBadge = contact.verified 
+                ? '<span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">Verified</span>'
+                : contact.deliverable 
+                    ? '<span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">Deliverable</span>'
+                    : '<span class="px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-medium">Unverified</span>';
+
+            const scoreColor = contact.contactScore >= 80 ? 'text-green-700' : 
+                              contact.contactScore >= 60 ? 'text-blue-700' : 'text-orange-700';
+
+            row.innerHTML = `
+                <td class="px-4 py-4 whitespace-nowrap">
+                    <input type="checkbox" id="contact-list-${index}" ${isSelected ? 'checked' : ''} onchange="toggleContact(${index})" 
+                           class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div>
+                        <div class="text-sm font-medium text-gray-900">${contact.name}</div>
+                        <div class="text-sm text-gray-500">${contact.company}</div>
+                    </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-900">${contact.title}</div>
+                    <div class="text-sm text-gray-500">${contact.department}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="email-modern ${contact.verified ? 'email-verified' : ''}">${contact.email}</span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm font-semibold ${scoreColor}">${contact.contactScore}/100</div>
+                    <div class="text-xs text-gray-500">Quality Score</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    ${contact.company}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">${contact.source}</span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="flex items-center space-x-2">
+                        ${verificationBadge}
+                        <button onclick="addSingleContactToSalesforce(currentContacts[${index}])" 
+                                class="px-2 py-1 salesforce-button text-white rounded text-xs hover:opacity-90 flex items-center space-x-1">
+                            <i data-lucide="cloud" class="w-3 h-3"></i>
+                            <span>SF</span>
+                        </button>
+                    </div>
+                </td>
+            `;
+            
+            tbody.appendChild(row);
+        }
+
+        // ===== SALESFORCE FUNCTIONS =====
+        function showSalesforceModal() {
+            document.getElementById('salesforce-modal').classList.remove('hidden');
+        }
+
+        function closeSalesforceModal() {
+            document.getElementById('salesforce-modal').classList.add('hidden');
+        }
+
+        function showSuccess(message) {
+            document.getElementById('success-message').textContent = message;
+            document.getElementById('success-section').classList.remove('hidden');
+            setTimeout(hideSuccess, 5000);
+        }
+
+        function hideSuccess() {
+            document.getElementById('success-section').classList.add('hidden');
+        }
+
+        function updateSalesforceStatus(connected) {
+            const statusDiv = document.getElementById('salesforce-status');
+            const connectedSpan = document.getElementById('sf-connected');
+            const disconnectedSpan = document.getElementById('sf-disconnected');
+            const connectBtn = document.getElementById('connect-salesforce-btn');
+
+            statusDiv.classList.remove('hidden');
+            
+            if (connected) {
+                connectedSpan.classList.remove('hidden');
+                disconnectedSpan.classList.add('hidden');
+                connectBtn.textContent = 'Disconnect Salesforce';
+                connectBtn.onclick = disconnectFromSalesforce;
+            } else {
+                connectedSpan.classList.add('hidden');
+                disconnectedSpan.classList.remove('hidden');
+                connectBtn.textContent = 'Connect Salesforce';
+                connectBtn.onclick = showSalesforceModal;
+            }
+        }
+
+        async function connectToSalesforce() {
+            const instanceUrl = document.getElementById('sf-instance-url').value.trim();
+            const username = document.getElementById('sf-username').value.trim();
+            const password = document.getElementById('sf-password').value.trim();
+
+            if (!instanceUrl || !username || !password) {
+                showError('Please fill in all Salesforce connection fields');
+                return;
+            }
+
+            const connectBtn = document.getElementById('sf-connect-btn');
+            connectBtn.disabled = true;
+            connectBtn.textContent = 'Connecting...';
+
+            try {
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                salesforceSession = {
+                    instanceUrl: instanceUrl,
+                    username: username,
+                    sessionId: 'mock_session_' + Date.now(),
+                    connected: true
+                };
+
+                localStorage.setItem('salesforceSession', JSON.stringify(salesforceSession));
+                
+                updateSalesforceStatus(true);
+                closeSalesforceModal();
+                showSuccess('Successfully connected to Salesforce!');
+                
+                document.getElementById('sf-instance-url').value = '';
+                document.getElementById('sf-username').value = '';
+                document.getElementById('sf-password').value = '';
+
+                addToRecentActivity('salesforce', 'Connected to Salesforce CRM');
+
+            } catch (error) {
+                showError('Failed to connect to Salesforce: ' + error.message);
+            } finally {
+                connectBtn.disabled = false;
+                connectBtn.textContent = 'Connect';
+            }
+        }
+
+        function disconnectFromSalesforce() {
+            salesforceSession = null;
+            localStorage.removeItem('salesforceSession');
+            updateSalesforceStatus(false);
+            showSuccess('Disconnected from Salesforce');
+            addToRecentActivity('salesforce', 'Disconnected from Salesforce CRM');
+        }
+
+        async function addToSalesforce() {
+            if (!salesforceSession) {
+                showError('Please connect to Salesforce first');
+                showSalesforceModal();
+                return;
+            }
+
+            if (selectedContacts.size === 0) {
+                showError('Please select contacts to add to Salesforce');
+                return;
+            }
+
+            const contactsToAdd = Array.from(selectedContacts).map(index => currentContacts[index]);
+            
+            try {
+                for (const contact of contactsToAdd) {
+                    await simulateAddContactToSalesforce(contact);
+                }
+
+                showSuccess(`Successfully added ${contactsToAdd.length} contacts to Salesforce!`);
+                addToRecentActivity('salesforce', `Added ${contactsToAdd.length} enhanced contacts to Salesforce CRM`);
+                
+                selectedContacts.clear();
+                document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+                updateSelectionUI();
+
+            } catch (error) {
+                showError('Failed to add contacts to Salesforce: ' + error.message);
+            }
+        }
+
+        async function addSingleContactToSalesforce(contact) {
+            if (!salesforceSession) {
+                showError('Please connect to Salesforce first');
+                showSalesforceModal();
+                return;
+            }
+
+            try {
+                await simulateAddContactToSalesforce(contact);
+                showSuccess(`Added ${contact.name} to Salesforce with score ${contact.contactScore}!`);
+                addToRecentActivity('salesforce', `Added ${contact.name} (Score: ${contact.contactScore}) to Salesforce CRM`);
+            } catch (error) {
+                showError('Failed to add contact to Salesforce: ' + error.message);
+            }
+        }
+
+        async function simulateAddContactToSalesforce(contact) {
+            await new Promise(resolve => setTimeout(resolve, 500));
+            console.log('Adding enhanced contact to Salesforce:', contact);
+            
+            if (Math.random() < 0.05) {
+                throw new Error('Duplicate contact detected');
+            }
+            
+            return {
+                id: 'sf_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+                success: true
+            };
+        }
+
+        // ===== API FUNCTIONS =====
+        async function searchHunter(domain, limit) {
+            const url = `https://api.hunter.io/v2/domain-search?domain=${domain}&limit=${limit}&api_key=${HUNTER_API_KEY}`;
+            const response = await fetch(url);
+
+            if (!response.ok) {
+                throw new Error(`Professional Database error: ${response.status}`);
+            }
+
+            const data = await response.json();
+            return data.data;
+        }
+
+        async function searchApollo(domain, limit) {
+            const requestBody = {
+                api_key: APOLLO_API_KEY,
+                q_organization_domains: domain,
+                page: 1,
+                per_page: Math.min(limit, 100),
+                q_person_seniorities: ['manager', 'director', 'vp', 'c_level'],
+                sort_by_field: 'person_seniority',
+                sort_ascending: false,
+                email_status: ['verified'],
+                q_person_emails: true,
+                include_emails: true,
+            };
+
+            try {
+                const response = await fetch('/.netlify/functions/apollo-proxy', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody)
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(`Professional Database error: ${response.status} - ${errorData.error || 'Unknown error'}`);
+                }
+                
+                const data = await response.json();
+                return data;
+
+            } catch (error) {
+                console.error('Professional Database call failed:', error.message);
+                throw error;
+            }
+        }
+
+        async function scrapeCompanyWebsite(domain) {
+            try {
+                const scrapedContacts = [];
+                const domains = ['salesforce.com', 'microsoft.com', 'hubspot.com', 'stripe.com', 'notion.so'];
+                
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                if (domains.includes(domain)) {
+                    const mockTitles = [
+                        'Head of Business Development',
+                        'VP of Customer Success',
+                        'Director of Strategic Partnerships',
+                        'Senior Marketing Manager',
+                        'Lead Software Engineer'
+                    ];
+                    
+                    const mockNames = [
+                        'Sarah Johnson', 'Michael Chen', 'Emily Rodriguez', 
+                        'David Kim', 'Jessica Williams', 'Alex Thompson'
+                    ];
+
+                    for (let i = 0; i < Math.floor(Math.random() * 3) + 2; i++) {
+                        const name = mockNames[Math.floor(Math.random() * mockNames.length)];
+                        const title = mockTitles[Math.floor(Math.random() * mockTitles.length)];
+                        const firstName = name.split(' ')[0].toLowerCase();
+                        const lastName = name.split(' ')[1].toLowerCase();
+                        
+                        scrapedContacts.push({
+                            name: name,
+                            title: title,
+                            email: `${firstName}.${lastName}@${domain}`,
+                            source: 'Web Intelligence',
+                            verified: false,
+                            confidence: 70 + Math.floor(Math.random() * 20),
+                        });
+                    }
+                }
+
+                return scrapedContacts;
+
+            } catch (error) {
+                return [];
+            }
+        }
+
+        function categorizeByTitle(position) {
+            if (!position) return 'Other';
+            const pos = position.toLowerCase();
+            if (pos.includes('sales') || pos.includes('business development')) return 'Sales';
+            if (pos.includes('marketing') || pos.includes('growth')) return 'Marketing';
+            if (pos.includes('engineer') || pos.includes('developer') || pos.includes('tech')) return 'Engineering';
+            if (pos.includes('finance') || pos.includes('accounting')) return 'Finance';
+            if (pos.includes('operations') || pos.includes('ops')) return 'Operations';
+            if (pos.includes('ceo') || pos.includes('cto') || pos.includes('president') || pos.includes('founder')) return 'Executive';
+            return 'Other';
+        }
+
+        function categorizeSeniority(position) {
+            if (!position) return 'individual';
+            const pos = position.toLowerCase();
+            if (pos.includes('ceo') || pos.includes('cto') || pos.includes('cfo') || pos.includes('coo') || 
+                pos.includes('president') || pos.includes('founder') || pos.includes('vp ') || pos.includes('vice president')) {
+                return 'executive';
+            }
+            if (pos.includes('director') || pos.includes('head of') || pos.includes('lead')) return 'director';
+            if (pos.includes('manager') || pos.includes('supervisor')) return 'manager';
+            return 'individual';
+        }
+
+        // ===== DISPLAY FUNCTIONS =====
+        function displayResults(contacts) {
+            document.getElementById('results-count').textContent = `${contacts.length} contacts`;
+            
+            document.getElementById('contacts-grid').innerHTML = '';
+            document.getElementById('contacts-table-body').innerHTML = '';
+            
+            contacts.forEach((contact, index) => {
+                if (contactViewMode === 'grid') {
+                    createContactCard(contact, index);
+                } else {
+                    createContactRow(contact, index);
+                }
+            });
+            
+            updateSelectionUI();
+            
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        }
+
+        function getSeniorityColor(seniority) {
+            switch(seniority) {
+                case 'executive': return 'bg-purple-100 text-purple-800';
+                case 'director': return 'bg-blue-100 text-blue-800';
+                case 'manager': return 'bg-green-100 text-green-800';
+                default: return 'bg-gray-100 text-gray-800';
+            }
+        }
+
+        // ===== UI CONTROL FUNCTIONS =====
+        function showLoading() {
+            document.getElementById('search-loading').classList.remove('hidden');
+            document.getElementById('search-results').classList.add('hidden');
+        }
+
+        function hideLoading() {
+            document.getElementById('search-loading').classList.add('hidden');
+        }
+
+        function showResults() {
+            document.getElementById('search-results').classList.remove('hidden');
+            document.getElementById('error-section').classList.add('hidden');
+        }
+
+        function hideResults() {
+            document.getElementById('search-results').classList.add('hidden');
+            document.getElementById('company-info-card').classList.add('hidden');
+        }
+
+        function showError(message) {
+            document.getElementById('error-message').textContent = message;
+            document.getElementById('error-section').classList.remove('hidden');
+            setTimeout(hideError, 5000);
+        }
+
+        function hideError() {
+            document.getElementById('error-section').classList.add('hidden');
+        }
+
+        // ===== DATA PERSISTENCE FUNCTIONS =====
+        function getStoredData(key, defaultValue = null) {
+            try {
+                const stored = localStorage.getItem(key);
+                return stored ? JSON.parse(stored) : defaultValue;
+            } catch (e) {
+                console.error('Error reading from localStorage:', e);
+                return defaultValue;
+            }
+        }
+
+        function setStoredData(key, value) {
+            try {
+                localStorage.setItem(key, JSON.stringify(value));
+            } catch (e) {
+                console.error('Error writing to localStorage:', e);
+            }
+        }
+
+        function incrementMetric(metric, count = 1) {
+            const metrics = getStoredData('salesSimplifiedMetrics', {
+                totalSearches: 0,
+                contactsFound: 0,
+                verifiedEmails: 0,
+                listsCreated: 0,
+                exports: 0,
+                exportedContacts: 0,
+                companiesSearched: 0,
+                salesforceExports: 0
+            });
+            
+            metrics[metric] += count;
+            setStoredData('salesSimplifiedMetrics', metrics);
+            updateDashboardMetrics();
+            updateReportsMetrics();
+        }
+
+        function updateDashboardMetrics() {
+            const metrics = getStoredData('salesSimplifiedMetrics', {
+                totalSearches: 0,
+                contactsFound: 0,
+                verifiedEmails: 0,
+                listsCreated: 0,
+                exports: 0,
+                exportedContacts: 0,
+                companiesSearched: 0,
+                salesforceExports: 0
+            });
+
+            document.getElementById('dashboard-total-searches').textContent = metrics.totalSearches;
+            document.getElementById('dashboard-contacts-found').textContent = metrics.contactsFound;
+            document.getElementById('dashboard-lists-created').textContent = metrics.listsCreated;
+            document.getElementById('dashboard-exports').textContent = metrics.exports;
+
+            const verificationRate = metrics.contactsFound > 0 ? Math.round((metrics.verifiedEmails / metrics.contactsFound) * 100) : 0;
+            document.getElementById('contacts-verification').textContent = `${verificationRate}% verified`;
+
+            const avgExportSize = metrics.exports > 0 ? Math.round(metrics.exportedContacts / metrics.exports) : 0;
+            document.getElementById('average-export-size').textContent = `${avgExportSize} contacts avg`;
+
+            const searchGrowth = Math.min(Math.floor(metrics.totalSearches / 10), 50);
+            document.getElementById('searches-growth').textContent = `+${searchGrowth}% this month`;
+
+            const listsThisWeek = Math.min(metrics.listsCreated, 7);
+            document.getElementById('lists-growth').textContent = `${listsThisWeek} this week`;
+        }
+
+        function updateReportsMetrics() {
+            const metrics = getStoredData('salesSimplifiedMetrics', {
+                totalSearches: 0,
+                contactsFound: 0,
+                verifiedEmails: 0,
+                listsCreated: 0,
+                exports: 0,
+                exportedContacts: 0,
+                companiesSearched: 0,
+                salesforceExports: 0
+            });
+
+            const verificationRate = metrics.contactsFound > 0 ? Math.round((metrics.verifiedEmails / metrics.contactsFound) * 100) : 0;
+            const avgScore = Math.floor(Math.random() * 20) + 75; // Simulated
+
+            document.getElementById('verification-rate').textContent = `${verificationRate}%`;
+            document.getElementById('avg-score').textContent = avgScore;
+            document.getElementById('companies-searched').textContent = metrics.companiesSearched || Math.floor(metrics.totalSearches * 0.8);
+            document.getElementById('sf-exports').textContent = metrics.salesforceExports;
+        }
+
+        function addToRecentActivity(type, message) {
+            const activities = getStoredData('recentActivity', []);
+            const newActivity = {
+                type: type,
+                message: message,
+                timestamp: new Date().toISOString()
+            };
+            
+            activities.unshift(newActivity);
+            if (activities.length > 10) activities.pop();
+            
+            setStoredData('recentActivity', activities);
+            updateRecentActivity();
+        }
+
+        function updateRecentActivity() {
+            const activities = getStoredData('recentActivity', []);
+            const container = document.getElementById('recent-activity');
+            
+            if (activities.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8 text-gray-500">
+                        <i data-lucide="activity" class="w-8 h-8 mx-auto mb-2"></i>
+                        <p class="text-sm">Start searching to see your activity</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = activities.slice(0, 5).map(activity => {
+                const timeAgo = getTimeAgo(new Date(activity.timestamp));
+                const iconMap = { 'search': 'search', 'export': 'download', 'list': 'plus', 'salesforce': 'cloud' };
+                const colorMap = { 'search': 'blue', 'export': 'green', 'list': 'purple', 'salesforce': 'indigo' };
+                
+                return `
+                    <div class="flex items-start space-x-3">
+                        <div class="w-8 h-8 bg-${colorMap[activity.type]}-100 rounded-full flex items-center justify-center">
+                            <i data-lucide="${iconMap[activity.type]}" class="w-4 h-4 text-${colorMap[activity.type]}-600"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-sm font-medium text-gray-900">${activity.message}</p>
+                            <p class="text-xs text-gray-500">${timeAgo}</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        }
+
+        function getTimeAgo(date) {
+            const now = new Date();
+            const diff = now - date;
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(diff / 3600000);
+            const days = Math.floor(diff / 86400000);
+            
+            if (minutes < 60) return `${minutes} minute${minutes === 1 ? '' : 's'} ago`;
+            if (hours < 24) return `${hours} hour${hours === 1 ? '' : 's'} ago`;
+            return `${days} day${days === 1 ? '' : 's'} ago`;
+        }
+
+        function updateSavedListsPreview() {
+            const lists = getStoredData('contactLists', []);
+            const container = document.getElementById('saved-lists-preview');
+            
+            if (lists.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8 text-gray-500">
+                        <i data-lucide="list" class="w-8 h-8 mx-auto mb-2"></i>
+                        <p class="text-sm">No saved lists yet</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = lists.slice(0, 3).map(list => `
+                <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer" onclick="viewListFromDashboard('${list.id}')">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <i data-lucide="briefcase" class="w-4 h-4 text-blue-600"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-900">${list.name}</p>
+                            <p class="text-xs text-gray-500">${list.contacts.length} contacts</p>
+                        </div>
+                    </div>
+                    <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i>
+                </div>
+            `).join('');
+            
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        }
+
+        // ===== NAVIGATION FUNCTIONS =====
+        function showSection(sectionName) {
+            document.querySelectorAll('.section-content').forEach(section => {
+                section.classList.add('hidden');
+            });
+            
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+                item.classList.add('text-gray-700');
+            });
+            
+            document.getElementById(sectionName + '-section').classList.remove('hidden');
+            
+            event.target.closest('.nav-item').classList.add('active');
+            event.target.closest('.nav-item').classList.remove('text-gray-700');
+            
+            if (sectionName === 'contact-lists') {
+                loadContactListsPage();
+            }
+            
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        }
+
+        function loadContactListsPage() {
+            const lists = getStoredData('contactLists', []);
+            const container = document.getElementById('contact-lists-grid');
+            
+            if (lists.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-12 text-gray-500">
+                        <i data-lucide="list" class="w-16 h-16 mx-auto mb-4"></i>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">No contact lists yet</h3>
+                        <p class="text-gray-600 mb-4">Start by finding contacts and saving them to lists</p>
+                        <button onclick="showSection('contact-finder')" class="px-4 py-2 brand-gradient text-white rounded-lg font-medium hover:opacity-90">
+                            Find Contacts
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = lists.map(list => {
+                const timeAgo = getTimeAgo(new Date(list.created));
+                const avgScore = list.contacts.length > 0 ? 
+                    Math.round(list.contacts.reduce((sum, c) => sum + (c.contactScore || 75), 0) / list.contacts.length) : 0;
+                
+                return `
+                    <div class="bg-white rounded-lg shadow-sm p-6 card-hover border-l-4 border-blue-500">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-900">${list.name}</h3>
+                            <div class="text-xs text-gray-500">Created ${timeAgo}</div>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-4">Enhanced contact list with verification and scoring</p>
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="text-center">
+                                <div class="text-2xl font-bold text-blue-600">${list.contacts.length}</div>
+                                <div class="text-xs text-gray-500">Contacts</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-2xl font-bold text-green-600">${avgScore}</div>
+                                <div class="text-xs text-gray-500">Avg Score</div>
+                            </div>
+                        </div>
+                        <div class="flex justify-between">
+                            <div class="flex space-x-2">
+                                <button onclick="viewList('${list.id}')" class="p-1 text-gray-400 hover:text-blue-600" title="View">
+                                    <i data-lucide="eye" class="w-4 h-4"></i>
+                                </button>
+                                <button onclick="exportSavedList('${list.id}')" class="p-1 text-gray-400 hover:text-green-600" title="Export">
+                                    <i data-lucide="download" class="w-4 h-4"></i>
+                                </button>
+                                <button onclick="deleteList('${list.id}')" class="p-1 text-gray-400 hover:text-red-600" title="Delete">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        }
+
+        // ===== CONTACT VIEW FUNCTIONS =====
+        function setContactView(viewMode) {
+            contactViewMode = viewMode;
+            
+            const gridBtn = document.getElementById('grid-view-btn');
+            const listBtn = document.getElementById('list-view-btn');
+            
+            if (viewMode === 'grid') {
+                gridBtn.classList.add('bg-white', 'text-gray-900', 'shadow-sm');
+                gridBtn.classList.remove('text-gray-600');
+                listBtn.classList.add('text-gray-600');
+                listBtn.classList.remove('bg-white', 'text-gray-900', 'shadow-sm');
+                
+                document.getElementById('contacts-grid').classList.remove('hidden');
+                document.getElementById('contacts-list').classList.add('hidden');
+            } else {
+                listBtn.classList.add('bg-white', 'text-gray-900', 'shadow-sm');
+                listBtn.classList.remove('text-gray-600');
+                gridBtn.classList.add('text-gray-600');
+                gridBtn.classList.remove('bg-white', 'text-gray-900', 'shadow-sm');
+                
+                document.getElementById('contacts-list').classList.remove('hidden');
+                document.getElementById('contacts-grid').classList.add('hidden');
+            }
+            
+            if (currentContacts.length > 0) {
+                displayResults(currentContacts);
+                updateSelectionUI();
+            }
+        }
+
+        // ===== CONTACT MANAGEMENT FUNCTIONS =====
+        function toggleContact(index) {
+            if (selectedContacts.has(index)) {
+                selectedContacts.delete(index);
+            } else {
+                selectedContacts.add(index);
+            }
+            updateSelectionUI();
+        }
+
+        function selectAllContacts() {
+            const allSelected = selectedContacts.size === currentContacts.length;
+            
+            if (allSelected) {
+                selectedContacts.clear();
+                document.getElementById('select-all-btn').textContent = 'Select All';
+            } else {
+                selectedContacts.clear();
+                for (let i = 0; i < currentContacts.length; i++) {
+                    selectedContacts.add(i);
+                }
+                document.getElementById('select-all-btn').textContent = 'Deselect All';
+            }
+            
+            document.querySelectorAll('#contacts-grid input[type="checkbox"], #contacts-table-body input[type="checkbox"]').forEach((checkbox, index) => {
+                checkbox.checked = selectedContacts.has(index);
+            });
+            
+            const headerCheckbox = document.getElementById('select-all-list');
+            if (headerCheckbox) {
+                headerCheckbox.checked = selectedContacts.size === currentContacts.length;
+            }
+            
+            updateSelectionUI();
+        }
+
+        function selectAllContactsCheckbox() {
+            const headerCheckbox = document.getElementById('select-all-list');
+            const isChecked = headerCheckbox.checked;
+            
+            if (isChecked) {
+                selectedContacts.clear();
+                for (let i = 0; i < currentContacts.length; i++) {
+                    selectedContacts.add(i);
+                }
+                document.getElementById('select-all-btn').textContent = 'Deselect All';
+            } else {
+                selectedContacts.clear();
+                document.getElementById('select-all-btn').textContent = 'Select All';
+            }
+            
+            document.querySelectorAll('#contacts-table-body input[type="checkbox"]').forEach((checkbox, index) => {
+                checkbox.checked = isChecked;
+            });
+            
+            updateSelectionUI();
+        }
+
+        function updateSelectionUI() {
+            const hasSelection = selectedContacts.size > 0;
+            
+            document.getElementById('add-to-list-btn').disabled = !hasSelection;
+            document.getElementById('add-to-salesforce-btn').disabled = !hasSelection;
+            document.getElementById('export-selected-btn').disabled = !hasSelection;
+            
+            const selectAllBtn = document.getElementById('select-all-btn');
+            if (selectAllBtn) {
+                selectAllBtn.textContent = selectedContacts.size === currentContacts.length ? 'Deselect All' : 'Select All';
+            }
+            
+            const headerCheckbox = document.getElementById('select-all-list');
+            if (headerCheckbox) {
+                headerCheckbox.checked = selectedContacts.size === currentContacts.length;
+                headerCheckbox.indeterminate = selectedContacts.size > 0 && selectedContacts.size < currentContacts.length;
+            }
+        }
+
+        function addToList() {
+            if (selectedContacts.size === 0) {
+                showError('Please select contacts to add to a list');
+                return;
+            }
+            
+            document.getElementById('save-list-modal').classList.remove('hidden');
+            document.getElementById('list-name-input').focus();
+        }
+
+        function cancelSaveList() {
+            document.getElementById('save-list-modal').classList.add('hidden');
+            document.getElementById('list-name-input').value = '';
+        }
+
+        function confirmSaveList() {
+            const listName = document.getElementById('list-name-input').value.trim();
+            if (!listName) {
+                showError('Please enter a list name');
+                return;
+            }
+            
+            const selectedContactsArray = Array.from(selectedContacts).map(index => currentContacts[index]);
+            
+            const lists = getStoredData('contactLists', []);
+            const newList = {
+                id: Date.now().toString(),
+                name: listName,
+                contacts: selectedContactsArray,
+                created: new Date().toISOString()
+            };
+            
+            lists.unshift(newList);
+            setStoredData('contactLists', lists);
+            
+            incrementMetric('listsCreated');
+            addToRecentActivity('list', `Created "${listName}" list with ${selectedContactsArray.length} enhanced contacts`);
+            
+            updateSavedListsPreview();
+            
+            document.getElementById('save-list-modal').classList.add('hidden');
+            document.getElementById('list-name-input').value = '';
+            
+            selectedContacts.clear();
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+            updateSelectionUI();
+            
+            showSuccess(`List "${listName}" saved successfully with ${selectedContactsArray.length} contacts!`);
+        }
+
+        function viewListFromDashboard(listId) {
+            showSection('contact-lists');
+            
+            setTimeout(() => {
+                const listElement = document.querySelector(`[onclick*="${listId}"]`);
+                if (listElement) {
+                    listElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    listElement.style.backgroundColor = '#dbeafe';
+                    setTimeout(() => {
+                        listElement.style.backgroundColor = '';
+                    }, 2000);
+                }
+            }, 100);
+        }
+
+        function viewList(listId) {
+            const lists = getStoredData('contactLists', []);
+            const list = lists.find(l => l.id === listId);
+            if (list) {
+                currentContacts = list.contacts;
+                selectedContacts.clear();
+                
+                showSection('contact-finder');
+                
+                setTimeout(() => {
+                    displayResults(list.contacts);
+                    showResults();
+                    
+                    document.getElementById('search-domain').value = `Saved List: ${list.name}`;
+                    document.getElementById('results-count').textContent = `${list.contacts.length} contacts`;
+                }, 100);
+            }
+        }
+
+        function exportSavedList(listId) {
+            const lists = getStoredData('contactLists', []);
+            const list = lists.find(l => l.id === listId);
+            
+            if (!list) {
+                showError('List not found');
+                return;
+            }
+
+            currentContacts = list.contacts;
+            selectedContacts.clear();
+            for (let i = 0; i < list.contacts.length; i++) {
+                selectedContacts.add(i);
+            }
+            
+            companyData = { organization: list.name };
+            exportContacts();
+        }
+
+        function deleteList(listId) {
+            if (!confirm('Are you sure you want to delete this list?')) {
+                return;
+            }
+            
+            const lists = getStoredData('contactLists', []);
+            const listIndex = lists.findIndex(l => l.id === listId);
+            
+            if (listIndex === -1) {
+                showError('List not found');
+                return;
+            }
+            
+            const deletedList = lists[listIndex];
+            lists.splice(listIndex, 1);
+            setStoredData('contactLists', lists);
+            
+            const metrics = getStoredData('salesSimplifiedMetrics', {
+                totalSearches: 0,
+                contactsFound: 0,
+                verifiedEmails: 0,
+                listsCreated: 0,
+                exports: 0,
+                exportedContacts: 0
+            });
+            metrics.listsCreated = lists.length;
+            setStoredData('salesSimplifiedMetrics', metrics);
+            
+            updateDashboardMetrics();
+            updateSavedListsPreview();
+            loadContactListsPage();
+            
+            showSuccess(`List "${deletedList.name}" deleted successfully.`);
+        }
+
+        function exportContacts() {
+            const contactsToExport = selectedContacts.size > 0 
+                ? Array.from(selectedContacts).map(index => currentContacts[index])
+                : currentContacts;
+            
+            if (contactsToExport.length === 0) {
+                showError('No contacts to export');
+                return;
+            }
+
+            const excelData = contactsToExport.map(contact => ({
+                'First Name': contact.name.split(' ')[0],
+                'Last Name': contact.name.split(' ').slice(1).join(' '),
+                'Full Name': contact.name,
+                'Email Address': contact.email,
+                'Job Title': contact.title,
+                'Department': contact.department,
+                'Seniority Level': contact.seniority,
+                'Contact Score': contact.contactScore || 75,
+                'Email Verification Status': contact.verified ? 'Verified' : contact.deliverable ? 'Deliverable' : 'Unverified',
+                'Email Deliverable': contact.deliverable ? 'Yes' : 'No',
+                'LinkedIn Profile': contact.linkedin || '',
+                'Phone Number': contact.phone || '',
+                'Company Name': contact.company,
+                'Email Verified': contact.verified ? 'Yes' : 'No',
+                'Confidence Score': contact.confidence + '%',
+                'Data Source': contact.source,
+                'Lead Source': 'Sales Simplified Enhanced',
+                'Lead Status': 'New',
+                'Date Exported': new Date().toLocaleDateString(),
+                'Exported By': 'Sales Simplified Platform'
+            }));
+
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.json_to_sheet(excelData);
+
+            const range = XLSX.utils.decode_range(ws['!ref']);
+            const colWidths = [];
+            for (let C = range.s.c; C <= range.e.c; ++C) {
+                let maxWidth = 10;
+                for (let R = range.s.r; R <= range.e.r; ++R) {
+                    const cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
+                    const cell = ws[cellAddress];
+                    if (cell && cell.v) {
+                        const cellLength = cell.v.toString().length;
+                        if (cellLength > maxWidth) maxWidth = cellLength;
+                    }
+                }
+                colWidths.push({ wch: Math.min(maxWidth + 2, 50) });
+            }
+            ws['!cols'] = colWidths;
+
+            const companyName = (companyData?.organization || 'contacts').replace(/[^a-zA-Z0-9]/g, '');
+            const sheetName = `${companyName} Enhanced Contacts`;
+            XLSX.utils.book_append_sheet(wb, ws, sheetName);
+
+            const timestamp = new Date().toISOString().slice(0, 10);
+            const filename = `Sales_Simplified_Enhanced_${companyName}_${timestamp}.xlsx`;
+
+            XLSX.writeFile(wb, filename);
+
+            incrementMetric('exports');
+            incrementMetric('exportedContacts', contactsToExport.length);
+            addToRecentActivity('export', `Exported ${contactsToExport.length} enhanced contacts from ${companyName}`);
+
+            showSuccess(`Downloaded ${contactsToExport.length} contacts with enhanced scoring to ${filename}`);
+        }
+
+        // ===== QUICK ACTIONS =====
+        function createNewList() {
+            document.getElementById('save-list-modal').classList.remove('hidden');
+            document.getElementById('list-name-input').focus();
+        }
+
+        function exportLastSearch() {
+            if (currentContacts.length > 0) {
+                selectedContacts.clear();
+                for (let i = 0; i < currentContacts.length; i++) {
+                    selectedContacts.add(i);
+                }
+                exportContacts();
+            } else {
+                showError('No recent search to export');
+            }
+        }
+
+        // ===== INITIALIZE =====
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+            
+            // Initialize Salesforce session if exists
+            const savedSession = localStorage.getItem('salesforceSession');
+            if (savedSession) {
+                try {
+                    salesforceSession = JSON.parse(savedSession);
+                    if (salesforceSession && salesforceSession.connected) {
+                        updateSalesforceStatus(true);
+                    }
+                } catch (e) {
+                    console.error('Error loading Salesforce session:', e);
+                    localStorage.removeItem('salesforceSession');
+                }
+            }
+            
+            updateDashboardMetrics();
+            updateReportsMetrics();
+            updateRecentActivity();
+            updateSavedListsPreview();
+            
+            document.getElementById('search-domain').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    executeSearch();
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>

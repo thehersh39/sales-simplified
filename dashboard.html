@@ -903,12 +903,13 @@
 
         const hunterResults = { status: 'rejected', reason: 'Rate limit exceeded' };
 
-       // ADD THESE DEBUG LINES:
+      // ADD THESE DEBUG LINES:
 console.log('=== API RESULTS DEBUG ===');
 console.log('Apollo Results:', apolloResults);
 console.log('Apollo Status:', apolloResults.status);
 console.log('Apollo Data:', apolloResults.value);
 console.log('Apollo People:', apolloResults.value?.people);
+console.log('First Apollo contact raw:', apolloResults.value?.people[0]);
 console.log('Web Results:', webResults);
 console.log('Hunter Results:', hunterResults);
 

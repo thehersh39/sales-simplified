@@ -921,7 +921,7 @@ console.log('Hunter Results:', hunterResults);
             webResults.status === 'fulfilled' ? webResults.value : [],
             cleanDomain
         );
-
+console.log('Fused Data Contacts:', fusedData.contacts);
         if (fusedData.contacts.length === 0) {
             throw new Error('No contacts found for this domain with current filters.');
         }

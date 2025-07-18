@@ -909,8 +909,7 @@ console.log('Apollo Results:', apolloResults);
 console.log('Apollo Status:', apolloResults.status);
 console.log('Apollo Data:', apolloResults.value);
 console.log('Apollo People:', apolloResults.value?.people);
-console.log('First Apollo contact raw:', apolloResults.value?.people[0]);
-console.log('Web Results:', webResults);
+console.log('First Apollo contact raw:', JSON.stringify(apolloResults.value?.people[0], null, 2));console.log('Web Results:', webResults);
 console.log('Hunter Results:', hunterResults);
 
         updateSearchStatus('Applying contact scoring algorithms...');

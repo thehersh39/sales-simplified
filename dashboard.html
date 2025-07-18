@@ -894,11 +894,13 @@
                 await new Promise(resolve => setTimeout(resolve, 1000));
 
                 updateSearchStatus('Enhanced email verification in progress...');
-                const [hunterResults, apolloResults, webResults] = await Promise.allSettled([
-                    searchHunter(cleanDomain, limit),
-                    searchApollo(cleanDomain, limit),
-                    scrapeCompanyWebsite(cleanDomain)
-                ]);
+                // Skip Hunter due to rate limits, focus on Apollo
+const [apolloResults, webResults] = await Promise.allSettled([
+    searchApollo(cleanDomain, limit),
+    scrapeCompanyWebsite(cleanDomain)
+]);
+
+const hunterResults = { status: 'rejected', reason: 'Rate limit exceeded' };
 
                 updateSearchStatus('Applying contact scoring algorithms...');
                 await new Promise(resolve => setTimeout(resolve, 1000));

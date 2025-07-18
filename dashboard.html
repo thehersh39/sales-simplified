@@ -867,92 +867,86 @@
         // ===== ENHANCED SEARCH FUNCTIONS =====
 
         async function executeSearch() {
-            const domain = document.getElementById('search-domain').value.trim();
-            if (!domain) {
-                showError('Please enter a company domain');
-                return;
-            }
+    const domain = document.getElementById('search-domain').value.trim();
+    if (!domain) {
+        showError('Please enter a company domain');
+        return;
+    }
 
-            const cleanDomain = domain.replace(/^(https?:\/\/)?(www\.)?/, '').split('/')[0];
-            
-            hideError();
-            hideResults();
-            showLoading();
-            
-            const button = document.getElementById('main-search-btn');
-            const originalText = button.innerHTML;
-            button.innerHTML = '<div class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent inline-block mr-2"></div>Enhanced Analysis...';
-            button.disabled = true;
+    const cleanDomain = domain.replace(/^(https?:\/\/)?(www\.)?/, '').split('/')[0];
+    
+    hideError();
+    hideResults();
+    showLoading();
+    
+    const button = document.getElementById('main-search-btn');
+    const originalText = button.innerHTML;
+    button.innerHTML = '<div class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent inline-block mr-2"></div>Enhanced Analysis...';
+    button.disabled = true;
 
-            try {
-                // Show company information
-                showCompanyInfo(cleanDomain);
-                
-                const limit = Math.min(parseInt(document.getElementById('results-limit').value), 100);
+    try {
+        // Show company information
+        showCompanyInfo(cleanDomain);
+        
+        const limit = Math.min(parseInt(document.getElementById('results-limit').value), 100);
 
-                updateSearchStatus('Gathering company intelligence...');
-                await new Promise(resolve => setTimeout(resolve, 1000));
+        updateSearchStatus('Gathering company intelligence...');
+        await new Promise(resolve => setTimeout(resolve, 1000));
 
-                updateSearchStatus('Enhanced email verification in progress...');
-                // Skip Hunter due to rate limits, focus on Apollo
-const [apolloResults, webResults] = await Promise.allSettled([
-    searchApollo(cleanDomain, limit),
-    scrapeCompanyWebsite(cleanDomain)
-]);
+        updateSearchStatus('Enhanced email verification in progress...');
+        
+        // Skip Hunter due to rate limits, focus on Apollo
+        const [apolloResults, webResults] = await Promise.allSettled([
+            searchApollo(cleanDomain, limit),
+            scrapeCompanyWebsite(cleanDomain)
+        ]);
 
-const hunterResults = { status: 'rejected', reason: 'Rate limit exceeded' };
-// Skip Hunter due to rate limits, focus on Apollo
-const [apolloResults, webResults] = await Promise.allSettled([
-    searchApollo(cleanDomain, limit),
-    scrapeCompanyWebsite(cleanDomain)
-]);
+        const hunterResults = { status: 'rejected', reason: 'Rate limit exceeded' };
 
-const hunterResults = { status: 'rejected', reason: 'Rate limit exceeded' };
+        // ADD THESE DEBUG LINES:
+        console.log('=== API RESULTS DEBUG ===');
+        console.log('Apollo Results:', apolloResults);
+        console.log('Web Results:', webResults);
+        console.log('Hunter Results:', hunterResults);
 
-// ADD THESE DEBUG LINES:
-console.log('=== API RESULTS DEBUG ===');
-console.log('Apollo Results:', apolloResults);
-console.log('Web Results:', webResults);
-console.log('Hunter Results:', hunterResults);
+        updateSearchStatus('Applying contact scoring algorithms...');
+        await new Promise(resolve => setTimeout(resolve, 1000));
 
-updateSearchStatus('Applying contact scoring algorithms...');
-await new Promise(resolve => setTimeout(resolve, 1000));
+        const fusedData = enhancedFuseDataSources(
+            hunterResults.status === 'fulfilled' ? hunterResults.value : null,
+            apolloResults.status === 'fulfilled' ? apolloResults.value : null,
+            webResults.status === 'fulfilled' ? webResults.value : [],
+            cleanDomain
+        );
 
-const fusedData = enhancedFuseDataSources(
-    hunterResults.status === 'fulfilled' ? hunterResults.value : null,
-    apolloResults.status === 'fulfilled' ? apolloResults.value : null,
-    webResults.status === 'fulfilled' ? webResults.value : [],
-    cleanDomain
-);
-
-                if (fusedData.contacts.length === 0) {
-                    throw new Error('No contacts found for this domain with current filters.');
-                }
-
-                companyData = fusedData.companyInfo;
-                currentContacts = fusedData.contacts;
-                selectedContacts.clear();
-
-                displayResults(fusedData.contacts);
-                showResults();
-                
-                incrementMetric('totalSearches');
-                incrementMetric('contactsFound', fusedData.contacts.length);
-                
-                const verifiedCount = fusedData.contacts.filter(c => c.verified).length;
-                incrementMetric('verifiedEmails', verifiedCount);
-                
-                addToRecentActivity('search', `Enhanced search: ${cleanDomain} • ${fusedData.contacts.length} contacts • Company data enriched`);
-
-            } catch (error) {
-                console.error('Search Error:', error);
-                showError(error.message);
-            } finally {
-                button.innerHTML = originalText;
-                button.disabled = false;
-                hideLoading();
-            }
+        if (fusedData.contacts.length === 0) {
+            throw new Error('No contacts found for this domain with current filters.');
         }
+
+        companyData = fusedData.companyInfo;
+        currentContacts = fusedData.contacts;
+        selectedContacts.clear();
+
+        displayResults(fusedData.contacts);
+        showResults();
+        
+        incrementMetric('totalSearches');
+        incrementMetric('contactsFound', fusedData.contacts.length);
+        
+        const verifiedCount = fusedData.contacts.filter(c => c.verified).length;
+        incrementMetric('verifiedEmails', verifiedCount);
+        
+        addToRecentActivity('search', `Enhanced search: ${cleanDomain} • ${fusedData.contacts.length} contacts • Company data enriched`);
+
+    } catch (error) {
+        console.error('Search Error:', error);
+        showError(error.message);
+    } finally {
+        button.innerHTML = originalText;
+        button.disabled = false;
+        hideLoading();
+    }
+}
 
         function updateSearchStatus(message) {
             document.getElementById('search-status').textContent = message;

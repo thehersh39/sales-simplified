@@ -901,7 +901,19 @@ const [apolloResults, webResults] = await Promise.allSettled([
 ]);
 
 const hunterResults = { status: 'rejected', reason: 'Rate limit exceeded' };
+// Skip Hunter due to rate limits, focus on Apollo
+const [apolloResults, webResults] = await Promise.allSettled([
+    searchApollo(cleanDomain, limit),
+    scrapeCompanyWebsite(cleanDomain)
+]);
 
+const hunterResults = { status: 'rejected', reason: 'Rate limit exceeded' };
+
+// ADD THESE DEBUG LINES:
+console.log('=== API RESULTS DEBUG ===');
+console.log('Apollo Results:', apolloResults);
+console.log('Web Results:', webResults);
+console.log('Hunter Results:', hunterResults);
                 updateSearchStatus('Applying contact scoring algorithms...');
                 await new Promise(resolve => setTimeout(resolve, 1000));
 

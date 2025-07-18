@@ -914,15 +914,16 @@ console.log('=== API RESULTS DEBUG ===');
 console.log('Apollo Results:', apolloResults);
 console.log('Web Results:', webResults);
 console.log('Hunter Results:', hunterResults);
-                updateSearchStatus('Applying contact scoring algorithms...');
-                await new Promise(resolve => setTimeout(resolve, 1000));
 
-                const fusedData = enhancedFuseDataSources(
-                    hunterResults.status === 'fulfilled' ? hunterResults.value : null,
-                    apolloResults.status === 'fulfilled' ? apolloResults.value : null,
-                    webResults.status === 'fulfilled' ? webResults.value : [],
-                    cleanDomain
-                );
+updateSearchStatus('Applying contact scoring algorithms...');
+await new Promise(resolve => setTimeout(resolve, 1000));
+
+const fusedData = enhancedFuseDataSources(
+    hunterResults.status === 'fulfilled' ? hunterResults.value : null,
+    apolloResults.status === 'fulfilled' ? apolloResults.value : null,
+    webResults.status === 'fulfilled' ? webResults.value : [],
+    cleanDomain
+);
 
                 if (fusedData.contacts.length === 0) {
                     throw new Error('No contacts found for this domain with current filters.');

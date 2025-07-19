@@ -175,6 +175,24 @@
                         </button>
                     </div>
                 </div>
+                <!-- Admin Panel Navigation (only show if user is admin) -->
+<div id="admin-section" class="mt-8 border-t border-gray-200 pt-4 hidden">
+    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Admin Panel</h3>
+    <div class="space-y-2">
+        <a href="#" onclick="showSection('team-management')" class="nav-item flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-700">
+            <i data-lucide="users" class="w-4 h-4"></i>
+            <span>Team Management</span>
+        </a>
+        <a href="#" onclick="showSection('usage-analytics')" class="nav-item flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-700">
+            <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+            <span>Usage Analytics</span>
+        </a>
+        <a href="#" onclick="showSection('billing')" class="nav-item flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-700">
+            <i data-lucide="credit-card" class="w-4 h-4"></i>
+            <span>Billing & Usage</span>
+        </a>
+    </div>
+</div>
             </div>
         </div>
 
@@ -640,7 +658,187 @@
             </div>
         </div>
     </div>
+<!-- Team Management Section -->
+<div id="team-management-section" class="section-content hidden">
+    <div class="mb-6">
+        <h2 class="text-2xl font-bold text-gray-900">Team Management</h2>
+        <p class="text-gray-600">Manage your team members and their access</p>
+    </div>
 
+    <!-- Add New User -->
+    <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Add Team Member</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <input type="email" id="new-user-email" placeholder="email@company.com" 
+                   class="border border-gray-300 rounded-lg px-3 py-2">
+            <input type="text" id="new-user-name" placeholder="Full Name" 
+                   class="border border-gray-300 rounded-lg px-3 py-2">
+            <button onclick="addTeamMember()" class="px-4 py-2 brand-gradient text-white rounded-lg hover:opacity-90">
+                Add Member
+            </button>
+        </div>
+    </div>
+
+    <!-- Team Members List -->
+    <div class="bg-white rounded-lg shadow-sm">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-900">Team Members</h3>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Last Active</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Searches</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="team-members-table" class="bg-white divide-y divide-gray-200">
+                    <!-- Team members will be populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Usage Analytics Section -->
+<div id="usage-analytics-section" class="section-content hidden">
+    <div class="mb-6">
+        <h2 class="text-2xl font-bold text-gray-900">Usage Analytics</h2>
+        <p class="text-gray-600">Monitor team usage and API consumption</p>
+    </div>
+
+    <!-- Usage Overview Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white rounded-lg shadow-sm p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600">This Month</p>
+                    <p class="text-2xl font-bold text-blue-600" id="monthly-searches">247</p>
+                    <p class="text-xs text-gray-500">Total Searches</p>
+                </div>
+                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <i data-lucide="search" class="w-5 h-5 text-blue-600"></i>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600">API Usage</p>
+                    <p class="text-2xl font-bold text-green-600">23%</p>
+                    <p class="text-xs text-gray-500">of 4,000 credits</p>
+                </div>
+                <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                    <i data-lucide="cpu" class="w-5 h-5 text-green-600"></i>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600">Active Users</p>
+                    <p class="text-2xl font-bold text-purple-600">31</p>
+                    <p class="text-xs text-gray-500">of 40 total</p>
+                </div>
+                <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                    <i data-lucide="users" class="w-5 h-5 text-purple-600"></i>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600">Success Rate</p>
+                    <p class="text-2xl font-bold text-orange-600">94%</p>
+                    <p class="text-xs text-gray-500">Email Verification</p>
+                </div>
+                <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                    <i data-lucide="shield-check" class="w-5 h-5 text-orange-600"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Usage Chart Placeholder -->
+    <div class="bg-white rounded-lg shadow-sm p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Daily Usage Trend</h3>
+        <div class="text-center py-8 text-gray-500">
+            <i data-lucide="trending-up" class="w-12 h-12 mx-auto mb-2"></i>
+            <p>Usage analytics dashboard</p>
+            <p class="text-sm">Real-time charts and insights</p>
+        </div>
+    </div>
+</div>
+
+<!-- Billing Section -->
+<div id="billing-section" class="section-content hidden">
+    <div class="mb-6">
+        <h2 class="text-2xl font-bold text-gray-900">Billing & Subscription</h2>
+        <p class="text-gray-600">Manage your Sales Simplified subscription</p>
+    </div>
+
+    <!-- Current Plan -->
+    <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-gray-900">Current Plan</h3>
+            <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">Active</span>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+                <p class="text-sm text-gray-600">Plan</p>
+                <p class="text-xl font-bold text-gray-900">Professional Team</p>
+                <p class="text-sm text-gray-500">40 users included</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-600">Monthly Cost</p>
+                <p class="text-xl font-bold text-gray-900">$1,500</p>
+                <p class="text-sm text-gray-500">$37.50 per user</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-600">Next Billing</p>
+                <p class="text-xl font-bold text-gray-900">Feb 15, 2025</p>
+                <p class="text-sm text-gray-500">Auto-renewal enabled</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Usage Limits -->
+    <div class="bg-white rounded-lg shadow-sm p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Usage & Limits</h3>
+        <div class="space-y-4">
+            <div>
+                <div class="flex justify-between text-sm mb-1">
+                    <span>API Credits Used</span>
+                    <span>920 / 4,000</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div class="bg-blue-600 h-2 rounded-full" style="width: 23%"></div>
+                </div>
+            </div>
+            <div>
+                <div class="flex justify-between text-sm mb-1">
+                    <span>Team Members</span>
+                    <span>40 / 40</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div class="bg-green-600 h-2 rounded-full" style="width: 100%"></div>
+                </div>
+            </div>
+            <div>
+                <div class="flex justify-between text-sm mb-1">
+                    <span>Monthly Searches</span>
+                    <span>247 / Unlimited</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div class="bg-purple-600 h-2 rounded-full" style="width: 15%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
     <!-- Salesforce Connection Modal -->
     <div id="salesforce-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
         <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
@@ -2213,6 +2411,7 @@ function processLogin() {
     currentUser = { email: email, name: name, organization: currentOrganization };
     localStorage.setItem('currentUser', JSON.stringify(currentUser));
     updateUserDisplay();
+    showAdminSections(); // ADD THIS LINE
     document.getElementById('login-modal').remove();
     showSuccess(`Welcome ${name}!`);
 }
@@ -2240,10 +2439,11 @@ function logout() {
 }
         // ===== INITIALIZE =====
         document.addEventListener('DOMContentLoaded', function() {
-            initializeUser();
-            if (typeof lucide !== 'undefined') {
-                lucide.createIcons();
-            }
+    initializeUser();
+    showAdminSections(); // ADD THIS LINE
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
             
             // Initialize Salesforce session if exists
             const savedSession = localStorage.getItem('salesforceSession');
@@ -2270,6 +2470,126 @@ function logout() {
                 }
             });
         });
+        // ===== ADMIN FUNCTIONS =====
+        function addTeamMember() {
+            const email = document.getElementById('new-user-email').value.trim();
+            const name = document.getElementById('new-user-name').value.trim();
+            
+            if (!email || !name) {
+                showError('Please enter both email and name');
+                return;
+            }
+            
+            // Get current team members
+            const teamMembers = getStoredData('teamMembers', []);
+            
+            // Check if user already exists
+            if (teamMembers.find(member => member.email === email)) {
+                showError('User already exists in the team');
+                return;
+            }
+            
+            // Add new team member
+            const newMember = {
+                id: Date.now().toString(),
+                email: email,
+                name: name,
+                added: new Date().toISOString(),
+                lastActive: null,
+                searches: 0,
+                status: 'invited'
+            };
+            
+            teamMembers.push(newMember);
+            setStoredData('teamMembers', teamMembers);
+            
+            // Clear form
+            document.getElementById('new-user-email').value = '';
+            document.getElementById('new-user-name').value = '';
+            
+            // Refresh team members table
+            loadTeamMembers();
+            
+            showSuccess(`${name} has been added to the team`);
+        }
+
+        function loadTeamMembers() {
+            const teamMembers = getStoredData('teamMembers', []);
+            const tbody = document.getElementById('team-members-table');
+            
+            if (!tbody) return;
+            
+            if (teamMembers.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                            No team members yet. Add your first team member above.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tbody.innerHTML = teamMembers.map(member => {
+                const lastActive = member.lastActive ? 
+                    getTimeAgo(new Date(member.lastActive)) : 'Never';
+                
+                const statusColor = member.status === 'active' ? 'text-green-600' : 'text-gray-500';
+                
+                return `
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-medium text-gray-900">${member.name}</div>
+                            <div class="text-sm ${statusColor}">${member.status}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            ${member.email}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            ${lastActive}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            ${member.searches}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <button onclick="removeTeamMember('${member.id}')" class="text-red-600 hover:text-red-900">
+                                Remove
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function removeTeamMember(memberId) {
+            if (!confirm('Are you sure you want to remove this team member?')) {
+                return;
+            }
+            
+            const teamMembers = getStoredData('teamMembers', []);
+            const updatedMembers = teamMembers.filter(member => member.id !== memberId);
+            setStoredData('teamMembers', updatedMembers);
+            
+            loadTeamMembers();
+            showSuccess('Team member removed successfully');
+        }
+
+        function isUserAdmin() {
+            // Check if current user is admin (Bryan or designated admin)
+            return currentUser && (
+                currentUser.email === 'bryan@company.com' || 
+                currentUser.email === 'admin@company.com' ||
+                currentUser.email.includes('admin')
+            );
+        }
+
+        function showAdminSections() {
+            if (isUserAdmin()) {
+                document.getElementById('admin-section').classList.remove('hidden');
+            } else {
+                document.getElementById('admin-section').classList.add('hidden');
+            }
+        }
     </script>
 
 </body>

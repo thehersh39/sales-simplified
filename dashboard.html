@@ -740,6 +740,8 @@
         let contactViewMode = 'grid';
         let salesforceSession = null;
         let advancedFiltersVisible = false;
+        let currentUser = null;
+        let currentOrganization = 'bryans_company';
 
         // Enhanced Company Data Simulation
         const companyDatabase = {
@@ -1550,22 +1552,24 @@ console.log('Fused Data Contacts:', fusedData.contacts);
 
         // ===== DATA PERSISTENCE FUNCTIONS =====
         function getStoredData(key, defaultValue = null) {
-            try {
-                const stored = localStorage.getItem(key);
-                return stored ? JSON.parse(stored) : defaultValue;
-            } catch (e) {
-                console.error('Error reading from localStorage:', e);
-                return defaultValue;
-            }
-        }
+    try {
+        const userKey = currentUser ? `user_${currentUser.email.replace(/[^a-zA-Z0-9]/g, '_')}_${key}` : key;
+        const stored = localStorage.getItem(userKey);
+        return stored ? JSON.parse(stored) : defaultValue;
+    } catch (e) {
+        console.error('Error reading from localStorage:', e);
+        return defaultValue;
+    }
+}
 
         function setStoredData(key, value) {
-            try {
-                localStorage.setItem(key, JSON.stringify(value));
-            } catch (e) {
-                console.error('Error writing to localStorage:', e);
-            }
-        }
+    try {
+        const userKey = currentUser ? `user_${currentUser.email.replace(/[^a-zA-Z0-9]/g, '_')}_${key}` : key;
+        localStorage.setItem(userKey, JSON.stringify(value));
+    } catch (e) {
+        console.error('Error writing to localStorage:', e);
+    }
+}
 
         function incrementMetric(metric, count = 1) {
             const metrics = getStoredData('salesSimplifiedMetrics', {
@@ -2152,9 +2156,85 @@ console.log('Fused Data Contacts:', fusedData.contacts);
                 showError('No recent search to export');
             }
         }
+// ===== USER LOGIN SYSTEM =====
+function initializeUser() {
+    const savedUser = localStorage.getItem('currentUser');
+    if (savedUser) {
+        try {
+            currentUser = JSON.parse(savedUser);
+            updateUserDisplay();
+        } catch (e) {
+            showLoginModal();
+        }
+    } else {
+        showLoginModal();
+    }
+}
 
+function showLoginModal() {
+    const modal = document.createElement('div');
+    modal.id = 'login-modal';
+    modal.className = 'fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50';
+    modal.innerHTML = `
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Login to Sales Simplified</h3>
+            <div class="space-y-4">
+                <input type="email" id="login-email" placeholder="your.email@company.com" 
+                       class="w-full border border-gray-300 rounded-lg px-3 py-2">
+                <input type="text" id="login-name" placeholder="Your Full Name" 
+                       class="w-full border border-gray-300 rounded-lg px-3 py-2">
+            </div>
+            <div class="mt-6">
+                <button onclick="processLogin()" class="w-full px-4 py-2 brand-gradient text-white rounded-lg">
+                    Login
+                </button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    document.getElementById('login-email').focus();
+}
+
+function processLogin() {
+    const email = document.getElementById('login-email').value.trim();
+    const name = document.getElementById('login-name').value.trim();
+    
+    if (!email || !name) {
+        showError('Please enter both email and name');
+        return;
+    }
+    
+    currentUser = { email: email, name: name, organization: currentOrganization };
+    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    updateUserDisplay();
+    document.getElementById('login-modal').remove();
+    showSuccess(`Welcome ${name}!`);
+}
+
+function updateUserDisplay() {
+    const userSection = document.querySelector('.flex.items-center.space-x-4');
+    if (userSection && currentUser) {
+        userSection.innerHTML = `
+            <div class="text-sm text-blue-200 text-right">
+                <div class="font-medium">${currentUser.name}</div>
+                <div class="text-xs">${currentUser.email}</div>
+            </div>
+            <button onclick="logout()" class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                <i data-lucide="user" class="w-4 h-4 text-white"></i>
+            </button>
+        `;
+    }
+}
+
+function logout() {
+    if (confirm('Logout?')) {
+        localStorage.removeItem('currentUser');
+        location.reload();
+    }
+}
         // ===== INITIALIZE =====
         document.addEventListener('DOMContentLoaded', function() {
+            initializeUser();
             if (typeof lucide !== 'undefined') {
                 lucide.createIcons();
             }

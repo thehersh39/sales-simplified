@@ -1740,28 +1740,34 @@ console.log('Fused Data Contacts:', fusedData.contacts);
 
         // ===== NAVIGATION FUNCTIONS =====
         function showSection(sectionName) {
-            document.querySelectorAll('.section-content').forEach(section => {
-                section.classList.add('hidden');
-            });
-            
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.classList.remove('active');
-                item.classList.add('text-gray-700');
-            });
-            
-            document.getElementById(sectionName + '-section').classList.remove('hidden');
-            
-            event.target.closest('.nav-item').classList.add('active');
-            event.target.closest('.nav-item').classList.remove('text-gray-700');
-            
-            if (sectionName === 'contact-lists') {
-                loadContactListsPage();
-            }
-            
-            if (typeof lucide !== 'undefined') {
-                lucide.createIcons();
-            }
-        }
+    document.querySelectorAll('.section-content').forEach(section => {
+        section.classList.add('hidden');
+    });
+    
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('active');
+        item.classList.add('text-gray-700');
+    });
+    
+    const targetSection = document.getElementById(sectionName + '-section');
+    if (targetSection) {  // ADD THIS CHECK
+        targetSection.classList.remove('hidden');
+    }
+    
+    const navItem = event?.target?.closest('.nav-item');  // MAKE THIS SAFER
+    if (navItem) {
+        navItem.classList.add('active');
+        navItem.classList.remove('text-gray-700');
+    }
+    
+    if (sectionName === 'contact-lists') {
+        loadContactListsPage();
+    }
+    
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+}
 
         function loadContactListsPage() {
             const lists = getStoredData('contactLists', []);

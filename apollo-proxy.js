@@ -20,40 +20,43 @@ exports.handler = async (event, context) => {
   try {
     const body = JSON.parse(event.body);
     
-    // First, search for people
+    // First, search for people using the original endpoint
     const searchResponse = await fetch('https://api.apollo.io/v1/mixed_people/search', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-Api-Key': 'cgAc0fBksS1tJePYf0n4DA'
+        'x-api-key': 'cgAc0fBksS1tJePYf0n4DA'  // lowercase!
       },
       body: JSON.stringify(body)
     });
     
     const searchData = await searchResponse.json();
     
-    // Then enrich each person to unlock their email (spend credits)
+    // Then enrich each person using the correct enrichment endpoint
     const enrichedPeople = [];
     for (const person of searchData.people?.slice(0, 10) || []) {
       try {
-        const enrichResponse = await fetch('https://api.apollo.io/v1/people/match', {
+        const enrichUrl = `https://api.apollo.io/api/v1/people/match?reveal_personal_emails=false`;
+        
+        const enrichResponse = await fetch(enrichUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'X-Api-Key': 'cgAc0fBksS1tJePYf0n4DA'
+            'Cache-Control': 'no-cache',
+            'x-api-key': 'cgAc0fBksS1tJePYf0n4DA'  // lowercase!
           },
           body: JSON.stringify({
             first_name: person.first_name,
             last_name: person.last_name,
-            organization_name: person.organization?.name,
-            reveal_personal_emails: false
+            organization_name: person.organization?.name
           })
         });
         
-        const enrichedPerson = await enrichResponse.json();
-        enrichedPeople.push(enrichedPerson.person || person);
+        const enrichedData = await enrichResponse.json();
+        enrichedPeople.push(enrichedData.person || person);
+        
       } catch (e) {
-        enrichedPeople.push(person); // Fallback to original
+        enrichedPeople.push(person);
       }
     }
     

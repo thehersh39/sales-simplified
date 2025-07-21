@@ -20,37 +20,53 @@ exports.handler = async (event, context) => {
   try {
     const body = JSON.parse(event.body);
     
-    // Try the enrichment endpoint instead
-    const response = await fetch('https://api.apollo.io/v1/people/match', {
+    // First, search for people
+    const searchResponse = await fetch('https://api.apollo.io/v1/mixed_people/search', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'X-Api-Key': 'cgAc0fBksS1tJePYf0n4DA'
       },
-      body: JSON.stringify({
-        ...body,
-        reveal_personal_emails: false,
-        reveal_phone_number: true
-      })
+      body: JSON.stringify(body)
     });
     
-    const data = await response.json();
+    const searchData = await searchResponse.json();
+    
+    // Then enrich each person to unlock their email (spend credits)
+    const enrichedPeople = [];
+    for (const person of searchData.people?.slice(0, 10) || []) {
+      try {
+        const enrichResponse = await fetch('https://api.apollo.io/v1/people/match', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Api-Key': 'cgAc0fBksS1tJePYf0n4DA'
+          },
+          body: JSON.stringify({
+            first_name: person.first_name,
+            last_name: person.last_name,
+            organization_name: person.organization?.name,
+            reveal_personal_emails: false
+          })
+        });
+        
+        const enrichedPerson = await enrichResponse.json();
+        enrichedPeople.push(enrichedPerson.person || person);
+      } catch (e) {
+        enrichedPeople.push(person); // Fallback to original
+      }
+    }
     
     return {
       statusCode: 200,
-      headers: {
-        ...headers,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(data)
+      headers: { ...headers, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...searchData, people: enrichedPeople })
     };
+    
   } catch (error) {
     return {
       statusCode: 500,
-      headers: {
-        ...headers,
-        'Content-Type': 'application/json'
-      },
+      headers: { ...headers, 'Content-Type': 'application/json' },
       body: JSON.stringify({ error: error.message })
     };
   }

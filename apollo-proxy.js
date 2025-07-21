@@ -20,15 +20,22 @@ exports.handler = async (event, context) => {
   try {
     const body = JSON.parse(event.body);
     
+    // Add the correct parameters for unlocking emails
+    const requestBody = {
+      ...body,
+      include_emails: true,
+      email_status: ['verified', 'guessed', 'bounced', 'other']
+    };
+    
     const response = await fetch('https://api.apollo.io/v1/mixed_people/search', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'X-Api-Key': 'cgAc0fBksS1tJePYf0n4DA'
       },
-      body: JSON.stringify(body)
+      body: JSON.stringify(requestBody)
     });
-
+    
     const data = await response.json();
     
     return {
@@ -39,7 +46,6 @@ exports.handler = async (event, context) => {
       },
       body: JSON.stringify(data)
     };
-
   } catch (error) {
     return {
       statusCode: 500,

@@ -20,20 +20,18 @@ exports.handler = async (event, context) => {
   try {
     const body = JSON.parse(event.body);
     
-    // Add the correct parameters for unlocking emails
-    const requestBody = {
-      ...body,
-      include_emails: true,
-      email_status: ['verified', 'guessed', 'bounced', 'other']
-    };
-    
-    const response = await fetch('https://api.apollo.io/v1/mixed_people/search', {
+    // Try the enrichment endpoint instead
+    const response = await fetch('https://api.apollo.io/v1/people/match', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'X-Api-Key': 'cgAc0fBksS1tJePYf0n4DA'
       },
-      body: JSON.stringify(requestBody)
+      body: JSON.stringify({
+        ...body,
+        reveal_personal_emails: false,
+        reveal_phone_number: true
+      })
     });
     
     const data = await response.json();

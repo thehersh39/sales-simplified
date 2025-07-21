@@ -1162,9 +1162,10 @@ console.log('Fused Data Contacts:', fusedData.contacts);
             
             if (apolloResults && apolloResults.people) {
                 apolloResults.people.forEach(person => {
-                    const processedEmail = person.email === "email_not_unlocked@domain.com" 
-                        ? `${person.first_name?.toLowerCase() || 'contact'}.${person.last_name?.toLowerCase() || 'person'}@${domain}` 
-                        : person.email;
+                    const processedEmail = person.personal_emails?.[0] || 
+    (person.email === "email_not_unlocked@domain.com" 
+        ? `${person.first_name?.toLowerCase() || 'contact'}.${person.last_name?.toLowerCase() || 'person'}@${domain}` 
+        : person.email);
                     
                     const emailVerification = enhancedEmailVerification(processedEmail, domain);
                     

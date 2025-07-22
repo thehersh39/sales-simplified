@@ -20,7 +20,7 @@ exports.handler = async (event, context) => {
   try {
     const body = JSON.parse(event.body);
     
-    // STEP 1: Discover contacts using mixed_people/search
+    // Step 1: Discover contacts
     const discoverResponse = await fetch('https://api.apollo.io/api/v1/mixed_people/search', {
       method: 'POST',
       headers: {
@@ -30,8 +30,7 @@ exports.handler = async (event, context) => {
       body: JSON.stringify({
         q_organization_domains: [body.q_organization_domains],
         page: body.page || 1,
-        per_page: body.per_page || 10,
-        person_titles: ["Founder", "VP", "CTO", "Director", "Manager", "Head", "Chief"]
+        per_page: body.per_page || 10
       })
     });
     
@@ -45,35 +44,49 @@ exports.handler = async (event, context) => {
       };
     }
     
-    // STEP 2: Enrich with emails using bulk_match
-    const peopleToEnrich = discoveredData.people.map(person => ({
-      first_name: person.first_name,
-      last_name: person.last_name,
-      organization_name: person.organization?.name,
-      organization_domain: body.q_organization_domains
-    }));
-    
-    const enrichResponse = await fetch('https://api.apollo.io/api/v1/people/bulk_match', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'no-cache',
-        'x-api-key': 'cgAc0fBksS1tJePYf0n4DA'
-      },
-      body: JSON.stringify({
-        reveal_personal_emails: false,
-        people: peopleToEnrich
-      })
-    });
-    
-    const enrichedData = await enrichResponse.json();
+    // Step 2: Enrich each person using Francis's exact structure
+    const enrichedPeople = [];
+    for (const person of discoveredData.people.slice(0, 10)) {
+      try {
+        const enrichResponse = await fetch('https://api.apollo.io/api/v1/people/match', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache',
+            'x-api-key': 'cgAc0fBksS1tJePYf0n4DA',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({
+            first_name: person.first_name,
+            last_name: person.last_name,
+            domain: body.q_organization_domains, // Use 'domain' not 'organization_domain'
+            reveal_personal_emails: false,
+            reveal_phone_number: false
+          })
+        });
+        
+        const enrichedData = await enrichResponse.json();
+        
+        // Merge the enriched data with original person data
+        const mergedPerson = {
+          ...person,
+          email: enrichedData.person?.email || person.email,
+          email_status: enrichedData.person?.email_status || person.email_status
+        };
+        
+        enrichedPeople.push(mergedPerson);
+        
+      } catch (e) {
+        enrichedPeople.push(person);
+      }
+    }
     
     return {
       statusCode: 200,
       headers: { ...headers, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         ...discoveredData,
-        people: enrichedData.matches || []
+        people: enrichedPeople
       })
     };
     

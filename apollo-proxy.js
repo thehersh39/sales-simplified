@@ -20,50 +20,29 @@ exports.handler = async (event, context) => {
   try {
     const body = JSON.parse(event.body);
     
-    // First, search for people using the original endpoint
-    const searchResponse = await fetch('https://api.apollo.io/v1/mixed_people/search', {
+    // Use the correct endpoint that actually returns emails
+    const response = await fetch('https://api.apollo.io/api/v1/people/bulk_match', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': 'cgAc0fBksS1tJePYf0n4DA'  // lowercase!
+        'Cache-Control': 'no-cache',
+        'x-api-key': 'cgAc0fBksS1tJePYf0n4DA'
       },
-      body: JSON.stringify(body)
+      body: JSON.stringify({
+        reveal_personal_emails: false,
+        details: [{
+          organization_name: body.q_organization_domains,
+          // We'll need to structure this correctly for bulk match
+        }]
+      })
     });
     
-    const searchData = await searchResponse.json();
-    
-    // Then enrich each person using the correct enrichment endpoint
-    const enrichedPeople = [];
-    for (const person of searchData.people?.slice(0, 10) || []) {
-      try {
-        const enrichUrl = `https://api.apollo.io/api/v1/people/match?reveal_personal_emails=false`;
-        
-        const enrichResponse = await fetch(enrichUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Cache-Control': 'no-cache',
-            'x-api-key': 'cgAc0fBksS1tJePYf0n4DA'  // lowercase!
-          },
-          body: JSON.stringify({
-            first_name: person.first_name,
-            last_name: person.last_name,
-            organization_name: person.organization?.name
-          })
-        });
-        
-        const enrichedData = await enrichResponse.json();
-        enrichedPeople.push(enrichedData.person || person);
-        
-      } catch (e) {
-        enrichedPeople.push(person);
-      }
-    }
+    const data = await response.json();
     
     return {
       statusCode: 200,
       headers: { ...headers, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...searchData, people: enrichedPeople })
+      body: JSON.stringify(data)
     };
     
   } catch (error) {

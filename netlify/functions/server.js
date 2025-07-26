@@ -1,195 +1,130 @@
-import express from 'express';
-import serverless from 'serverless-http';
+const express = require('express');
+const serverless = require('serverless-http');
 
 const app = express();
-
-// Middleware
 app.use(express.json());
-app.use(express.static('.'));
 
-// Environment variables
-const HUNTER_API_KEY = process.env.HUNTER_API_KEY;
+// CORS middleware
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(200);
+  } else {
+    next();
+  }
+});
 
-// Hunter.io API integration
-async function searchHunterIO(domain, limit = 10) {
-    if (!HUNTER_API_KEY) {
-        console.log('Hunter.io API key not found');
-        return { data: { emails: [] } };
-    }
-
-    try {
-        const response = await fetch(
-            `https://api.hunter.io/v2/domain-search?domain=${domain}&limit=${limit}&api_key=${HUNTER_API_KEY}`
-        );
-        
-        if (!response.ok) {
-            throw new Error(`Hunter.io API error: ${response.status}`);
-        }
-        
-        return await response.json();
-    } catch (error) {
-        console.error('Hunter.io search failed:', error);
-        return { data: { emails: [] } };
-    }
-}
-
-// Company enrichment service
-function enrichCompanyData(domain, hunterData) {
-    const brandMappings = {
-        'mccain.com': 'McCain Foods',
-        'eatlegendary.com': 'Legendary Foods',
-        'crazyrichards.com': "Crazy Richard's",
-        'questnutrition.com': 'Quest Nutrition',
-        'sevensundays.com': 'Seven Sundays',
-        'partakefoods.com': 'Partake Foods',
-        'stripe.com': 'Stripe',
-        'airbnb.com': 'Airbnb'
-    };
-
-    const industryMappings = {
-        'mccain.com': 'Consumer Packaged Goods',
-        'eatlegendary.com': 'Consumer Packaged Goods', 
-        'crazyrichards.com': 'Consumer Packaged Goods',
-        'questnutrition.com': 'Consumer Packaged Goods',
-        'sevensundays.com': 'Consumer Packaged Goods',
-        'partakefoods.com': 'Consumer Packaged Goods',
-        'stripe.com': 'Technology',
-        'airbnb.com': 'Travel & Hospitality'
-    };
-
-    const companyName = brandMappings[domain] || 
-                       hunterData?.organization || 
-                       domain.split('.')[0].charAt(0).toUpperCase() + domain.split('.')[0].slice(1);
-
-    const industry = industryMappings[domain] || 'Business Services';
-
-    return {
-        name: companyName,
-        domain: domain,
-        industry: industry,
-        description: `${companyName} - Professional business in the ${industry.toLowerCase()} industry`,
-        employee_count: hunterData?.employee_count || null,
-        country: hunterData?.country || null
-    };
-}
-
-// Enhanced contact processing
-function processContacts(hunterEmails, companyData) {
-    return hunterEmails.map(email => {
-        // Calculate confidence score
-        let confidence = 75; // Base score
-        
-        // Domain verification boost
-        if (email.email && email.email.includes(companyData.domain.split('.')[0])) {
-            confidence += 15;
-        }
-        
-        // Professional format boost
-        if (email.first_name && email.last_name && email.email) {
-            confidence += 10;
-        }
-        
-        // Hunter verification boost
-        if (email.verification && email.verification.result === 'deliverable') {
-            confidence = Math.min(confidence + 10, 100);
-        }
-
-        return {
-            first_name: email.first_name || 'Professional',
-            last_name: email.last_name || 'Contact',
-            email: email.email,
-            position: email.position || email.title || 'Team Member',
-            company: companyData.name,
-            department: email.department || null,
-            confidence: Math.min(confidence, 100),
-            verification_status: email.verification?.result || 'verified',
-            source: 'Hunter.io',
-            phone_number: email.phone_number || null,
-            linkedin_url: email.linkedin_url || null
-        };
-    });
-}
-
-// API Routes
+// Contact finder search endpoint (for enhanced dashboard)
 app.post('/api/contact-finder/search', async (req, res) => {
-    try {
-        const { domain, limit = 10 } = req.body;
-        
-        if (!domain) {
-            return res.status(400).json({ error: 'Domain is required' });
-        }
-
-        console.log(`Searching contacts for domain: ${domain}`);
-        
-        // Search Hunter.io
-        const hunterResult = await searchHunterIO(domain, limit);
-        const hunterEmails = hunterResult.data?.emails || [];
-        
-        console.log(`Hunter.io found ${hunterEmails.length} contacts`);
-        
-        // Enrich company data
-        const companyData = enrichCompanyData(domain, hunterResult.data);
-        
-        // Process and enhance contacts
-        const contacts = processContacts(hunterEmails, companyData);
-        
-        console.log(`Processed ${contacts.length} contacts with enhanced data`);
-        
-        res.json({
-            success: true,
-            contacts: contacts,
-            company: companyData,
-            total_results: contacts.length,
-            api_usage: {
-                hunter_calls: hunterEmails.length > 0 ? 1 : 0,
-                total_contacts: contacts.length
-            }
-        });
-        
-    } catch (error) {
-        console.error('Contact search error:', error);
-        res.status(500).json({ 
-            error: 'Contact search failed',
-            message: error.message 
-        });
+  try {
+    const { domain, limit } = req.body;
+    
+    if (!domain) {
+      return res.status(400).json({ error: "Domain is required" });
     }
+
+    console.log(`🔍 Contact finder search for: ${domain} (limit: ${limit})`);
+    
+    // Hunter.io API integration
+    const HUNTER_API_KEY = process.env.HUNTER_API_KEY;
+    if (!HUNTER_API_KEY) {
+      return res.status(500).json({ error: "Hunter.io API key not configured" });
+    }
+
+    // Company enrichment (simplified)
+    const enrichedCompanyData = {
+      name: domain.includes('partake') ? 'Partake Foods' : 
+            domain.includes('mccain') ? 'McCain Foods' :
+            domain.includes('stripe') ? 'Stripe' :
+            domain.charAt(0).toUpperCase() + domain.split('.')[0].slice(1),
+      industry: domain.includes('partake') || domain.includes('mccain') ? 'Consumer Packaged Goods' :
+                domain.includes('stripe') ? 'Technology' : 'Business',
+      description: `Professional company providing business services and solutions.`,
+      domain: domain
+    };
+
+    // Hunter.io contact search
+    let contacts = [];
+    
+    try {
+      const hunterLimit = Math.min(limit || 10, 10);
+      const hunterUrl = `https://api.hunter.io/v2/domain-search?domain=${domain}&api_key=${HUNTER_API_KEY}&limit=${hunterLimit}`;
+      
+      const response = await fetch(hunterUrl);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`Hunter.io API error: ${response.status} - ${errorText}`);
+        throw new Error(`Hunter.io API error: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      const emails = data.data?.emails || [];
+      console.log(`Hunter.io found ${emails.length} contacts for ${domain}`);
+      
+      if (emails.length > 0) {
+        contacts = emails.map((contact) => ({
+          first_name: contact.first_name,
+          last_name: contact.last_name,
+          email: contact.value || contact.email, // Hunter.io uses 'value' field for emails
+          position: contact.position,
+          company: enrichedCompanyData.name,
+          confidence: contact.confidence || 100,
+          department: contact.department,
+          phone: contact.phone_number,
+          linkedin: contact.linkedin_url
+        }));
+      }
+    } catch (error) {
+      console.error("❌ Hunter.io search failed:", error);
+    }
+
+    // Return results in format expected by dashboard
+    res.json({
+      contacts: contacts,
+      company: {
+        name: enrichedCompanyData.name,
+        description: enrichedCompanyData.description,
+        industry: enrichedCompanyData.industry,
+        domain: domain
+      },
+      success: contacts.length > 0
+    });
+
+  } catch (error) {
+    console.error("Contact finder search error:", error);
+    res.status(500).json({ 
+      error: "Search failed", 
+      message: error instanceof Error ? error.message : "Unknown error"
+    });
+  }
 });
 
 // Dashboard stats endpoint
 app.get('/api/dashboard/stats', (req, res) => {
-    res.json({
-        totalSearches: 1,
-        contactsFound: 10,
-        verificationRate: 100,
-        listsCreated: 0,
-        exports: 0
-    });
+  res.json({
+    totalSearches: 0,
+    contactsFound: 0,
+    listsCreated: 0,
+    verifiedEmails: 0
+  });
 });
 
-// Contact lists endpoint
+// Contact lists endpoints
 app.get('/api/contact-lists', (req, res) => {
-    res.json([]);
+  res.json([]);
 });
 
 app.post('/api/contact-lists', (req, res) => {
-    const { name, contacts } = req.body;
-    console.log(`Saving contact list: ${name} with ${contacts.length} contacts`);
-    res.json({ success: true, id: Date.now().toString() });
+  res.json({ id: Date.now(), ...req.body });
 });
 
-// Health check
-app.get('/api/health', (req, res) => {
-    res.json({ 
-        status: 'healthy', 
-        hunter_configured: !!HUNTER_API_KEY,
-        timestamp: new Date().toISOString()
-    });
+// Search history endpoint
+app.get('/api/search-history', (req, res) => {
+  res.json([]);
 });
 
-// Serve dashboard.html as default
-app.get('/', (req, res) => {
-    res.sendFile('dashboard.html', { root: '.' });
-});
-
-// Create the Netlify function handler
-export const handler = serverless(app);
+// Export handler for Netlify Functions
+module.exports.handler = serverless(app);

@@ -1,2 +1,48 @@
 [build]
+  # Build command for static dashboard
+  command = "npm install"
+  
+  # Output directory for frontend
+  publish = "."
+  
+  # Functions directory (keeping your existing setting)
   functions = "./netlify/functions"
+  
+  # Node.js version
+  node_bundler = "esbuild"
+
+[build.environment]
+  NODE_VERSION = "20"
+  NPM_FLAGS = "--force"
+
+# API function for backend
+[[plugins]]
+  package = "@netlify/plugin-functions-install-core"
+
+# Redirect all API calls to serverless function
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/server/:splat"
+  status = 200
+  force = true
+
+# SPA fallback for dashboard
+[[redirects]]
+  from = "/dashboard.html"
+  to = "/dashboard.html"
+  status = 200
+
+# Default redirect to dashboard
+[[redirects]]
+  from = "/"
+  to = "/dashboard.html"
+  status = 200
+
+# Headers for security
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"

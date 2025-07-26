@@ -932,6 +932,8 @@
         const API_BASE = '/api';
         let currentViewMode = 'grid';
         let selectedContacts = new Set();
+        let currentContacts = [];
+        let contactViewMode = 'grid';
         
         async function apiCall(endpoint, options = {}) {
             try {
@@ -1022,8 +1024,6 @@
         const HUNTER_API_KEY = '64514bd46213dce4c8e6ed724555b2f9d0fa8e03';
         const APOLLO_API_KEY = 'cgAc0fBksS1tJePYf0n4DA';
 
-        let currentContacts = [];
-        let selectedContacts = new Set();
         let companyData = null;
         let contactViewMode = 'grid';
         let salesforceSession = null;

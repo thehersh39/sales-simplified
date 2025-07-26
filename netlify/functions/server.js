@@ -127,4 +127,4 @@ app.get('/api/search-history', (req, res) => {
 });
 
 // Export handler for Netlify Functions
-module.exports.handler = serverless(app);
+exports.handler = serverless(app);

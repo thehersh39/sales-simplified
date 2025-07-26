@@ -1,7 +1,0 @@
-{
-  "functions": {
-    "api/contact-search.js": {
-      "runtime": "nodejs18.x"
-    }
-  }
-}

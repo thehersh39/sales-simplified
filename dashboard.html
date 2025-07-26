@@ -928,6 +928,94 @@
     </div>
 
     <script>
+                // ===== ENHANCED HUNTER.IO INTEGRATION =====
+        const API_BASE = '/api';
+        
+        async function apiCall(endpoint, options = {}) {
+            try {
+                const response = await fetch(`${API_BASE}${endpoint}`, {
+                    headers: { 'Content-Type': 'application/json', ...options.headers },
+                    ...options
+                });
+                return response.ok ? await response.json() : null;
+            } catch (error) {
+                console.error('API Error:', error);
+                return null;
+            }
+        }
+        
+        async function searchContactsReal(domain) {
+            const response = await apiCall('/contact-finder/search', {
+                method: 'POST',
+                body: JSON.stringify({ domain, limit: 10 })
+            });
+            return response ? { contacts: response.contacts, company: response.company, success: true } : { contacts: [], success: false };
+        }
+        
+        function displayRealContactResults(contacts, company) {
+            const grid = document.getElementById('contacts-grid');
+            
+            if (company) {
+                document.getElementById('company-info-card').classList.remove('hidden');
+                document.getElementById('company-name').textContent = company.name;
+                document.getElementById('company-industry').textContent = company.industry;
+            }
+            
+            grid.innerHTML = contacts.map((contact, index) => `
+                <div class="contact-card p-6 border rounded-lg bg-white shadow-sm">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h4 class="font-semibold text-gray-900">${contact.first_name} ${contact.last_name}</h4>
+                            <p class="text-sm text-gray-600">${contact.position || 'Professional'}</p>
+                        </div>
+                        <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">
+                            ${contact.confidence || 100}% Verified
+                        </span>
+                    </div>
+                    <div class="space-y-2 mb-4">
+                        <div class="flex items-center space-x-2">
+                            <i data-lucide="mail" class="w-4 h-4 text-gray-400"></i>
+                            <span class="text-sm font-mono">${contact.email}</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <i data-lucide="building" class="w-4 h-4 text-gray-400"></i>
+                            <span class="text-sm text-gray-600">${contact.company || company?.name}</span>
+                        </div>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button onclick="addToList(${index})" class="flex-1 px-3 py-1 bg-blue-100 text-blue-700 rounded text-xs">Add</button>
+                        <button onclick="exportContact(${index})" class="flex-1 px-3 py-1 bg-gray-100 text-gray-700 rounded text-xs">Export</button>
+                    </div>
+                </div>
+            `).join('');
+            
+            document.getElementById('search-results').classList.remove('hidden');
+            window.currentSearchResults = contacts;
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+        
+        function addToList(index) {
+            const contact = window.currentSearchResults[index];
+            let list = JSON.parse(localStorage.getItem('currentList') || '[]');
+            if (!list.find(c => c.email === contact.email)) {
+                list.push(contact);
+                localStorage.setItem('currentList', JSON.stringify(list));
+                alert(`${contact.first_name} ${contact.last_name} added to list`);
+            }
+        }
+        
+        function exportContact(index) {
+            const contact = window.currentSearchResults[index];
+            const csv = `"First Name","Last Name","Email","Position","Company","Confidence"\n"${contact.first_name}","${contact.last_name}","${contact.email}","${contact.position || ''}","${contact.company || ''}","${contact.confidence || 100}%"`;
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${contact.first_name}_${contact.last_name}.csv`;
+            a.click();
+        }
+        
+        // ===== ENHANCED MAIN FUNCTIONS =====
         // Global Variables
         const HUNTER_API_KEY = '64514bd46213dce4c8e6ed724555b2f9d0fa8e03';
         const APOLLO_API_KEY = 'cgAc0fBksS1tJePYf0n4DA';
@@ -1066,91 +1154,44 @@
 
         // ===== ENHANCED SEARCH FUNCTIONS =====
 
-        async function executeSearch() {
-    const domain = document.getElementById('search-domain').value.trim();
-    if (!domain) {
-        showError('Please enter a company domain');
-        return;
-    }
-
-    const cleanDomain = domain.replace(/^(https?:\/\/)?(www\.)?/, '').split('/')[0];
-    
-    hideError();
-    hideResults();
-    showLoading();
-    
-    const button = document.getElementById('main-search-btn');
-    const originalText = button.innerHTML;
-    button.innerHTML = '<div class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent inline-block mr-2"></div>Enhanced Analysis...';
-    button.disabled = true;
-
-    try {
-        // Show company information
-        showCompanyInfo(cleanDomain);
-        
-        const limit = Math.min(parseInt(document.getElementById('results-limit').value), 100);
-
-        updateSearchStatus('Gathering company intelligence...');
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
-        updateSearchStatus('Enhanced email verification in progress...');
-        
-        // Skip Hunter due to rate limits, focus on Apollo
-        const [apolloResults, webResults] = await Promise.allSettled([
-            searchApollo(cleanDomain, limit),
-            scrapeCompanyWebsite(cleanDomain)
-        ]);
-
-        const hunterResults = { status: 'rejected', reason: 'Rate limit exceeded' };
-
-      // ADD THESE DEBUG LINES:
-console.log('=== API RESULTS DEBUG ===');
-console.log('Apollo Results:', apolloResults);
-console.log('Apollo Status:', apolloResults.status);
-console.log('Apollo Data:', apolloResults.value);
-console.log('Apollo People:', apolloResults.value?.people);
-console.log('First Apollo contact raw:', JSON.stringify(apolloResults.value?.people[0], null, 2));console.log('Web Results:', webResults);
-console.log('Hunter Results:', hunterResults);
-
-        updateSearchStatus('Applying contact scoring algorithms...');
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
-        const fusedData = enhancedFuseDataSources(
-            hunterResults.status === 'fulfilled' ? hunterResults.value : null,
-            apolloResults.status === 'fulfilled' ? apolloResults.value : null,
-            webResults.status === 'fulfilled' ? webResults.value : [],
-            cleanDomain
-        );
-console.log('Fused Data Contacts:', fusedData.contacts);
-        if (fusedData.contacts.length === 0) {
-            throw new Error('No contacts found for this domain with current filters.');
+           async function executeSearch() {
+            const domain = document.getElementById('search-domain').value.trim();
+            if (!domain) { 
+                showError('Please enter a company domain');
+                return; 
+            }
+            
+            const cleanDomain = domain.replace(/^(https?:\/\/)?(www\.)?/, '').split('/')[0];
+            hideError();
+            hideResults();
+            showLoading();
+            
+            const button = document.getElementById('main-search-btn');
+            const originalText = button.innerHTML;
+            button.innerHTML = '<div class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent inline-block mr-2"></div>Real Hunter.io Search...';
+            button.disabled = true;
+            
+            try {
+                const result = await searchContactsReal(cleanDomain);
+                if (result.success && result.contacts.length > 0) {
+                    displayRealContactResults(result.contacts, result.company);
+                    incrementMetric('totalSearches');
+                    incrementMetric('contactsFound', result.contacts.length);
+                    incrementMetric('verifiedEmails', result.contacts.length);
+                    addToRecentActivity('search', `Found ${result.contacts.length} verified contacts at ${cleanDomain}`);
+                    showResults();
+                } else {
+                    throw new Error(`No verified contacts found for ${cleanDomain}`);
+                }
+            } catch (error) {
+                console.error('Search Error:', error);
+                showError(error.message);
+            } finally {
+                button.innerHTML = originalText;
+                button.disabled = false;
+                hideLoading();
+            }
         }
-
-        companyData = fusedData.companyInfo;
-        currentContacts = fusedData.contacts;
-        selectedContacts.clear();
-
-        displayResults(fusedData.contacts);
-        showResults();
-        
-        incrementMetric('totalSearches');
-        incrementMetric('contactsFound', fusedData.contacts.length);
-        
-        const verifiedCount = fusedData.contacts.filter(c => c.verified).length;
-        incrementMetric('verifiedEmails', verifiedCount);
-        
-        addToRecentActivity('search', `Enhanced search: ${cleanDomain} • ${fusedData.contacts.length} contacts • Company data enriched`);
-
-    } catch (error) {
-        console.error('Search Error:', error);
-        showError(error.message);
-    } finally {
-        button.innerHTML = originalText;
-        button.disabled = false;
-        hideLoading();
-    }
-}
-
         function updateSearchStatus(message) {
             document.getElementById('search-status').textContent = message;
         }

@@ -957,6 +957,10 @@
         }
         
         function displayRealContactResults(contacts, company) {
+            // Update global variables for selection system
+            currentContacts = contacts;
+            selectedContacts.clear();
+            
             const grid = document.getElementById('contacts-grid');
             
             if (company) {
@@ -965,12 +969,25 @@
                 document.getElementById('company-industry').textContent = company.industry;
             }
             
+            // Update contact count display
+            const countElement = document.getElementById('results-count');
+            if (countElement) {
+                countElement.textContent = `${contacts.length} contacts found`;
+            }
+            
             grid.innerHTML = contacts.map((contact, index) => `
                 <div class="contact-card p-6 border rounded-lg bg-white shadow-sm">
                     <div class="flex items-center justify-between mb-4">
-                        <div>
-                            <h4 class="font-semibold text-gray-900">${contact.first_name} ${contact.last_name}</h4>
-                            <p class="text-sm text-gray-600">${contact.position || 'Professional'}</p>
+                        <div class="flex items-center space-x-3">
+                            <input type="checkbox" 
+                                   class="contact-checkbox" 
+                                   data-index="${index}"
+                                   onchange="toggleContactSelection(${index})"
+                                   id="contact-${index}">
+                            <div>
+                                <h4 class="font-semibold text-gray-900">${contact.first_name} ${contact.last_name}</h4>
+                                <p class="text-sm text-gray-600">${contact.position || 'Professional'}</p>
+                            </div>
                         </div>
                         <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">
                             ${contact.confidence || 100}% Verified
@@ -979,7 +996,7 @@
                     <div class="space-y-2 mb-4">
                         <div class="flex items-center space-x-2">
                             <i data-lucide="mail" class="w-4 h-4 text-gray-400"></i>
-                            <span class="text-sm font-mono">${contact.email}</span>
+                            <span class="text-sm font-mono email-modern email-verified">${contact.email}</span>
                         </div>
                         <div class="flex items-center space-x-2">
                             <i data-lucide="building" class="w-4 h-4 text-gray-400"></i>
@@ -987,27 +1004,154 @@
                         </div>
                     </div>
                     <div class="flex space-x-2">
-                        <button onclick="addToList(${index})" class="flex-1 px-3 py-1 bg-blue-100 text-blue-700 rounded text-xs">Add</button>
-                        <button onclick="exportContact(${index})" class="flex-1 px-3 py-1 bg-gray-100 text-gray-700 rounded text-xs">Export</button>
+                        <button onclick="addToList(${index})" class="flex-1 px-3 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200">Add to List</button>
+                        <button onclick="exportContact(${index})" class="flex-1 px-3 py-1 bg-gray-100 text-gray-700 rounded text-xs hover:bg-gray-200">Export</button>
                     </div>
                 </div>
             `).join('');
             
             document.getElementById('search-results').classList.remove('hidden');
             window.currentSearchResults = contacts;
+            
+            // Update selection controls
+            updateSelectionControls();
+            
             if (typeof lucide !== 'undefined') lucide.createIcons();
         }
         
+        function toggleContactSelection(index) {
+            if (selectedContacts.has(index)) {
+                selectedContacts.delete(index);
+            } else {
+                selectedContacts.add(index);
+            }
+            updateSelectionControls();
+        }
+
+        function selectAllContacts() {
+            selectedContacts.clear();
+            for (let i = 0; i < currentContacts.length; i++) {
+                selectedContacts.add(i);
+            }
+            // Update all checkboxes
+            document.querySelectorAll('.contact-checkbox').forEach((checkbox, index) => {
+                checkbox.checked = true;
+            });
+            updateSelectionControls();
+        }
+
+        function deselectAllContacts() {
+            selectedContacts.clear();
+            document.querySelectorAll('.contact-checkbox').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            updateSelectionControls();
+        }
+
+        function updateSelectionControls() {
+            const selectedCount = selectedContacts.size;
+            const totalCount = currentContacts.length;
+            
+            // Update selection count display
+            const selectionInfo = document.getElementById('selection-info');
+            if (selectionInfo) {
+                if (selectedCount > 0) {
+                    selectionInfo.textContent = `${selectedCount} of ${totalCount} contacts selected`;
+                    selectionInfo.classList.remove('hidden');
+                } else {
+                    selectionInfo.classList.add('hidden');
+                }
+            }
+            
+            // Enable/disable bulk action buttons
+            const bulkButtons = document.querySelectorAll('.bulk-action-btn');
+            bulkButtons.forEach(btn => {
+                btn.disabled = selectedCount === 0;
+                btn.classList.toggle('opacity-50', selectedCount === 0);
+            });
+        }
+
         function addToList(index) {
             const contact = window.currentSearchResults[index];
             let list = JSON.parse(localStorage.getItem('currentList') || '[]');
             if (!list.find(c => c.email === contact.email)) {
                 list.push(contact);
                 localStorage.setItem('currentList', JSON.stringify(list));
-                alert(`${contact.first_name} ${contact.last_name} added to list`);
+                showSuccess(`${contact.first_name} ${contact.last_name} added to list`);
+            } else {
+                showError('Contact already in list');
             }
         }
         
+        function toggleViewMode() {
+            contactViewMode = contactViewMode === 'grid' ? 'list' : 'grid';
+            
+            // Update view mode buttons
+            const gridBtn = document.getElementById('grid-view-btn');
+            const listBtn = document.getElementById('list-view-btn');
+            
+            if (contactViewMode === 'grid') {
+                gridBtn?.classList.add('bg-blue-100', 'text-blue-600');
+                gridBtn?.classList.remove('text-gray-600');
+                listBtn?.classList.remove('bg-blue-100', 'text-blue-600');
+                listBtn?.classList.add('text-gray-600');
+                
+                document.getElementById('contacts-grid').classList.remove('hidden');
+                document.getElementById('contacts-table').classList.add('hidden');
+            } else {
+                listBtn?.classList.add('bg-blue-100', 'text-blue-600');
+                listBtn?.classList.remove('text-gray-600');
+                gridBtn?.classList.remove('bg-blue-100', 'text-blue-600');
+                gridBtn?.classList.add('text-gray-600');
+                
+                document.getElementById('contacts-grid').classList.add('hidden');
+                document.getElementById('contacts-table').classList.remove('hidden');
+                
+                // Re-populate table view if contacts exist
+                if (currentContacts.length > 0) {
+                    displayContactsAsTable(currentContacts);
+                }
+            }
+        }
+
+        function displayContactsAsTable(contacts) {
+            const tbody = document.getElementById('contacts-table-body');
+            if (!tbody) return;
+            
+            tbody.innerHTML = contacts.map((contact, index) => `
+                <tr class="table-row border-b">
+                    <td class="px-6 py-4">
+                        <input type="checkbox" 
+                               class="contact-checkbox" 
+                               data-index="${index}"
+                               onchange="toggleContactSelection(${index})"
+                               id="contact-table-${index}">
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="font-medium text-gray-900">${contact.first_name} ${contact.last_name}</div>
+                        <div class="text-sm text-gray-500">${contact.position || 'Professional'}</div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="email-modern email-verified">${contact.email}</div>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-900">
+                        ${contact.company || 'Unknown'}
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">
+                            ${contact.confidence || 100}%
+                        </span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="flex space-x-2">
+                            <button onclick="addToList(${index})" class="text-blue-600 hover:text-blue-800 text-sm">Add</button>
+                            <button onclick="exportContact(${index})" class="text-gray-600 hover:text-gray-800 text-sm">Export</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
         function exportContact(index) {
             const contact = window.currentSearchResults[index];
             const csv = `"First Name","Last Name","Email","Position","Company","Confidence"\n"${contact.first_name}","${contact.last_name}","${contact.email}","${contact.position || ''}","${contact.company || ''}","${contact.confidence || 100}%"`;
@@ -1180,7 +1324,6 @@
                     incrementMetric('contactsFound', result.contacts.length);
                     incrementMetric('verifiedEmails', result.contacts.length);
                     addToRecentActivity('search', `Found ${result.contacts.length} verified contacts at ${cleanDomain}`);
-                    showResults();
                 } else {
                     throw new Error(`No verified contacts found for ${cleanDomain}`);
                 }

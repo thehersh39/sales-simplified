@@ -930,6 +930,8 @@
     <script>
                 // ===== ENHANCED HUNTER.IO INTEGRATION =====
         const API_BASE = '/api';
+        let currentViewMode = 'grid';
+        let selectedContacts = new Set();
         
         async function apiCall(endpoint, options = {}) {
             try {
@@ -975,7 +977,8 @@
                     <div class="space-y-2 mb-4">
                         <div class="flex items-center space-x-2">
                             <i data-lucide="mail" class="w-4 h-4 text-gray-400"></i>
-<span class="text-sm font-mono">${contact.email || contact.value || contact.email_address || 'Email loading...'}</span>                        </div>
+                            <span class="text-sm font-mono">${contact.email}</span>
+                        </div>
                         <div class="flex items-center space-x-2">
                             <i data-lucide="building" class="w-4 h-4 text-gray-400"></i>
                             <span class="text-sm text-gray-600">${contact.company || company?.name}</span>
@@ -1005,7 +1008,8 @@
         
         function exportContact(index) {
             const contact = window.currentSearchResults[index];
-const csv = `"First Name","Last Name","Email","Position","Company","Confidence"\n"${contact.first_name}","${contact.last_name}","${contact.email || contact.value || contact.email_address}","${contact.position || ''}","${contact.company || ''}","${contact.confidence || 100}%"`;            const blob = new Blob([csv], { type: 'text/csv' });
+            const csv = `"First Name","Last Name","Email","Position","Company","Confidence"\n"${contact.first_name}","${contact.last_name}","${contact.email}","${contact.position || ''}","${contact.company || ''}","${contact.confidence || 100}%"`;
+            const blob = new Blob([csv], { type: 'text/csv' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
@@ -2070,7 +2074,7 @@ async function searchApollo(domain, limit) {
 
         // ===== CONTACT VIEW FUNCTIONS =====
         function setContactView(viewMode) {
-            contactViewMode = viewMode;
+            currentViewMode = viewMode;
             
             const gridBtn = document.getElementById('grid-view-btn');
             const listBtn = document.getElementById('list-view-btn');
@@ -2080,33 +2084,27 @@ async function searchApollo(domain, limit) {
                 gridBtn.classList.remove('text-gray-600');
                 listBtn.classList.add('text-gray-600');
                 listBtn.classList.remove('bg-white', 'text-gray-900', 'shadow-sm');
-                
-                document.getElementById('contacts-grid').classList.remove('hidden');
-                document.getElementById('contacts-list').classList.add('hidden');
             } else {
                 listBtn.classList.add('bg-white', 'text-gray-900', 'shadow-sm');
                 listBtn.classList.remove('text-gray-600');
                 gridBtn.classList.add('text-gray-600');
                 gridBtn.classList.remove('bg-white', 'text-gray-900', 'shadow-sm');
-                
-                document.getElementById('contacts-list').classList.remove('hidden');
-                document.getElementById('contacts-grid').classList.add('hidden');
             }
             
-            if (currentContacts.length > 0) {
-                displayResults(currentContacts);
-                updateSelectionUI();
+            // Re-display contacts if we have them
+            if (window.currentSearchResults && window.currentSearchResults.length > 0) {
+                displayContactsInCurrentView(window.currentSearchResults);
             }
         }
 
         // ===== CONTACT MANAGEMENT FUNCTIONS =====
-        function toggleContact(index) {
+        function toggleContactSelection(index) {
             if (selectedContacts.has(index)) {
                 selectedContacts.delete(index);
             } else {
                 selectedContacts.add(index);
             }
-            updateSelectionUI();
+            updateActionButtons();
         }
 
         function selectAllContacts() {

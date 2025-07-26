@@ -949,8 +949,7 @@
         }
         
         async function searchContactsReal(domain) {
-            const response = await apiCall('/contact-finder/search', {
-                method: 'POST',
+const response = await apiCall('/contact-search', {                method: 'POST',
                 body: JSON.stringify({ domain, limit: 10 })
             });
             return response ? { contacts: response.contacts, company: response.company, success: true } : { contacts: [], success: false };

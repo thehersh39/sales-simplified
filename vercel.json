@@ -1,0 +1,17 @@
+{
+  "functions": {
+    "api/contact-search.js": {
+      "runtime": "nodejs18.x"
+    }
+  },
+  "routes": [
+    {
+      "src": "/api/contact-finder/search",
+      "dest": "/api/contact-search.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/dashboard.html"
+    }
+  ]
+}

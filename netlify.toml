@@ -5,8 +5,8 @@
   # Output directory for frontend
   publish = "."
   
-  # Functions directory (keeping your existing setting)
-  functions = "./netlify/functions"
+  # Functions directory
+  functions = "netlify/functions"
   
   # Node.js version
   node_bundler = "esbuild"

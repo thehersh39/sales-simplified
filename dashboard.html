@@ -1101,7 +1101,7 @@
                 listBtn?.classList.add('text-gray-600');
                 
                 document.getElementById('contacts-grid').classList.remove('hidden');
-                document.getElementById('contacts-table').classList.add('hidden');
+                document.getElementById('contacts-list').classList.add('hidden');
             } else {
                 listBtn?.classList.add('bg-blue-100', 'text-blue-600');
                 listBtn?.classList.remove('text-gray-600');
@@ -1109,7 +1109,7 @@
                 gridBtn?.classList.add('text-gray-600');
                 
                 document.getElementById('contacts-grid').classList.add('hidden');
-                document.getElementById('contacts-table').classList.remove('hidden');
+                document.getElementById('contacts-list').classList.remove('hidden');
                 
                 // Re-populate table view if contacts exist
                 if (currentContacts.length > 0) {
@@ -2253,7 +2253,7 @@ async function searchApollo(domain, limit) {
                 
                 // Show table, hide grid
                 document.getElementById('contacts-grid').classList.add('hidden');
-                document.getElementById('contacts-table').classList.remove('hidden');
+                document.getElementById('contacts-list').classList.remove('hidden');
             }
             
             // Re-display contacts if we have them

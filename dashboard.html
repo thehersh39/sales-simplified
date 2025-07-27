@@ -486,9 +486,12 @@
                                     <label class="text-sm font-medium text-gray-700">Filter:</label>
                                     <select id="title-filter" onchange="filterContacts()" class="px-3 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500">
                                         <option value="">All Titles</option>
-                                        <option value="executive">Executives (C-Level, VP)</option>
+                                        <option value="executive">C-Level Executives</option>
+                                        <option value="vp">Vice Presidents</option>
                                         <option value="director">Directors</option>
                                         <option value="manager">Managers</option>
+                                        <option value="sales">Sales Team</option>
+                                        <option value="marketing">Marketing Team</option>
                                         <option value="other">Other Roles</option>
                                     </select>
                                 </div>
@@ -1829,7 +1832,7 @@
 async function searchApollo(domain, limit) {
     const requestBody = {
         page: 1,
-        per_page: Math.min(limit, 100),
+        per_page: Math.min(limit, 50),
         q_organization_domains_list: [domain],  // Fixed: Use correct parameter name as array
         person_titles: ["VP", "Director", "Manager", "Head", "Chief", "President"],
         organization_locations: ["United States"],
@@ -2910,15 +2913,24 @@ function logout() {
                     switch (titleFilter) {
                         case 'executive':
                             return title.includes('ceo') || title.includes('cto') || title.includes('cfo') || 
-                                   title.includes('president') || title.includes('vp') || title.includes('vice president');
+                                   title.includes('coo') || title.includes('chief') || title.includes('c-level');
+                        case 'vp':
+                            return title.includes('vp') || title.includes('vice president') || title.includes('v.p.');
                         case 'director':
                             return title.includes('director');
                         case 'manager':
                             return title.includes('manager') || title.includes('mgr');
+                        case 'sales':
+                            return title.includes('sales') || title.includes('account') || title.includes('business development') || 
+                                   title.includes('bd') || title.includes('revenue') || title.includes('commercial');
+                        case 'marketing':
+                            return title.includes('marketing') || title.includes('brand') || title.includes('digital') || 
+                                   title.includes('content') || title.includes('campaign') || title.includes('growth');
                         case 'other':
                             return !title.includes('ceo') && !title.includes('cto') && !title.includes('cfo') && 
                                    !title.includes('president') && !title.includes('vp') && !title.includes('vice president') &&
-                                   !title.includes('director') && !title.includes('manager') && !title.includes('mgr');
+                                   !title.includes('director') && !title.includes('manager') && !title.includes('mgr') &&
+                                   !title.includes('sales') && !title.includes('marketing');
                         default:
                             return true;
                     }

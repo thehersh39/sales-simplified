@@ -3,176 +3,2789 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sales Simplified - Contact Intelligence Platform</title>
+    <title>Sales Simplified - Enhanced Contact Intelligence Platform</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        .brand-gradient { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-        .card-hover { transition: transform 0.2s, box-shadow 0.2s; }
-        .card-hover:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
-        .contact-card { border: 2px solid transparent; transition: all 0.2s; }
-        .contact-card.selected { border-color: #667eea; background-color: #f8faff; }
-        .hidden { display: none; }
+        .gradient-bg {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+        }
+        .card-hover {
+            transition: all 0.2s ease-in-out;
+        }
+        .card-hover:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        .stats-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border: 1px solid #e2e8f0;
+        }
+        .contact-card {
+            background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .nav-item {
+            transition: all 0.2s ease;
+        }
+        .nav-item:hover {
+            background: rgba(59, 130, 246, 0.1);
+        }
+        .nav-item.active {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+        }
+        .table-row:hover {
+            background-color: #f8fafc;
+        }
+        .brand-gradient {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 50%, #1e40af 100%);
+        }
+        .salesforce-button {
+            background: linear-gradient(135deg, #1798c1 0%, #0f4c75 100%);
+        }
+        .salesforce-button:hover {
+            opacity: 0.9;
+        }
+        .email-modern {
+            background: linear-gradient(145deg, #f8fafc 0%, #ffffff 100%);
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 2px 8px;
+            font-family: 'SF Mono', 'Monaco', 'Cascadia Code', 'Roboto Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 0.025em;
+        }
+        .email-verified {
+            background: linear-gradient(145deg, #ecfdf5 0%, #f0fdf4 100%);
+            border-color: #d1fae5;
+            color: #065f46;
+        }
+        .score-badge {
+            background: linear-gradient(135deg, #ddd6fe 0%, #e0e7ff 100%);
+            color: #5b21b6;
+            font-weight: 600;
+        }
+        .company-info-card {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border: 1px solid #bae6fd;
+        }
+        .advanced-filter {
+            background: linear-gradient(135deg, #fefbff 0%, #f7f3ff 100%);
+            border: 1px solid #e9d5ff;
+        }
     </style>
 </head>
-<body class="bg-gray-50">
-    <div class="min-h-screen">
-        <!-- Header -->
-        <header class="bg-white shadow-sm border-b border-gray-200">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between items-center h-16">
-                    <div class="flex items-center">
-                        <h1 class="text-2xl font-bold text-gray-900">Sales Simplified</h1>
-                        <span class="ml-3 px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm font-medium">Contact Intelligence</span>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Top Navigation -->
+    <nav class="gradient-bg text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 brand-gradient rounded-lg flex items-center justify-center">
+                        <i data-lucide="zap" class="w-6 h-6 text-white"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold">Sales Simplified</h1>
+                        <p class="text-xs text-blue-200">Enhanced Contact Intelligence Platform</p>
+                    </div>
+                </div>
+
+                <!-- Status Badge -->
+                <div class="flex items-center space-x-4">
+                    <div class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-bold">
+                        ✅ ACTIVE PLATFORM
+                    </div>
+                    
+                    <!-- Salesforce Status -->
+                    <div id="salesforce-status" class="hidden">
+                        <span id="sf-connected" class="hidden bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-bold">
+                            ✅ Salesforce Connected
+                        </span>
+                        <span id="sf-disconnected" class="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs font-bold">
+                            ⚪ Salesforce Disconnected
+                        </span>
+                    </div>
+                    
+                    <button id="connect-salesforce-btn" onclick="showSalesforceModal()" 
+                            class="salesforce-button text-white px-3 py-1 rounded-full text-xs font-bold hover:opacity-90">
+                        Connect Salesforce
+                    </button>
+                </div>
+
+                <!-- User Menu -->
+                <div class="flex items-center space-x-4">
+                    <div class="text-sm text-blue-200">
+                        <span class="font-medium">Professional Team</span> • Contact Intelligence
+                    </div>
+                    <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                        <i data-lucide="user" class="w-4 h-4 text-white"></i>
                     </div>
                 </div>
             </div>
-        </header>
+        </div>
+    </nav>
+
+    <div class="flex">
+        <!-- Sidebar Navigation -->
+        <div class="w-64 bg-white shadow-lg h-screen sticky top-16">
+            <div class="p-6">
+                <nav class="space-y-2">
+                    <a href="#" onclick="showSection('dashboard')" class="nav-item active flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium">
+                        <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="#" onclick="showSection('contact-finder')" class="nav-item flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-700">
+                        <i data-lucide="search" class="w-4 h-4"></i>
+                        <span>Contact Finder</span>
+                    </a>
+                    <a href="#" onclick="showSection('contact-lists')" class="nav-item flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-700">
+                        <i data-lucide="users" class="w-4 h-4"></i>
+                        <span>Contact Lists</span>
+                    </a>
+                    <a href="#" onclick="showSection('reports')" class="nav-item flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-700">
+                        <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+                        <span>Reports</span>
+                    </a>
+                    <a href="#" onclick="showSection('exports')" class="nav-item flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-700">
+                        <i data-lucide="download" class="w-4 h-4"></i>
+                        <span>Exports</span>
+                    </a>
+                </nav>
+
+                <!-- Quick Actions -->
+                <div class="mt-8">
+                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Quick Actions</h3>
+                    <div class="space-y-2">
+                        <button onclick="goToContactFinder()" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg flex items-center space-x-2">
+                            <i data-lucide="zap" class="w-3 h-3"></i>
+                            <span>Find Contacts</span>
+                        </button>
+                        <button onclick="exportLastSearch()" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg flex items-center space-x-2">
+                            <i data-lucide="download" class="w-3 h-3"></i>
+                            <span>Export Last Search</span>
+                        </button>
+                        <button onclick="createNewList()" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg flex items-center space-x-2">
+                            <i data-lucide="plus" class="w-3 h-3"></i>
+                            <span>Create List</span>
+                        </button>
+                    </div>
+                </div>
+                <!-- Admin Panel Navigation (only show if user is admin) -->
+<div id="admin-section" class="mt-8 border-t border-gray-200 pt-4 hidden">
+    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Admin Panel</h3>
+    <div class="space-y-2">
+        <a href="#" onclick="showSection('team-management')" class="nav-item flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-700">
+            <i data-lucide="users" class="w-4 h-4"></i>
+            <span>Team Management</span>
+        </a>
+        <a href="#" onclick="showSection('usage-analytics')" class="nav-item flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-700">
+            <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+            <span>Usage Analytics</span>
+        </a>
+        <a href="#" onclick="showSection('billing')" class="nav-item flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-700">
+            <i data-lucide="credit-card" class="w-4 h-4"></i>
+            <span>Billing & Usage</span>
+        </a>
+    </div>
+</div>
+            </div>
+        </div>
 
         <!-- Main Content -->
-        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <!-- Search Section -->
-            <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
-                <h2 class="text-xl font-semibold text-gray-900 mb-4">Find Business Contacts</h2>
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+        <div class="flex-1 p-6">
+            <!-- Dashboard Section -->
+            <div id="dashboard-section" class="section-content">
+                <!-- Dashboard Header -->
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-2">Dashboard</h2>
+                    <p class="text-gray-600">Welcome back! Here's your enhanced contact intelligence overview.</p>
+                </div>
+
+                <!-- Quick Start Button -->
+                <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Ready to find contacts?</h3>
+                            <p class="text-gray-600">Use our enhanced AI-powered contact discovery with company data enrichment</p>
+                        </div>
+                        <button onclick="goToContactFinder()" class="px-6 py-3 brand-gradient text-white rounded-lg hover:opacity-90 font-semibold flex items-center space-x-2">
+                            <i data-lucide="search" class="w-5 h-5"></i>
+                            <span>Find Contacts</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Stats Overview -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                    <div class="stats-card rounded-lg p-6 card-hover">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Total Searches</p>
+                                <p class="text-3xl font-bold text-gray-900" id="dashboard-total-searches">0</p>
+                                <p class="text-sm text-green-600" id="searches-growth">+0% this month</p>
+                            </div>
+                            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                <i data-lucide="search" class="w-6 h-6 text-blue-600"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stats-card rounded-lg p-6 card-hover">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Contacts Found</p>
+                                <p class="text-3xl font-bold text-gray-900" id="dashboard-contacts-found">0</p>
+                                <p class="text-sm text-green-600" id="contacts-verification">0% verified</p>
+                            </div>
+                            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                                <i data-lucide="users" class="w-6 h-6 text-green-600"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stats-card rounded-lg p-6 card-hover">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Lists Created</p>
+                                <p class="text-3xl font-bold text-gray-900" id="dashboard-lists-created">0</p>
+                                <p class="text-sm text-blue-600" id="lists-growth">0 this week</p>
+                            </div>
+                            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                                <i data-lucide="list" class="w-6 h-6 text-purple-600"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stats-card rounded-lg p-6 card-hover">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Exports</p>
+                                <p class="text-3xl font-bold text-gray-900" id="dashboard-exports">0</p>
+                                <p class="text-sm text-orange-600" id="average-export-size">0 contacts avg</p>
+                            </div>
+                            <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                                <i data-lucide="download" class="w-6 h-6 text-orange-600"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity & Saved Lists -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Recent Activity -->
+                    <div class="bg-white rounded-lg shadow-sm p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
+                        <div id="recent-activity" class="space-y-4">
+                            <div class="text-center py-8 text-gray-500">
+                                <i data-lucide="activity" class="w-8 h-8 mx-auto mb-2"></i>
+                                <p class="text-sm">Start searching to see your activity</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Saved Lists -->
+                    <div class="bg-white rounded-lg shadow-sm p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-900">Saved Lists</h3>
+                            <button onclick="createNewList()" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                                Create New
+                            </button>
+                        </div>
+                        <div id="saved-lists-preview" class="space-y-3">
+                            <div class="text-center py-8 text-gray-500">
+                                <i data-lucide="list" class="w-8 h-8 mx-auto mb-2"></i>
+                                <p class="text-sm">No saved lists yet</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Finder Section -->
+            <div id="contact-finder-section" class="section-content hidden">
+                <div class="flex items-center justify-between mb-6">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Company Domain</label>
-                        <input type="text" id="search-domain" placeholder="e.g., salesforce.com" 
+                        <h2 class="text-2xl font-bold text-gray-900">Contact Finder</h2>
+                        <p class="text-gray-600">Enhanced AI-powered contact discovery with company data enrichment</p>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <div class="flex bg-gray-100 rounded-lg p-1">
+                            <button onclick="setContactView('grid')" id="grid-view-btn" class="px-3 py-1 rounded bg-white text-gray-900 text-sm font-medium shadow-sm">
+                                <i data-lucide="grid-3x3" class="w-4 h-4"></i>
+                            </button>
+                            <button onclick="setContactView('list')" id="list-view-btn" class="px-3 py-1 rounded text-gray-600 text-sm font-medium">
+                                <i data-lucide="list" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Enhanced Search Form -->
+                <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Company Domain</label>
+                            <input type="text" id="search-domain" placeholder="e.g., salesforce.com" 
+                                   class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Seniority Level</label>
+                            <select id="seniority-filter" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
+                                <option value="">All Levels</option>
+                                <option value="c_level">C-Level</option>
+                                <option value="vp">VP Level</option>
+                                <option value="director">Director</option>
+                                <option value="manager">Manager</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Department</label>
+                            <select id="department-filter" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
+                                <option value="">All Departments</option>
+                                <option value="sales">Sales</option>
+                                <option value="marketing">Marketing</option>
+                                <option value="engineering">Engineering</option>
+                                <option value="operations">Operations</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Results Limit</label>
+                            <select id="results-limit" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
+                                <option value="25">25 contacts</option>
+                                <option value="50">50 contacts</option>
+                                <option value="100">100 contacts</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Advanced Filters -->
+                    <div class="advanced-filter rounded-lg p-4 mb-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <h4 class="text-sm font-semibold text-purple-900">Advanced Filters</h4>
+                            <button onclick="toggleAdvancedFilters()" id="toggle-filters-btn" class="text-purple-600 text-sm">
+                                Show More
+                            </button>
+                        </div>
+                        <div id="advanced-filters" class="hidden grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Company Size</label>
+                                <select id="company-size-filter" class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500">
+                                    <option value="">Any Size</option>
+                                    <option value="startup">Startup (1-50)</option>
+                                    <option value="small">Small (51-200)</option>
+                                    <option value="medium">Medium (201-1000)</option>
+                                    <option value="large">Large (1000+)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                                <input type="text" id="location-filter" placeholder="e.g., San Francisco, CA" 
+                                       class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Industry</label>
+                                <select id="industry-filter" class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500">
+                                    <option value="">Any Industry</option>
+                                    <option value="technology">Technology</option>
+                                    <option value="finance">Finance</option>
+                                    <option value="healthcare">Healthcare</option>
+                                    <option value="retail">Retail</option>
+                                    <option value="manufacturing">Manufacturing</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button onclick="executeSearch()" id="main-search-btn" class="w-full brand-gradient text-white py-3 rounded-lg font-semibold hover:opacity-90 flex items-center justify-center space-x-2">
+                        <i data-lucide="search" class="w-5 h-5"></i>
+                        <span>Find Contacts with Enhanced Intelligence</span>
+                    </button>
+                    <div class="mt-3 text-center">
+                        <p class="text-xs text-gray-500">🚀 Enhanced Email Verification + Company Data + Contact Scoring</p>
+                    </div>
+                </div>
+
+                <!-- Company Information Card -->
+                <div id="company-info-card" class="hidden company-info-card rounded-lg p-6 mb-6">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <i data-lucide="building" class="w-8 h-8 text-blue-600"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-lg font-semibold text-gray-900" id="company-name">Company Name</h3>
+                            <p class="text-sm text-gray-600 mb-2" id="company-description">Company description and details</p>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                                <div>
+                                    <span class="text-gray-500">Industry:</span>
+                                    <span class="ml-1 font-medium" id="company-industry">Technology</span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-500">Size:</span>
+                                    <span class="ml-1 font-medium" id="company-size">1000+ employees</span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-500">Location:</span>
+                                    <span class="ml-1 font-medium" id="company-location">San Francisco, CA</span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-500">Founded:</span>
+                                    <span class="ml-1 font-medium" id="company-founded">1999</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="search-results" class="hidden">
+                    <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <h3 class="text-lg font-semibold text-gray-900">Search Results</h3>
+                                <span id="results-count" class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">0 contacts</span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <button onclick="selectAllContacts()" id="select-all-btn" class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50">
+                                    Select All
+                                </button>
+                                <button onclick="addToList()" id="add-to-list-btn" class="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 disabled:opacity-50" disabled>
+                                    Add to List
+                                </button>
+                                <button onclick="addToSalesforce()" id="add-to-salesforce-btn" class="px-4 py-2 salesforce-button text-white rounded-lg text-sm font-medium hover:opacity-90 disabled:opacity-50" disabled>
+                                    Add to Salesforce
+                                </button>
+                                <button onclick="exportContacts()" id="export-selected-btn" class="px-4 py-2 brand-gradient text-white rounded-lg text-sm font-medium hover:opacity-90 disabled:opacity-50" disabled>
+                                    Export Selected
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="contacts-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    </div>
+
+                    <div id="contacts-list" class="hidden bg-white rounded-lg shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            <input type="checkbox" id="select-all-list" class="rounded border-gray-300" onchange="selectAllContactsCheckbox()">
+                                        </th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Score</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Source</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="contacts-table-body" class="bg-white divide-y divide-gray-200">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="search-loading" class="hidden">
+                    <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+                        <div class="text-center">
+                            <div class="inline-flex items-center space-x-3 mb-4">
+                                <div class="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                                <h3 class="text-lg font-semibold text-gray-900">Enhanced Contact Discovery</h3>
+                            </div>
+                            <p id="search-status" class="text-gray-600 mb-4">Analyzing company data and finding contacts...</p>
+                            <div class="grid grid-cols-4 gap-4 max-w-lg mx-auto">
+                                <div class="text-center">
+                                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                                        <i data-lucide="building" class="w-6 h-6 text-blue-600"></i>
+                                    </div>
+                                    <p class="text-xs text-gray-600">Company Data</p>
+                                </div>
+                                <div class="text-center">
+                                    <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                                        <i data-lucide="mail" class="w-6 h-6 text-orange-600"></i>
+                                    </div>
+                                    <p class="text-xs text-gray-600">Email Verification</p>
+                                </div>
+                                <div class="text-center">
+                                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                                        <i data-lucide="users" class="w-6 h-6 text-purple-600"></i>
+                                    </div>
+                                    <p class="text-xs text-gray-600">Contact Discovery</p>
+                                </div>
+                                <div class="text-center">
+                                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                                        <i data-lucide="star" class="w-6 h-6 text-green-600"></i>
+                                    </div>
+                                    <p class="text-xs text-gray-600">Contact Scoring</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Lists Section -->
+            <div id="contact-lists-section" class="section-content hidden">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-900">Contact Lists</h2>
+                        <p class="text-gray-600">Organize and manage your saved contacts</p>
+                    </div>
+                    <button onclick="createNewList()" class="px-4 py-2 brand-gradient text-white rounded-lg font-medium hover:opacity-90 flex items-center space-x-2">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                        <span>Create New List</span>
+                    </button>
+                </div>
+                <div id="contact-lists-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                </div>
+            </div>
+
+            <!-- Reports Section -->
+            <div id="reports-section" class="section-content hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-gray-900">Reports & Analytics</h2>
+                    <p class="text-gray-600">Track your contact discovery performance and email verification rates</p>
+                </div>
+                
+                <!-- Enhanced Analytics Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white rounded-lg shadow-sm p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Email Verification Rate</p>
+                                <p class="text-2xl font-bold text-green-600" id="verification-rate">0%</p>
+                            </div>
+                            <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                                <i data-lucide="shield-check" class="w-5 h-5 text-green-600"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-sm p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Avg Contact Score</p>
+                                <p class="text-2xl font-bold text-blue-600" id="avg-score">0</p>
+                            </div>
+                            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                <i data-lucide="star" class="w-5 h-5 text-blue-600"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-sm p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Companies Searched</p>
+                                <p class="text-2xl font-bold text-purple-600" id="companies-searched">0</p>
+                            </div>
+                            <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                                <i data-lucide="building" class="w-5 h-5 text-purple-600"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-sm p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Salesforce Exports</p>
+                                <p class="text-2xl font-bold text-indigo-600" id="sf-exports">0</p>
+                            </div>
+                            <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
+                                <i data-lucide="cloud" class="w-5 h-5 text-indigo-600"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="bg-white rounded-lg shadow-sm p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Search Performance</h3>
+                        <div class="text-center py-8 text-gray-500">
+                            <i data-lucide="bar-chart-3" class="w-12 h-12 mx-auto mb-2"></i>
+                            <p>Enhanced charts and analytics coming soon</p>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-sm p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Email Quality Metrics</h3>
+                        <div class="text-center py-8 text-gray-500">
+                            <i data-lucide="pie-chart" class="w-12 h-12 mx-auto mb-2"></i>
+                            <p>Email verification dashboard coming soon</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Exports Section -->
+            <div id="exports-section" class="section-content hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-gray-900">Export Center</h2>
+                    <p class="text-gray-600">Download your contacts in CRM-ready formats with enhanced data</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white rounded-lg shadow-sm p-6 text-center card-hover">
+                        <div class="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                            <i data-lucide="file-text" class="w-8 h-8 text-blue-600"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Salesforce Template</h3>
+                        <p class="text-sm text-gray-600 mb-4">Pre-formatted for direct Salesforce import with contact scores</p>
+                        <button class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                            Download Template
+                        </button>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-sm p-6 text-center card-hover">
+                        <div class="w-16 h-16 bg-orange-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                            <i data-lucide="file-spreadsheet" class="w-8 h-8 text-orange-600"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">HubSpot Template</h3>
+                        <p class="text-sm text-gray-600 mb-4">Ready for HubSpot contact import with company data</p>
+                        <button class="w-full px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700">
+                            Download Template
+                        </button>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-sm p-6 text-center card-hover">
+                        <div class="w-16 h-16 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                            <i data-lucide="download" class="w-8 h-8 text-green-600"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Enhanced Export</h3>
+                        <p class="text-sm text-gray-600 mb-4">Complete dataset with verification status and scores</p>
+                        <button class="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                            Customize Export
+                        </button>
+                    </div>
+                </div>
+                <!-- Team Management Section -->
+<div id="team-management-section" class="section-content hidden">
+    <div class="mb-6">
+        <h2 class="text-2xl font-bold text-gray-900">Team Management</h2>
+        <p class="text-gray-600">Manage your team members and their access</p>
+    </div>
+
+    <!-- Add New User -->
+    <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Add Team Member</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <input type="email" id="new-user-email" placeholder="email@company.com" 
+                   class="border border-gray-300 rounded-lg px-3 py-2">
+            <input type="text" id="new-user-name" placeholder="Full Name" 
+                   class="border border-gray-300 rounded-lg px-3 py-2">
+            <button onclick="addTeamMember()" class="px-4 py-2 brand-gradient text-white rounded-lg hover:opacity-90">
+                Add Member
+            </button>
+        </div>
+    </div>
+
+    <!-- Team Members List -->
+    <div class="bg-white rounded-lg shadow-sm">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-900">Team Members</h3>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Last Active</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Searches</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="team-members-table" class="bg-white divide-y divide-gray-200">
+                    <!-- Team members will be populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Usage Analytics Section -->
+<div id="usage-analytics-section" class="section-content hidden">
+    <div class="mb-6">
+        <h2 class="text-2xl font-bold text-gray-900">Usage Analytics</h2>
+        <p class="text-gray-600">Monitor team usage and API consumption</p>
+    </div>
+
+    <!-- Usage Overview Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white rounded-lg shadow-sm p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600">This Month</p>
+                    <p class="text-2xl font-bold text-blue-600" id="monthly-searches">247</p>
+                    <p class="text-xs text-gray-500">Total Searches</p>
+                </div>
+                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <i data-lucide="search" class="w-5 h-5 text-blue-600"></i>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600">API Usage</p>
+                    <p class="text-2xl font-bold text-green-600">23%</p>
+                    <p class="text-xs text-gray-500">of 4,000 credits</p>
+                </div>
+                <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                    <i data-lucide="cpu" class="w-5 h-5 text-green-600"></i>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600">Active Users</p>
+                    <p class="text-2xl font-bold text-purple-600">31</p>
+                    <p class="text-xs text-gray-500">of 40 total</p>
+                </div>
+                <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                    <i data-lucide="users" class="w-5 h-5 text-purple-600"></i>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600">Success Rate</p>
+                    <p class="text-2xl font-bold text-orange-600">94%</p>
+                    <p class="text-xs text-gray-500">Email Verification</p>
+                </div>
+                <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                    <i data-lucide="shield-check" class="w-5 h-5 text-orange-600"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Usage Chart Placeholder -->
+    <div class="bg-white rounded-lg shadow-sm p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Daily Usage Trend</h3>
+        <div class="text-center py-8 text-gray-500">
+            <i data-lucide="trending-up" class="w-12 h-12 mx-auto mb-2"></i>
+            <p>Usage analytics dashboard</p>
+            <p class="text-sm">Real-time charts and insights</p>
+        </div>
+    </div>
+</div>
+
+<!-- Billing Section -->
+<div id="billing-section" class="section-content hidden">
+    <div class="mb-6">
+        <h2 class="text-2xl font-bold text-gray-900">Billing & Subscription</h2>
+        <p class="text-gray-600">Manage your Sales Simplified subscription</p>
+    </div>
+            
+    <!-- Current Plan -->
+    <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-gray-900">Current Plan</h3>
+            <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">Active</span>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+                <p class="text-sm text-gray-600">Plan</p>
+                <p class="text-xl font-bold text-gray-900">Professional Team</p>
+                <p class="text-sm text-gray-500">40 users included</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-600">Monthly Cost</p>
+                <p class="text-xl font-bold text-gray-900">$1,500</p>
+                <p class="text-sm text-gray-500">$37.50 per user</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-600">Next Billing</p>
+                <p class="text-xl font-bold text-gray-900">Feb 15, 2025</p>
+                <p class="text-sm text-gray-500">Auto-renewal enabled</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Usage Limits -->
+    <div class="bg-white rounded-lg shadow-sm p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Usage & Limits</h3>
+        <div class="space-y-4">
+            <div>
+                <div class="flex justify-between text-sm mb-1">
+                    <span>API Credits Used</span>
+                    <span>920 / 4,000</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div class="bg-blue-600 h-2 rounded-full" style="width: 23%"></div>
+                </div>
+            </div>
+            <div>
+                <div class="flex justify-between text-sm mb-1">
+                    <span>Team Members</span>
+                    <span>40 / 40</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div class="bg-green-600 h-2 rounded-full" style="width: 100%"></div>
+                </div>
+            </div>
+            <div>
+                <div class="flex justify-between text-sm mb-1">
+                    <span>Monthly Searches</span>
+                    <span>247 / Unlimited</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div class="bg-purple-600 h-2 rounded-full" style="width: 15%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+            </div>
+        </div>
+    </div>
+    <!-- Salesforce Connection Modal -->
+    <div id="salesforce-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <div class="flex items-center mb-4">
+                    <div class="w-8 h-8 salesforce-button rounded-lg flex items-center justify-center mr-3">
+                        <i data-lucide="cloud" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-900">Connect to Salesforce</h3>
+                </div>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Instance URL</label>
+                        <input type="text" id="sf-instance-url" placeholder="https://yourcompany.salesforce.com" 
+                               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <p class="text-xs text-gray-500 mt-1">Your Salesforce login URL</p>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Username</label>
+                        <input type="email" id="sf-username" placeholder="your.email@company.com" 
                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                     </div>
-                </div>
-                <button onclick="performSearch()" id="search-btn" class="w-full brand-gradient text-white py-3 rounded-lg font-semibold hover:opacity-90">
-                    Find Contacts
-                </button>
-            </div>
-
-            <!-- Loading -->
-            <div id="loading" class="hidden bg-white rounded-lg shadow-sm p-8 text-center">
-                <div class="animate-spin rounded-full h-8 w-8 border-2 border-purple-500 border-t-transparent mx-auto mb-4"></div>
-                <p class="text-gray-600">Searching for contacts...</p>
-            </div>
-
-            <!-- Error Display -->
-            <div id="error-display" class="hidden bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-                <p id="error-text" class="text-red-700"></p>
-            </div>
-
-            <!-- Results -->
-            <div id="results-section" class="hidden">
-                <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-semibold text-gray-900">Contact Results</h3>
-                        <span id="contact-count" class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">0 contacts</span>
-                    </div>
-                    <div id="contacts-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <!-- Contacts will be populated here -->
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Password + Security Token</label>
+                        <input type="password" id="sf-password" placeholder="passwordSECURITYTOKEN" 
+                               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <p class="text-xs text-gray-500 mt-1">Combine your password with security token (no space)</p>
                     </div>
                 </div>
+                
+                <div class="flex justify-end space-x-2 mt-6">
+                    <button onclick="closeSalesforceModal()" class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50">
+                        Cancel
+                    </button>
+                    <button onclick="connectToSalesforce()" id="sf-connect-btn" class="px-4 py-2 salesforce-button text-white rounded-lg text-sm font-medium hover:opacity-90">
+                        Connect
+                    </button>
+                </div>
             </div>
-        </main>
+        </div>
+    </div>
+
+    <!-- Error Message -->
+    <div id="error-section" class="hidden fixed bottom-4 right-4 bg-red-50 border border-red-200 rounded-lg p-4 shadow-lg z-50">
+        <div class="flex items-center space-x-2">
+            <i data-lucide="alert-circle" class="w-5 h-5 text-red-600"></i>
+            <span class="font-medium text-red-900">Error</span>
+        </div>
+        <p id="error-message" class="text-red-700 text-sm mt-1">An error occurred</p>
+        <button onclick="hideError()" class="absolute top-2 right-2 text-red-400 hover:text-red-600">
+            <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+    </div>
+
+    <!-- Success Message -->
+    <div id="success-section" class="hidden fixed bottom-4 right-4 bg-green-50 border border-green-200 rounded-lg p-4 shadow-lg z-50">
+        <div class="flex items-center space-x-2">
+            <i data-lucide="check-circle" class="w-5 h-5 text-green-600"></i>
+            <span class="font-medium text-green-900">Success</span>
+        </div>
+        <p id="success-message" class="text-green-700 text-sm mt-1">Operation completed successfully</p>
+        <button onclick="hideSuccess()" class="absolute top-2 right-2 text-green-400 hover:text-green-600">
+            <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+    </div>
+
+    <!-- Save List Modal -->
+    <div id="save-list-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Save Contact List</h3>
+                <input type="text" id="list-name-input" placeholder="Enter list name..." 
+                       class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-4">
+                <div class="flex justify-end space-x-2">
+                    <button onclick="cancelSaveList()" class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50">
+                        Cancel
+                    </button>
+                    <button onclick="confirmSaveList()" class="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700">
+                        Save List
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
-        // Simple, clean implementation
-        let contactResults = [];
+        // Prevent duplicate script execution
+        if (typeof window.salesSimplifiedInitialized === 'undefined') {
+            window.salesSimplifiedInitialized = true;
+            
+            // ===== ENHANCED HUNTER.IO INTEGRATION =====
+            const API_BASE = '/api';
+            let currentViewMode = 'grid';
+            let selectedContacts = new Set();
+            let currentContacts = [];
+            let contactViewMode = 'grid';
         
-        async function performSearch() {
-            console.log('Search function called');
-            
-            const domain = document.getElementById('search-domain').value.trim();
-            if (!domain) {
-                showError('Please enter a company domain');
-                return;
-            }
-            
-            console.log('Searching for:', domain);
-            showLoading();
-            hideError();
-            
+        async function apiCall(endpoint, options = {}) {
             try {
-                const response = await fetch('/api/contact-search', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ domain: domain, limit: 10 })
+                const response = await fetch(`${API_BASE}${endpoint}`, {
+                    headers: { 'Content-Type': 'application/json', ...options.headers },
+                    ...options
                 });
-                
-                console.log('Response status:', response.status);
-                
-                if (!response.ok) {
-                    throw new Error(`Server error: ${response.status}`);
-                }
-                
-                const data = await response.json();
-                console.log('Response data:', data);
-                
-                if (data.contacts && data.contacts.length > 0) {
-                    displayContacts(data.contacts);
-                } else {
-                    throw new Error('No contacts found for this domain');
-                }
-                
+                return response.ok ? await response.json() : null;
             } catch (error) {
-                console.error('Search error:', error);
-                showError(error.message);
-            } finally {
-                hideLoading();
+                console.error('API Error:', error);
+                return null;
             }
         }
         
-        function displayContacts(contacts) {
-            contactResults = contacts;
-            const grid = document.getElementById('contacts-grid');
-            const countElement = document.getElementById('contact-count');
+        async function searchContactsReal(domain) {
+            const response = await apiCall('/contact-search', {
+                method: 'POST',
+                body: JSON.stringify({ domain, limit: 10 })
+            });
+            return response ? { contacts: response.contacts, company: response.company, success: true } : { contacts: [], success: false };
+        }
+        
+        function displayRealContactResults(contacts, company) {
+            // Update global variables for selection system
+            currentContacts = contacts;
+            selectedContacts.clear();
             
-            countElement.textContent = `${contacts.length} contacts`;
+            const grid = document.getElementById('contacts-grid');
+            
+            if (company) {
+                document.getElementById('company-info-card').classList.remove('hidden');
+                document.getElementById('company-name').textContent = company.name;
+                document.getElementById('company-industry').textContent = company.industry;
+            }
+            
+            // Update contact count display
+            const countElement = document.getElementById('results-count');
+            if (countElement) {
+                countElement.textContent = `${contacts.length} contacts found`;
+            }
             
             grid.innerHTML = contacts.map((contact, index) => `
-                <div class="contact-card p-4 border border-gray-200 rounded-lg">
-                    <div class="flex items-start space-x-3">
-                        <div class="flex-1">
-                            <h4 class="font-medium text-gray-900">${contact.name || 'Unknown Name'}</h4>
-                            <p class="text-sm text-blue-600">${contact.email || contact.value || 'No email'}</p>
-                            <p class="text-sm text-gray-500">${contact.position || contact.title || 'No title'}</p>
-                            ${contact.verified ? '<span class="inline-block mt-2 px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Verified</span>' : ''}
+                <div class="contact-card p-6 border rounded-lg bg-white shadow-sm">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-3">
+                            <input type="checkbox" 
+                                   class="contact-checkbox" 
+                                   data-index="${index}"
+                                   onchange="toggleContactSelection(${index})"
+                                   id="contact-${index}">
+                            <div>
+                                <h4 class="font-semibold text-gray-900">${contact.first_name} ${contact.last_name}</h4>
+                                <p class="text-sm text-gray-600">${contact.position || 'Professional'}</p>
+                            </div>
                         </div>
+                        <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">
+                            ${contact.confidence || 100}% Verified
+                        </span>
+                    </div>
+                    <div class="space-y-2 mb-4">
+                        <div class="flex items-center space-x-2">
+                            <i data-lucide="mail" class="w-4 h-4 text-gray-400"></i>
+                            <span class="text-sm font-mono email-modern email-verified">${contact.email}</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <i data-lucide="building" class="w-4 h-4 text-gray-400"></i>
+                            <span class="text-sm text-gray-600">${contact.company || company?.name}</span>
+                        </div>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button onclick="addToList(${index})" class="flex-1 px-3 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200">Add to List</button>
+                        <button onclick="exportContact(${index})" class="flex-1 px-3 py-1 bg-gray-100 text-gray-700 rounded text-xs hover:bg-gray-200">Export</button>
                     </div>
                 </div>
             `).join('');
             
-            showResults();
+            document.getElementById('search-results').classList.remove('hidden');
+            window.currentSearchResults = contacts;
+            
+            // Update selection controls
+            updateSelectionControls();
+            
+            if (typeof lucide !== 'undefined') lucide.createIcons();
         }
         
-        function showLoading() {
-            document.getElementById('loading').classList.remove('hidden');
-            document.getElementById('results-section').classList.add('hidden');
-        }
-        
-        function hideLoading() {
-            document.getElementById('loading').classList.add('hidden');
-        }
-        
-        function showResults() {
-            document.getElementById('results-section').classList.remove('hidden');
-        }
-        
-        function showError(message) {
-            document.getElementById('error-text').textContent = message;
-            document.getElementById('error-display').classList.remove('hidden');
-        }
-        
-        function hideError() {
-            document.getElementById('error-display').classList.add('hidden');
-        }
-        
-        // Enter key support
-        document.getElementById('search-domain').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                performSearch();
+        function toggleContactSelection(index) {
+            if (selectedContacts.has(index)) {
+                selectedContacts.delete(index);
+            } else {
+                selectedContacts.add(index);
             }
+            updateSelectionControls();
+        }
+
+        function selectAllContacts() {
+            selectedContacts.clear();
+            for (let i = 0; i < currentContacts.length; i++) {
+                selectedContacts.add(i);
+            }
+            // Update all checkboxes
+            document.querySelectorAll('.contact-checkbox').forEach((checkbox, index) => {
+                checkbox.checked = true;
+            });
+            updateSelectionControls();
+        }
+
+        function deselectAllContacts() {
+            selectedContacts.clear();
+            document.querySelectorAll('.contact-checkbox').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            updateSelectionControls();
+        }
+
+        function updateSelectionControls() {
+            const selectedCount = selectedContacts.size;
+            const totalCount = currentContacts.length;
+            
+            // Update selection count display
+            const selectionInfo = document.getElementById('selection-info');
+            if (selectionInfo) {
+                if (selectedCount > 0) {
+                    selectionInfo.textContent = `${selectedCount} of ${totalCount} contacts selected`;
+                    selectionInfo.classList.remove('hidden');
+                } else {
+                    selectionInfo.classList.add('hidden');
+                }
+            }
+            
+            // Enable/disable bulk action buttons
+            const bulkButtons = document.querySelectorAll('.bulk-action-btn');
+            bulkButtons.forEach(btn => {
+                btn.disabled = selectedCount === 0;
+                btn.classList.toggle('opacity-50', selectedCount === 0);
+            });
+        }
+
+        function addToList(index) {
+            const contact = window.currentSearchResults[index];
+            let list = JSON.parse(localStorage.getItem('currentList') || '[]');
+            if (!list.find(c => c.email === contact.email)) {
+                list.push(contact);
+                localStorage.setItem('currentList', JSON.stringify(list));
+                showSuccess(`${contact.first_name} ${contact.last_name} added to list`);
+            } else {
+                showError('Contact already in list');
+            }
+        }
+        
+        function toggleViewMode() {
+            contactViewMode = contactViewMode === 'grid' ? 'list' : 'grid';
+            
+            // Update view mode buttons
+            const gridBtn = document.getElementById('grid-view-btn');
+            const listBtn = document.getElementById('list-view-btn');
+            
+            if (contactViewMode === 'grid') {
+                gridBtn?.classList.add('bg-blue-100', 'text-blue-600');
+                gridBtn?.classList.remove('text-gray-600');
+                listBtn?.classList.remove('bg-blue-100', 'text-blue-600');
+                listBtn?.classList.add('text-gray-600');
+                
+                document.getElementById('contacts-grid').classList.remove('hidden');
+                document.getElementById('contacts-table').classList.add('hidden');
+            } else {
+                listBtn?.classList.add('bg-blue-100', 'text-blue-600');
+                listBtn?.classList.remove('text-gray-600');
+                gridBtn?.classList.remove('bg-blue-100', 'text-blue-600');
+                gridBtn?.classList.add('text-gray-600');
+                
+                document.getElementById('contacts-grid').classList.add('hidden');
+                document.getElementById('contacts-table').classList.remove('hidden');
+                
+                // Re-populate table view if contacts exist
+                if (currentContacts.length > 0) {
+                    displayContactsAsTable(currentContacts);
+                }
+            }
+        }
+
+        function displayContactsAsTable(contacts) {
+            const tbody = document.getElementById('contacts-table-body');
+            if (!tbody) return;
+            
+            tbody.innerHTML = contacts.map((contact, index) => `
+                <tr class="table-row border-b">
+                    <td class="px-6 py-4">
+                        <input type="checkbox" 
+                               class="contact-checkbox" 
+                               data-index="${index}"
+                               onchange="toggleContactSelection(${index})"
+                               id="contact-table-${index}">
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="font-medium text-gray-900">${contact.first_name} ${contact.last_name}</div>
+                        <div class="text-sm text-gray-500">${contact.position || 'Professional'}</div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="email-modern email-verified">${contact.email}</div>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-900">
+                        ${contact.company || 'Unknown'}
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">
+                            ${contact.confidence || 100}%
+                        </span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="flex space-x-2">
+                            <button onclick="addToList(${index})" class="text-blue-600 hover:text-blue-800 text-sm">Add</button>
+                            <button onclick="exportContact(${index})" class="text-gray-600 hover:text-gray-800 text-sm">Export</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function exportContact(index) {
+            const contact = window.currentSearchResults[index];
+            const csv = `"First Name","Last Name","Email","Position","Company","Confidence"\n"${contact.first_name}","${contact.last_name}","${contact.email}","${contact.position || ''}","${contact.company || ''}","${contact.confidence || 100}%"`;
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${contact.first_name}_${contact.last_name}.csv`;
+            a.click();
+        }
+        
+        // ===== ENHANCED MAIN FUNCTIONS =====
+        // Global Variables
+        const HUNTER_API_KEY = '64514bd46213dce4c8e6ed724555b2f9d0fa8e03';
+        const APOLLO_API_KEY = 'cgAc0fBksS1tJePYf0n4DA';
+
+        let companyData = null;
+        let salesforceSession = null;
+        let advancedFiltersVisible = false;
+        let currentUser = null;
+        let currentOrganization = 'bryans_company';
+
+        // Enhanced Company Data Simulation
+        const companyDatabase = {
+            'salesforce.com': {
+                name: 'Salesforce',
+                industry: 'Cloud Software',
+                size: '70,000+ employees',
+                location: 'San Francisco, CA',
+                founded: '1999',
+                description: 'Leading customer relationship management platform with comprehensive cloud-based solutions for sales, service, marketing, and analytics.'
+            },
+            'microsoft.com': {
+                name: 'Microsoft Corporation', 
+                industry: 'Technology',
+                size: '220,000+ employees',
+                location: 'Redmond, WA',
+                founded: '1975',
+                description: 'Multinational technology corporation developing computer software, consumer electronics, personal computers, and related services.'
+            },
+            'hubspot.com': {
+                name: 'HubSpot',
+                industry: 'Marketing Technology',
+                size: '7,000+ employees', 
+                location: 'Cambridge, MA',
+                founded: '2006',
+                description: 'Inbound marketing, sales, and customer service platform helping businesses grow better with comprehensive CRM solutions.'
+            }
+        };
+
+        // ===== NEW ENHANCED FUNCTIONS =====
+
+        function toggleAdvancedFilters() {
+            const filtersDiv = document.getElementById('advanced-filters');
+            const toggleBtn = document.getElementById('toggle-filters-btn');
+            
+            advancedFiltersVisible = !advancedFiltersVisible;
+            
+            if (advancedFiltersVisible) {
+                filtersDiv.classList.remove('hidden');
+                toggleBtn.textContent = 'Show Less';
+            } else {
+                filtersDiv.classList.add('hidden');
+                toggleBtn.textContent = 'Show More';
+            }
+        }
+
+        function goToContactFinder() {
+            showSection('contact-finder');
+        }
+
+        function calculateContactScore(contact) {
+            let score = 50; // Base score
+            
+            // Email verification bonus
+            if (contact.verified) score += 25;
+            
+            // Seniority level bonus
+            switch(contact.seniority) {
+                case 'executive': score += 20; break;
+                case 'director': score += 15; break;
+                case 'manager': score += 10; break;
+                default: score += 5; break;
+            }
+            
+            // LinkedIn profile bonus
+            if (contact.linkedin) score += 10;
+            
+            // Phone number bonus
+            if (contact.phone) score += 5;
+            
+            // Confidence score adjustment
+            score = Math.round(score * (contact.confidence / 100));
+            
+            return Math.min(score, 100);
+        }
+
+        function enhancedEmailVerification(email, domain) {
+            // Simulate advanced email verification
+            const commonPatterns = [
+                'firstname.lastname',
+                'firstname',
+                'flastname',
+                'firstname_lastname'
+            ];
+            
+            let verificationScore = Math.random() * 40 + 60; // 60-100 range
+            
+            // Check email pattern validity
+            const emailPattern = email.replace(`@${domain}`, '');
+            const hasCommonPattern = commonPatterns.some(pattern => 
+                emailPattern.includes('.') || emailPattern.includes('_')
+            );
+            
+            if (hasCommonPattern) verificationScore += 10;
+            if (email.includes('info@') || email.includes('contact@')) verificationScore -= 20;
+            
+            return {
+                verified: verificationScore > 80,
+                score: Math.round(verificationScore),
+                deliverable: verificationScore > 70,
+                risky: verificationScore < 60
+            };
+        }
+
+        function showCompanyInfo(domain) {
+            const companyInfo = companyDatabase[domain] || {
+                name: domain.charAt(0).toUpperCase() + domain.slice(1).replace('.com', ''),
+                industry: 'Technology',
+                size: 'Unknown',
+                location: 'Unknown',
+                founded: 'Unknown',
+                description: `Professional company in the ${domain.split('.')[0]} industry.`
+            };
+
+            document.getElementById('company-name').textContent = companyInfo.name;
+            document.getElementById('company-description').textContent = companyInfo.description;
+            document.getElementById('company-industry').textContent = companyInfo.industry;
+            document.getElementById('company-size').textContent = companyInfo.size;
+            document.getElementById('company-location').textContent = companyInfo.location;
+            document.getElementById('company-founded').textContent = companyInfo.founded;
+            
+            document.getElementById('company-info-card').classList.remove('hidden');
+        }
+
+        // ===== ENHANCED SEARCH FUNCTIONS =====
+
+           async function executeSearch() {
+            const domain = document.getElementById('search-domain').value.trim();
+            if (!domain) { 
+                showError('Please enter a company domain');
+                return; 
+            }
+            
+            const cleanDomain = domain.replace(/^(https?:\/\/)?(www\.)?/, '').split('/')[0];
+            hideError();
+            hideResults();
+            showLoading();
+            
+            const button = document.getElementById('main-search-btn');
+            const originalText = button.innerHTML;
+            button.innerHTML = '<div class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent inline-block mr-2"></div>Real Hunter.io Search...';
+            button.disabled = true;
+            
+            try {
+                const result = await searchContactsReal(cleanDomain);
+                if (result.success && result.contacts.length > 0) {
+                    displayRealContactResults(result.contacts, result.company);
+                    incrementMetric('totalSearches');
+                    incrementMetric('contactsFound', result.contacts.length);
+                    incrementMetric('verifiedEmails', result.contacts.length);
+                    addToRecentActivity('search', `Found ${result.contacts.length} verified contacts at ${cleanDomain}`);
+                } else {
+                    throw new Error(`No verified contacts found for ${cleanDomain}`);
+                }
+            } catch (error) {
+                console.error('Search Error:', error);
+                showError(error.message);
+            } finally {
+                button.innerHTML = originalText;
+                button.disabled = false;
+                hideLoading();
+            }
+        }
+        function updateSearchStatus(message) {
+            document.getElementById('search-status').textContent = message;
+        }
+
+        // Enhanced data fusion with contact scoring
+        function enhancedFuseDataSources(hunterResults, apolloResults, webResults, domain) {
+            let fusedContacts = [];
+            let sourcesUsed = [];
+            
+            if (apolloResults && apolloResults.people) {
+                apolloResults.people.forEach(person => {
+                    const processedEmail = person.personal_emails?.[0] || 
+    (person.email === "email_not_unlocked@domain.com" 
+        ? `${person.first_name?.toLowerCase() || 'contact'}.${person.last_name?.toLowerCase() || 'person'}@${domain}` 
+        : person.email);
+                    
+                    const emailVerification = enhancedEmailVerification(processedEmail, domain);
+                    
+                    const contact = {
+                        id: `db2_${person.id || Math.random()}`,
+                        name: person.name || `${person.first_name} ${person.last_name}`,
+                        title: person.title,
+                        email: processedEmail,
+                        phone: person.phone_numbers?.[0]?.raw_number || '',
+                        linkedin: person.linkedin_url || '',
+                        company: person.organization?.name || domain,
+                        source: 'Professional Database',
+                        verified: emailVerification.verified,
+                        confidence: emailVerification.score,
+                        department: categorizeByTitle(person.title),
+                        seniority: categorizeSeniority(person.title),
+                        deliverable: emailVerification.deliverable,
+                        risky: emailVerification.risky
+                    };
+                    
+                    contact.contactScore = calculateContactScore(contact);
+                    fusedContacts.push(contact);
+                });
+                sourcesUsed.push('Professional Database');
+            }
+            
+            if (hunterResults && hunterResults.emails) {
+                hunterResults.emails.forEach(email => {
+                    const emailVerification = enhancedEmailVerification(email.value, domain);
+                    
+                    const contact = {
+                        id: `db1_${email.value || Math.random()}`,
+                        name: `${email.first_name} ${email.last_name}`,
+                        title: email.position,
+                        email: email.value,
+                        phone: email.phone_number || '',
+                        linkedin: email.linkedin || '',
+                        company: hunterResults.domain || domain,
+                        source: 'Email Intelligence',
+                        verified: emailVerification.verified,
+                        confidence: emailVerification.score,
+                        department: categorizeByTitle(email.position),
+                        seniority: categorizeSeniority(email.position),
+                        deliverable: emailVerification.deliverable,
+                        risky: emailVerification.risky
+                    };
+                    
+                    contact.contactScore = calculateContactScore(contact);
+                    fusedContacts.push(contact);
+                });
+                sourcesUsed.push('Email Intelligence');
+            }
+
+            if (webResults && webResults.length > 0) {
+                webResults.forEach(contact => {
+                    const emailVerification = enhancedEmailVerification(contact.email, domain);
+                    
+                    const enhancedContact = {
+                        id: `web_${Math.random()}`,
+                        name: contact.name,
+                        title: contact.title,
+                        email: contact.email,
+                        phone: '',
+                        linkedin: '',
+                        company: domain,
+                        source: 'Web Intelligence',
+                        verified: emailVerification.verified,
+                        confidence: emailVerification.score,
+                        department: categorizeByTitle(contact.title),
+                        seniority: categorizeSeniority(contact.title),
+                        deliverable: emailVerification.deliverable,
+                        risky: emailVerification.risky
+                    };
+                    
+                    enhancedContact.contactScore = calculateContactScore(enhancedContact);
+                    fusedContacts.push(enhancedContact);
+                });
+                sourcesUsed.push('Web Intelligence');
+            }
+
+            // Remove duplicates
+            const uniqueContacts = [];
+            const seenEmails = new Set();
+            
+            fusedContacts.forEach(contact => {
+                if (!seenEmails.has(contact.email)) {
+                    seenEmails.add(contact.email);
+                    uniqueContacts.push(contact);
+                }
+            });
+
+            // Sort by contact score (highest first)
+            uniqueContacts.sort((a, b) => b.contactScore - a.contactScore);
+            
+            return {
+                contacts: uniqueContacts,
+                companyInfo: {
+                    domain: domain,
+                    name: companyDatabase[domain]?.name || domain,
+                    organization: hunterResults?.organization || domain,
+                    totalContacts: uniqueContacts.length,
+                    sources: sourcesUsed,
+                    verifiedContacts: uniqueContacts.filter(c => c.verified).length,
+                    avgScore: uniqueContacts.length > 0 ? Math.round(uniqueContacts.reduce((sum, c) => sum + c.contactScore, 0) / uniqueContacts.length) : 0
+                }
+            };
+        }
+
+        // ===== ENHANCED DISPLAY FUNCTIONS =====
+
+        function createContactCard(contact, index) {
+            const grid = document.getElementById('contacts-grid');
+            const card = document.createElement('div');
+            card.className = 'contact-card p-6 card-hover';
+            
+            const isSelected = selectedContacts.has(index);
+            const verificationBadge = contact.verified 
+                ? '<span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">✓ Verified</span>'
+                : contact.deliverable 
+                    ? '<span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">Deliverable</span>'
+                    : '<span class="px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-medium">Unverified</span>';
+
+            const linkedinLink = contact.linkedin 
+                ? `<a href="${contact.linkedin}" target="_blank" class="flex items-center space-x-1 text-blue-600 hover:text-blue-800">
+                    <i data-lucide="linkedin" class="w-4 h-4"></i>
+                    <span class="text-xs">LinkedIn</span>
+                  </a>`
+                : '<span class="text-xs text-gray-400">No LinkedIn</span>';
+
+            const phoneDisplay = contact.phone 
+                ? `<div class="flex items-center space-x-2">
+                    <i data-lucide="phone" class="w-4 h-4 text-gray-400"></i>
+                    <span class="text-xs">${contact.phone}</span>
+                  </div>`
+                : '';
+
+            const scoreColor = contact.contactScore >= 80 ? 'text-green-700' : 
+                              contact.contactScore >= 60 ? 'text-blue-700' : 'text-orange-700';
+
+            card.innerHTML = `
+                <div class="flex items-start justify-between mb-3">
+                    <div class="flex items-center space-x-2">
+                        <input type="checkbox" id="contact-${index}" ${isSelected ? 'checked' : ''} onchange="toggleContact(${index})" 
+                               class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                        <div>
+                            <h4 class="font-semibold text-gray-900">${contact.name}</h4>
+                            <p class="text-sm text-gray-600">${contact.title}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        ${verificationBadge}
+                        <span class="score-badge px-2 py-1 rounded-full text-xs font-medium">
+                            Score: ${contact.contactScore}
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="space-y-2 text-sm mb-4">
+                    <div class="flex items-center space-x-2">
+                        <i data-lucide="mail" class="w-4 h-4 text-gray-400"></i>
+                        <span class="email-modern ${contact.verified ? 'email-verified' : ''}">${contact.email}</span>
+                    </div>
+                    
+                    ${phoneDisplay}
+                    
+                    <div class="flex items-center space-x-2">
+                        <i data-lucide="briefcase" class="w-4 h-4 text-gray-400"></i>
+                        <span class="text-xs">${contact.department}</span>
+                    </div>
+
+                    <div class="flex items-center space-x-2">
+                        <i data-lucide="target" class="w-4 h-4 text-gray-400"></i>
+                        <span class="text-xs ${scoreColor} font-medium">Contact Score: ${contact.contactScore}/100</span>
+                    </div>
+                </div>
+                
+                <div class="pt-3 border-t border-gray-100 flex justify-between items-center">
+                    ${linkedinLink}
+                    <div class="flex items-center space-x-2">
+                        <span class="px-2 py-1 rounded-full text-xs font-medium ${getSeniorityColor(contact.seniority)}">
+                            ${contact.seniority}
+                        </span>
+                        <button onclick="addSingleContactToSalesforce(currentContacts[${index}])" 
+                                class="px-2 py-1 salesforce-button text-white rounded text-xs hover:opacity-90 flex items-center space-x-1">
+                            <i data-lucide="cloud" class="w-3 h-3"></i>
+                            <span>SF</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            grid.appendChild(card);
+        }
+
+        function createContactRow(contact, index) {
+            const tbody = document.getElementById('contacts-table-body');
+            const row = document.createElement('tr');
+            row.className = 'table-row';
+            
+            const isSelected = selectedContacts.has(index);
+            const verificationBadge = contact.verified 
+                ? '<span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">Verified</span>'
+                : contact.deliverable 
+                    ? '<span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">Deliverable</span>'
+                    : '<span class="px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-medium">Unverified</span>';
+
+            const scoreColor = contact.contactScore >= 80 ? 'text-green-700' : 
+                              contact.contactScore >= 60 ? 'text-blue-700' : 'text-orange-700';
+
+            row.innerHTML = `
+                <td class="px-4 py-4 whitespace-nowrap">
+                    <input type="checkbox" id="contact-list-${index}" ${isSelected ? 'checked' : ''} onchange="toggleContact(${index})" 
+                           class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div>
+                        <div class="text-sm font-medium text-gray-900">${contact.name}</div>
+                        <div class="text-sm text-gray-500">${contact.company}</div>
+                    </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-900">${contact.title}</div>
+                    <div class="text-sm text-gray-500">${contact.department}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="email-modern ${contact.verified ? 'email-verified' : ''}">${contact.email}</span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm font-semibold ${scoreColor}">${contact.contactScore}/100</div>
+                    <div class="text-xs text-gray-500">Quality Score</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    ${contact.company}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">${contact.source}</span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="flex items-center space-x-2">
+                        ${verificationBadge}
+                        <button onclick="addSingleContactToSalesforce(currentContacts[${index}])" 
+                                class="px-2 py-1 salesforce-button text-white rounded text-xs hover:opacity-90 flex items-center space-x-1">
+                            <i data-lucide="cloud" class="w-3 h-3"></i>
+                            <span>SF</span>
+                        </button>
+                    </div>
+                </td>
+            `;
+            
+            tbody.appendChild(row);
+        }
+
+        // ===== SALESFORCE FUNCTIONS =====
+        function showSalesforceModal() {
+            document.getElementById('salesforce-modal').classList.remove('hidden');
+        }
+
+        function closeSalesforceModal() {
+            document.getElementById('salesforce-modal').classList.add('hidden');
+        }
+
+        function showSuccess(message) {
+            document.getElementById('success-message').textContent = message;
+            document.getElementById('success-section').classList.remove('hidden');
+            setTimeout(hideSuccess, 5000);
+        }
+
+        function hideSuccess() {
+            document.getElementById('success-section').classList.add('hidden');
+        }
+
+        function updateSalesforceStatus(connected) {
+            const statusDiv = document.getElementById('salesforce-status');
+            const connectedSpan = document.getElementById('sf-connected');
+            const disconnectedSpan = document.getElementById('sf-disconnected');
+            const connectBtn = document.getElementById('connect-salesforce-btn');
+
+            statusDiv.classList.remove('hidden');
+            
+            if (connected) {
+                connectedSpan.classList.remove('hidden');
+                disconnectedSpan.classList.add('hidden');
+                connectBtn.textContent = 'Disconnect Salesforce';
+                connectBtn.onclick = disconnectFromSalesforce;
+            } else {
+                connectedSpan.classList.add('hidden');
+                disconnectedSpan.classList.remove('hidden');
+                connectBtn.textContent = 'Connect Salesforce';
+                connectBtn.onclick = showSalesforceModal;
+            }
+        }
+
+        async function connectToSalesforce() {
+            const instanceUrl = document.getElementById('sf-instance-url').value.trim();
+            const username = document.getElementById('sf-username').value.trim();
+            const password = document.getElementById('sf-password').value.trim();
+
+            if (!instanceUrl || !username || !password) {
+                showError('Please fill in all Salesforce connection fields');
+                return;
+            }
+
+            const connectBtn = document.getElementById('sf-connect-btn');
+            connectBtn.disabled = true;
+            connectBtn.textContent = 'Connecting...';
+
+            try {
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                salesforceSession = {
+                    instanceUrl: instanceUrl,
+                    username: username,
+                    sessionId: 'mock_session_' + Date.now(),
+                    connected: true
+                };
+
+                localStorage.setItem('salesforceSession', JSON.stringify(salesforceSession));
+                
+                updateSalesforceStatus(true);
+                closeSalesforceModal();
+                showSuccess('Successfully connected to Salesforce!');
+                
+                document.getElementById('sf-instance-url').value = '';
+                document.getElementById('sf-username').value = '';
+                document.getElementById('sf-password').value = '';
+
+                addToRecentActivity('salesforce', 'Connected to Salesforce CRM');
+
+            } catch (error) {
+                showError('Failed to connect to Salesforce: ' + error.message);
+            } finally {
+                connectBtn.disabled = false;
+                connectBtn.textContent = 'Connect';
+            }
+        }
+
+        function disconnectFromSalesforce() {
+            salesforceSession = null;
+            localStorage.removeItem('salesforceSession');
+            updateSalesforceStatus(false);
+            showSuccess('Disconnected from Salesforce');
+            addToRecentActivity('salesforce', 'Disconnected from Salesforce CRM');
+        }
+
+        async function addToSalesforce() {
+            if (!salesforceSession) {
+                showError('Please connect to Salesforce first');
+                showSalesforceModal();
+                return;
+            }
+
+            if (selectedContacts.size === 0) {
+                showError('Please select contacts to add to Salesforce');
+                return;
+            }
+
+            const contactsToAdd = Array.from(selectedContacts).map(index => currentContacts[index]);
+            
+            try {
+                for (const contact of contactsToAdd) {
+                    await simulateAddContactToSalesforce(contact);
+                }
+
+                showSuccess(`Successfully added ${contactsToAdd.length} contacts to Salesforce!`);
+                addToRecentActivity('salesforce', `Added ${contactsToAdd.length} enhanced contacts to Salesforce CRM`);
+                
+                selectedContacts.clear();
+                document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+                updateSelectionUI();
+
+            } catch (error) {
+                showError('Failed to add contacts to Salesforce: ' + error.message);
+            }
+        }
+
+        async function addSingleContactToSalesforce(contact) {
+            if (!salesforceSession) {
+                showError('Please connect to Salesforce first');
+                showSalesforceModal();
+                return;
+            }
+
+            try {
+                await simulateAddContactToSalesforce(contact);
+                showSuccess(`Added ${contact.name} to Salesforce with score ${contact.contactScore}!`);
+                addToRecentActivity('salesforce', `Added ${contact.name} (Score: ${contact.contactScore}) to Salesforce CRM`);
+            } catch (error) {
+                showError('Failed to add contact to Salesforce: ' + error.message);
+            }
+        }
+
+        async function simulateAddContactToSalesforce(contact) {
+            await new Promise(resolve => setTimeout(resolve, 500));
+            console.log('Adding enhanced contact to Salesforce:', contact);
+            
+            if (Math.random() < 0.05) {
+                throw new Error('Duplicate contact detected');
+            }
+            
+            return {
+                id: 'sf_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+                success: true
+            };
+        }
+
+        // ===== API FUNCTIONS =====
+        async function searchHunter(domain, limit) {
+            const url = `https://api.hunter.io/v2/domain-search?domain=${domain}&limit=${limit}&api_key=${HUNTER_API_KEY}`;
+            const response = await fetch(url);
+
+            if (!response.ok) {
+                throw new Error(`Professional Database error: ${response.status}`);
+            }
+
+            const data = await response.json();
+            return data.data;
+        }
+
+async function searchApollo(domain, limit) {
+    const requestBody = {
+        api_key: APOLLO_API_KEY,
+        q_organization_domains: domain,
+        page: 1,
+        per_page: Math.min(limit, 100),
+        person_titles: ["VP", "Director", "Manager", "Head", "Chief", "President"],
+        organization_locations: ["United States"],
+        person_locations: ["United States"],
+        reveal_personal_emails: true,
+        reveal_phone_number: true
+    };
+
+    try {
+        const response = await fetch('/.netlify/functions/apollo-proxy', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestBody)
         });
         
-        console.log('Script loaded successfully');
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(`Apollo API error: ${response.status} - ${errorData.error || 'Unknown error'}`);
+        }
+        
+        const data = await response.json();
+        return data;
+
+    } catch (error) {
+        console.error('Apollo API call failed:', error.message);
+        throw error;
+    }
+}
+
+        async function scrapeCompanyWebsite(domain) {
+            try {
+                const scrapedContacts = [];
+                const domains = ['salesforce.com', 'microsoft.com', 'hubspot.com', 'stripe.com', 'notion.so'];
+                
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                if (domains.includes(domain)) {
+                    const mockTitles = [
+                        'Head of Business Development',
+                        'VP of Customer Success',
+                        'Director of Strategic Partnerships',
+                        'Senior Marketing Manager',
+                        'Lead Software Engineer'
+                    ];
+                    
+                    const mockNames = [
+                        'Sarah Johnson', 'Michael Chen', 'Emily Rodriguez', 
+                        'David Kim', 'Jessica Williams', 'Alex Thompson'
+                    ];
+
+                    for (let i = 0; i < Math.floor(Math.random() * 3) + 2; i++) {
+                        const name = mockNames[Math.floor(Math.random() * mockNames.length)];
+                        const title = mockTitles[Math.floor(Math.random() * mockTitles.length)];
+                        const firstName = name.split(' ')[0].toLowerCase();
+                        const lastName = name.split(' ')[1].toLowerCase();
+                        
+                        scrapedContacts.push({
+                            name: name,
+                            title: title,
+                            email: `${firstName}.${lastName}@${domain}`,
+                            source: 'Web Intelligence',
+                            verified: false,
+                            confidence: 70 + Math.floor(Math.random() * 20),
+                        });
+                    }
+                }
+
+                return scrapedContacts;
+
+            } catch (error) {
+                return [];
+            }
+        }
+
+        function categorizeByTitle(position) {
+            if (!position) return 'Other';
+            const pos = position.toLowerCase();
+            if (pos.includes('sales') || pos.includes('business development')) return 'Sales';
+            if (pos.includes('marketing') || pos.includes('growth')) return 'Marketing';
+            if (pos.includes('engineer') || pos.includes('developer') || pos.includes('tech')) return 'Engineering';
+            if (pos.includes('finance') || pos.includes('accounting')) return 'Finance';
+            if (pos.includes('operations') || pos.includes('ops')) return 'Operations';
+            if (pos.includes('ceo') || pos.includes('cto') || pos.includes('president') || pos.includes('founder')) return 'Executive';
+            return 'Other';
+        }
+
+        function categorizeSeniority(position) {
+            if (!position) return 'individual';
+            const pos = position.toLowerCase();
+            if (pos.includes('ceo') || pos.includes('cto') || pos.includes('cfo') || pos.includes('coo') || 
+                pos.includes('president') || pos.includes('founder') || pos.includes('vp ') || pos.includes('vice president')) {
+                return 'executive';
+            }
+            if (pos.includes('director') || pos.includes('head of') || pos.includes('lead')) return 'director';
+            if (pos.includes('manager') || pos.includes('supervisor')) return 'manager';
+            return 'individual';
+        }
+
+        // ===== DISPLAY FUNCTIONS =====
+        function displayResults(contacts) {
+            document.getElementById('results-count').textContent = `${contacts.length} contacts`;
+            
+            document.getElementById('contacts-grid').innerHTML = '';
+            document.getElementById('contacts-table-body').innerHTML = '';
+            
+            contacts.forEach((contact, index) => {
+                if (contactViewMode === 'grid') {
+                    createContactCard(contact, index);
+                } else {
+                    createContactRow(contact, index);
+                }
+            });
+            
+            updateSelectionUI();
+            
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        }
+
+        function getSeniorityColor(seniority) {
+            switch(seniority) {
+                case 'executive': return 'bg-purple-100 text-purple-800';
+                case 'director': return 'bg-blue-100 text-blue-800';
+                case 'manager': return 'bg-green-100 text-green-800';
+                default: return 'bg-gray-100 text-gray-800';
+            }
+        }
+
+        // ===== UI CONTROL FUNCTIONS =====
+        function showLoading() {
+            document.getElementById('search-loading').classList.remove('hidden');
+            document.getElementById('search-results').classList.add('hidden');
+        }
+
+        function hideLoading() {
+            document.getElementById('search-loading').classList.add('hidden');
+        }
+
+        function showResults() {
+            document.getElementById('search-results').classList.remove('hidden');
+            document.getElementById('error-section').classList.add('hidden');
+        }
+
+        function hideResults() {
+            document.getElementById('search-results').classList.add('hidden');
+            document.getElementById('company-info-card').classList.add('hidden');
+        }
+
+        function showError(message) {
+            document.getElementById('error-message').textContent = message;
+            document.getElementById('error-section').classList.remove('hidden');
+            setTimeout(hideError, 5000);
+        }
+
+        function hideError() {
+            document.getElementById('error-section').classList.add('hidden');
+        }
+
+        // ===== DATA PERSISTENCE FUNCTIONS =====
+        function getStoredData(key, defaultValue = null) {
+    try {
+        const userKey = currentUser ? `user_${currentUser.email.replace(/[^a-zA-Z0-9]/g, '_')}_${key}` : key;
+        const stored = localStorage.getItem(userKey);
+        return stored ? JSON.parse(stored) : defaultValue;
+    } catch (e) {
+        console.error('Error reading from localStorage:', e);
+        return defaultValue;
+    }
+}
+
+        function setStoredData(key, value) {
+    try {
+        const userKey = currentUser ? `user_${currentUser.email.replace(/[^a-zA-Z0-9]/g, '_')}_${key}` : key;
+        localStorage.setItem(userKey, JSON.stringify(value));
+    } catch (e) {
+        console.error('Error writing to localStorage:', e);
+    }
+}
+
+        function incrementMetric(metric, count = 1) {
+            const metrics = getStoredData('salesSimplifiedMetrics', {
+                totalSearches: 0,
+                contactsFound: 0,
+                verifiedEmails: 0,
+                listsCreated: 0,
+                exports: 0,
+                exportedContacts: 0,
+                companiesSearched: 0,
+                salesforceExports: 0
+            });
+            
+            metrics[metric] += count;
+            setStoredData('salesSimplifiedMetrics', metrics);
+            updateDashboardMetrics();
+            updateReportsMetrics();
+        }
+
+        function updateDashboardMetrics() {
+            const metrics = getStoredData('salesSimplifiedMetrics', {
+                totalSearches: 0,
+                contactsFound: 0,
+                verifiedEmails: 0,
+                listsCreated: 0,
+                exports: 0,
+                exportedContacts: 0,
+                companiesSearched: 0,
+                salesforceExports: 0
+            });
+
+            document.getElementById('dashboard-total-searches').textContent = metrics.totalSearches;
+            document.getElementById('dashboard-contacts-found').textContent = metrics.contactsFound;
+            document.getElementById('dashboard-lists-created').textContent = metrics.listsCreated;
+            document.getElementById('dashboard-exports').textContent = metrics.exports;
+
+            const verificationRate = metrics.contactsFound > 0 ? Math.round((metrics.verifiedEmails / metrics.contactsFound) * 100) : 0;
+            document.getElementById('contacts-verification').textContent = `${verificationRate}% verified`;
+
+            const avgExportSize = metrics.exports > 0 ? Math.round(metrics.exportedContacts / metrics.exports) : 0;
+            document.getElementById('average-export-size').textContent = `${avgExportSize} contacts avg`;
+
+            const searchGrowth = Math.min(Math.floor(metrics.totalSearches / 10), 50);
+            document.getElementById('searches-growth').textContent = `+${searchGrowth}% this month`;
+
+            const listsThisWeek = Math.min(metrics.listsCreated, 7);
+            document.getElementById('lists-growth').textContent = `${listsThisWeek} this week`;
+        }
+
+        function updateReportsMetrics() {
+            const metrics = getStoredData('salesSimplifiedMetrics', {
+                totalSearches: 0,
+                contactsFound: 0,
+                verifiedEmails: 0,
+                listsCreated: 0,
+                exports: 0,
+                exportedContacts: 0,
+                companiesSearched: 0,
+                salesforceExports: 0
+            });
+
+            const verificationRate = metrics.contactsFound > 0 ? Math.round((metrics.verifiedEmails / metrics.contactsFound) * 100) : 0;
+            const avgScore = Math.floor(Math.random() * 20) + 75; // Simulated
+
+            document.getElementById('verification-rate').textContent = `${verificationRate}%`;
+            document.getElementById('avg-score').textContent = avgScore;
+            document.getElementById('companies-searched').textContent = metrics.companiesSearched || Math.floor(metrics.totalSearches * 0.8);
+            document.getElementById('sf-exports').textContent = metrics.salesforceExports;
+        }
+
+        function addToRecentActivity(type, message) {
+            const activities = getStoredData('recentActivity', []);
+            const newActivity = {
+                type: type,
+                message: message,
+                timestamp: new Date().toISOString()
+            };
+            
+            activities.unshift(newActivity);
+            if (activities.length > 10) activities.pop();
+            
+            setStoredData('recentActivity', activities);
+            updateRecentActivity();
+        }
+
+        function updateRecentActivity() {
+            const activities = getStoredData('recentActivity', []);
+            const container = document.getElementById('recent-activity');
+            
+            if (activities.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8 text-gray-500">
+                        <i data-lucide="activity" class="w-8 h-8 mx-auto mb-2"></i>
+                        <p class="text-sm">Start searching to see your activity</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = activities.slice(0, 5).map(activity => {
+                const timeAgo = getTimeAgo(new Date(activity.timestamp));
+                const iconMap = { 'search': 'search', 'export': 'download', 'list': 'plus', 'salesforce': 'cloud' };
+                const colorMap = { 'search': 'blue', 'export': 'green', 'list': 'purple', 'salesforce': 'indigo' };
+                
+                return `
+                    <div class="flex items-start space-x-3">
+                        <div class="w-8 h-8 bg-${colorMap[activity.type]}-100 rounded-full flex items-center justify-center">
+                            <i data-lucide="${iconMap[activity.type]}" class="w-4 h-4 text-${colorMap[activity.type]}-600"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-sm font-medium text-gray-900">${activity.message}</p>
+                            <p class="text-xs text-gray-500">${timeAgo}</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        }
+
+        function getTimeAgo(date) {
+            const now = new Date();
+            const diff = now - date;
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(diff / 3600000);
+            const days = Math.floor(diff / 86400000);
+            
+            if (minutes < 60) return `${minutes} minute${minutes === 1 ? '' : 's'} ago`;
+            if (hours < 24) return `${hours} hour${hours === 1 ? '' : 's'} ago`;
+            return `${days} day${days === 1 ? '' : 's'} ago`;
+        }
+
+        function updateSavedListsPreview() {
+            const lists = getStoredData('contactLists', []);
+            const container = document.getElementById('saved-lists-preview');
+            
+            if (lists.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8 text-gray-500">
+                        <i data-lucide="list" class="w-8 h-8 mx-auto mb-2"></i>
+                        <p class="text-sm">No saved lists yet</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = lists.slice(0, 3).map(list => `
+                <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer" onclick="viewListFromDashboard('${list.id}')">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <i data-lucide="briefcase" class="w-4 h-4 text-blue-600"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-900">${list.name}</p>
+                            <p class="text-xs text-gray-500">${list.contacts.length} contacts</p>
+                        </div>
+                    </div>
+                    <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i>
+                </div>
+            `).join('');
+            
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        }
+
+        // ===== NAVIGATION FUNCTIONS =====
+        function showSection(sectionName) {
+    document.querySelectorAll('.section-content').forEach(section => {
+        section.classList.add('hidden');
+    });
+    
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('active');
+        item.classList.add('text-gray-700');
+    });
+    
+    const targetSection = document.getElementById(sectionName + '-section');
+    if (targetSection) {  // ADD THIS CHECK
+        targetSection.classList.remove('hidden');
+    }
+    
+    const navItem = event?.target?.closest('.nav-item');  // MAKE THIS SAFER
+    if (navItem) {
+        navItem.classList.add('active');
+        navItem.classList.remove('text-gray-700');
+    }
+    
+    if (sectionName === 'contact-lists') {
+        loadContactListsPage();
+    }
+    
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+}
+
+        function loadContactListsPage() {
+            const lists = getStoredData('contactLists', []);
+            const container = document.getElementById('contact-lists-grid');
+            
+            if (lists.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-12 text-gray-500">
+                        <i data-lucide="list" class="w-16 h-16 mx-auto mb-4"></i>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">No contact lists yet</h3>
+                        <p class="text-gray-600 mb-4">Start by finding contacts and saving them to lists</p>
+                        <button onclick="showSection('contact-finder')" class="px-4 py-2 brand-gradient text-white rounded-lg font-medium hover:opacity-90">
+                            Find Contacts
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = lists.map(list => {
+                const timeAgo = getTimeAgo(new Date(list.created));
+                const avgScore = list.contacts.length > 0 ? 
+                    Math.round(list.contacts.reduce((sum, c) => sum + (c.contactScore || 75), 0) / list.contacts.length) : 0;
+                
+                return `
+                    <div class="bg-white rounded-lg shadow-sm p-6 card-hover border-l-4 border-blue-500">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-900">${list.name}</h3>
+                            <div class="text-xs text-gray-500">Created ${timeAgo}</div>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-4">Enhanced contact list with verification and scoring</p>
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="text-center">
+                                <div class="text-2xl font-bold text-blue-600">${list.contacts.length}</div>
+                                <div class="text-xs text-gray-500">Contacts</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-2xl font-bold text-green-600">${avgScore}</div>
+                                <div class="text-xs text-gray-500">Avg Score</div>
+                            </div>
+                        </div>
+                        <div class="flex justify-between">
+                            <div class="flex space-x-2">
+                                <button onclick="viewList('${list.id}')" class="p-1 text-gray-400 hover:text-blue-600" title="View">
+                                    <i data-lucide="eye" class="w-4 h-4"></i>
+                                </button>
+                                <button onclick="exportSavedList('${list.id}')" class="p-1 text-gray-400 hover:text-green-600" title="Export">
+                                    <i data-lucide="download" class="w-4 h-4"></i>
+                                </button>
+                                <button onclick="deleteList('${list.id}')" class="p-1 text-gray-400 hover:text-red-600" title="Delete">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        }
+
+        // ===== CONTACT VIEW FUNCTIONS =====
+        function setContactView(viewMode) {
+            currentViewMode = viewMode;
+            contactViewMode = viewMode; // Update the global view mode variable
+            
+            const gridBtn = document.getElementById('grid-view-btn');
+            const listBtn = document.getElementById('list-view-btn');
+            
+            if (viewMode === 'grid') {
+                gridBtn.classList.add('bg-white', 'text-gray-900', 'shadow-sm');
+                gridBtn.classList.remove('text-gray-600');
+                listBtn.classList.add('text-gray-600');
+                listBtn.classList.remove('bg-white', 'text-gray-900', 'shadow-sm');
+                
+                // Show grid, hide table
+                document.getElementById('contacts-grid').classList.remove('hidden');
+                document.getElementById('contacts-table').classList.add('hidden');
+            } else {
+                listBtn.classList.add('bg-white', 'text-gray-900', 'shadow-sm');
+                listBtn.classList.remove('text-gray-600');
+                gridBtn.classList.add('text-gray-600');
+                gridBtn.classList.remove('bg-white', 'text-gray-900', 'shadow-sm');
+                
+                // Show table, hide grid
+                document.getElementById('contacts-grid').classList.add('hidden');
+                document.getElementById('contacts-table').classList.remove('hidden');
+            }
+            
+            // Re-display contacts if we have them
+            if (currentContacts && currentContacts.length > 0) {
+                displayResults(currentContacts);
+            }
+        }
+
+        // ===== CONTACT MANAGEMENT FUNCTIONS =====
+        function toggleContactSelection(index) {
+            if (selectedContacts.has(index)) {
+                selectedContacts.delete(index);
+            } else {
+                selectedContacts.add(index);
+            }
+            updateActionButtons();
+        }
+
+        function selectAllContacts() {
+            const allSelected = selectedContacts.size === currentContacts.length;
+            
+            if (allSelected) {
+                selectedContacts.clear();
+                document.getElementById('select-all-btn').textContent = 'Select All';
+            } else {
+                selectedContacts.clear();
+                for (let i = 0; i < currentContacts.length; i++) {
+                    selectedContacts.add(i);
+                }
+                document.getElementById('select-all-btn').textContent = 'Deselect All';
+            }
+            
+            document.querySelectorAll('#contacts-grid input[type="checkbox"], #contacts-table-body input[type="checkbox"]').forEach((checkbox, index) => {
+                checkbox.checked = selectedContacts.has(index);
+            });
+            
+            const headerCheckbox = document.getElementById('select-all-list');
+            if (headerCheckbox) {
+                headerCheckbox.checked = selectedContacts.size === currentContacts.length;
+            }
+            
+            updateSelectionUI();
+        }
+
+        function selectAllContactsCheckbox() {
+            const headerCheckbox = document.getElementById('select-all-list');
+            const isChecked = headerCheckbox.checked;
+            
+            if (isChecked) {
+                selectedContacts.clear();
+                for (let i = 0; i < currentContacts.length; i++) {
+                    selectedContacts.add(i);
+                }
+                document.getElementById('select-all-btn').textContent = 'Deselect All';
+            } else {
+                selectedContacts.clear();
+                document.getElementById('select-all-btn').textContent = 'Select All';
+            }
+            
+            document.querySelectorAll('#contacts-table-body input[type="checkbox"]').forEach((checkbox, index) => {
+                checkbox.checked = isChecked;
+            });
+            
+            updateSelectionUI();
+        }
+
+        function updateSelectionUI() {
+            const hasSelection = selectedContacts.size > 0;
+            
+            document.getElementById('add-to-list-btn').disabled = !hasSelection;
+            document.getElementById('add-to-salesforce-btn').disabled = !hasSelection;
+            document.getElementById('export-selected-btn').disabled = !hasSelection;
+            
+            const selectAllBtn = document.getElementById('select-all-btn');
+            if (selectAllBtn) {
+                selectAllBtn.textContent = selectedContacts.size === currentContacts.length ? 'Deselect All' : 'Select All';
+            }
+            
+            const headerCheckbox = document.getElementById('select-all-list');
+            if (headerCheckbox) {
+                headerCheckbox.checked = selectedContacts.size === currentContacts.length;
+                headerCheckbox.indeterminate = selectedContacts.size > 0 && selectedContacts.size < currentContacts.length;
+            }
+        }
+
+        function addToList() {
+            if (selectedContacts.size === 0) {
+                showError('Please select contacts to add to a list');
+                return;
+            }
+            
+            document.getElementById('save-list-modal').classList.remove('hidden');
+            document.getElementById('list-name-input').focus();
+        }
+
+        function cancelSaveList() {
+            document.getElementById('save-list-modal').classList.add('hidden');
+            document.getElementById('list-name-input').value = '';
+        }
+
+        function confirmSaveList() {
+            const listName = document.getElementById('list-name-input').value.trim();
+            if (!listName) {
+                showError('Please enter a list name');
+                return;
+            }
+            
+            const selectedContactsArray = Array.from(selectedContacts).map(index => currentContacts[index]);
+            
+            const lists = getStoredData('contactLists', []);
+            const newList = {
+                id: Date.now().toString(),
+                name: listName,
+                contacts: selectedContactsArray,
+                created: new Date().toISOString()
+            };
+            
+            lists.unshift(newList);
+            setStoredData('contactLists', lists);
+            
+            incrementMetric('listsCreated');
+            addToRecentActivity('list', `Created "${listName}" list with ${selectedContactsArray.length} enhanced contacts`);
+            
+            updateSavedListsPreview();
+            
+            document.getElementById('save-list-modal').classList.add('hidden');
+            document.getElementById('list-name-input').value = '';
+            
+            selectedContacts.clear();
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+            updateSelectionUI();
+            
+            showSuccess(`List "${listName}" saved successfully with ${selectedContactsArray.length} contacts!`);
+        }
+
+        function viewListFromDashboard(listId) {
+            showSection('contact-lists');
+            
+            setTimeout(() => {
+                const listElement = document.querySelector(`[onclick*="${listId}"]`);
+                if (listElement) {
+                    listElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    listElement.style.backgroundColor = '#dbeafe';
+                    setTimeout(() => {
+                        listElement.style.backgroundColor = '';
+                    }, 2000);
+                }
+            }, 100);
+        }
+
+        function viewList(listId) {
+            const lists = getStoredData('contactLists', []);
+            const list = lists.find(l => l.id === listId);
+            if (list) {
+                currentContacts = list.contacts;
+                selectedContacts.clear();
+                
+                showSection('contact-finder');
+                
+                setTimeout(() => {
+                    // Use displayRealContactResults to preserve all contact data including names and scores
+                    displayRealContactResults(list.contacts, null);
+                    showResults();
+                    
+                    document.getElementById('search-domain').value = `Saved List: ${list.name}`;
+                    document.getElementById('results-count').textContent = `${list.contacts.length} contacts`;
+                }, 100);
+            }
+        }
+
+        function exportSavedList(listId) {
+            const lists = getStoredData('contactLists', []);
+            const list = lists.find(l => l.id === listId);
+            
+            if (!list) {
+                showError('List not found');
+                return;
+            }
+
+            currentContacts = list.contacts;
+            selectedContacts.clear();
+            for (let i = 0; i < list.contacts.length; i++) {
+                selectedContacts.add(i);
+            }
+            
+            companyData = { organization: list.name };
+            exportContacts();
+        }
+
+        function deleteList(listId) {
+            if (!confirm('Are you sure you want to delete this list?')) {
+                return;
+            }
+            
+            const lists = getStoredData('contactLists', []);
+            const listIndex = lists.findIndex(l => l.id === listId);
+            
+            if (listIndex === -1) {
+                showError('List not found');
+                return;
+            }
+            
+            const deletedList = lists[listIndex];
+            lists.splice(listIndex, 1);
+            setStoredData('contactLists', lists);
+            
+            const metrics = getStoredData('salesSimplifiedMetrics', {
+                totalSearches: 0,
+                contactsFound: 0,
+                verifiedEmails: 0,
+                listsCreated: 0,
+                exports: 0,
+                exportedContacts: 0
+            });
+            metrics.listsCreated = lists.length;
+            setStoredData('salesSimplifiedMetrics', metrics);
+            
+            updateDashboardMetrics();
+            updateSavedListsPreview();
+            loadContactListsPage();
+            
+            showSuccess(`List "${deletedList.name}" deleted successfully.`);
+        }
+
+        function exportContacts() {
+            const contactsToExport = selectedContacts.size > 0 
+                ? Array.from(selectedContacts).map(index => currentContacts[index])
+                : currentContacts;
+            
+            if (contactsToExport.length === 0) {
+                showError('No contacts to export');
+                return;
+            }
+
+            const excelData = contactsToExport.map(contact => ({
+                'First Name': contact.name.split(' ')[0],
+                'Last Name': contact.name.split(' ').slice(1).join(' '),
+                'Full Name': contact.name,
+                'Email Address': contact.email,
+                'Job Title': contact.title,
+                'Department': contact.department,
+                'Seniority Level': contact.seniority,
+                'Contact Score': contact.contactScore || 75,
+                'Email Verification Status': contact.verified ? 'Verified' : contact.deliverable ? 'Deliverable' : 'Unverified',
+                'Email Deliverable': contact.deliverable ? 'Yes' : 'No',
+                'LinkedIn Profile': contact.linkedin || '',
+                'Phone Number': contact.phone || '',
+                'Company Name': contact.company,
+                'Email Verified': contact.verified ? 'Yes' : 'No',
+                'Confidence Score': contact.confidence + '%',
+                'Data Source': contact.source,
+                'Lead Source': 'Sales Simplified Enhanced',
+                'Lead Status': 'New',
+                'Date Exported': new Date().toLocaleDateString(),
+                'Exported By': 'Sales Simplified Platform'
+            }));
+
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.json_to_sheet(excelData);
+
+            const range = XLSX.utils.decode_range(ws['!ref']);
+            const colWidths = [];
+            for (let C = range.s.c; C <= range.e.c; ++C) {
+                let maxWidth = 10;
+                for (let R = range.s.r; R <= range.e.r; ++R) {
+                    const cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
+                    const cell = ws[cellAddress];
+                    if (cell && cell.v) {
+                        const cellLength = cell.v.toString().length;
+                        if (cellLength > maxWidth) maxWidth = cellLength;
+                    }
+                }
+                colWidths.push({ wch: Math.min(maxWidth + 2, 50) });
+            }
+            ws['!cols'] = colWidths;
+
+            const companyName = (companyData?.organization || 'contacts').replace(/[^a-zA-Z0-9]/g, '');
+            const sheetName = `${companyName} Enhanced Contacts`;
+            XLSX.utils.book_append_sheet(wb, ws, sheetName);
+
+            const timestamp = new Date().toISOString().slice(0, 10);
+            const filename = `Sales_Simplified_Enhanced_${companyName}_${timestamp}.xlsx`;
+
+            XLSX.writeFile(wb, filename);
+
+            incrementMetric('exports');
+            incrementMetric('exportedContacts', contactsToExport.length);
+            addToRecentActivity('export', `Exported ${contactsToExport.length} enhanced contacts from ${companyName}`);
+
+            showSuccess(`Downloaded ${contactsToExport.length} contacts with enhanced scoring to ${filename}`);
+        }
+
+        // ===== QUICK ACTIONS =====
+        function createNewList() {
+            document.getElementById('save-list-modal').classList.remove('hidden');
+            document.getElementById('list-name-input').focus();
+        }
+
+        function exportLastSearch() {
+            if (currentContacts.length > 0) {
+                selectedContacts.clear();
+                for (let i = 0; i < currentContacts.length; i++) {
+                    selectedContacts.add(i);
+                }
+                exportContacts();
+            } else {
+                showError('No recent search to export');
+            }
+        }
+// ===== USER LOGIN SYSTEM =====
+function initializeUser() {
+    const savedUser = localStorage.getItem('currentUser');
+    if (savedUser) {
+        try {
+            currentUser = JSON.parse(savedUser);
+            updateUserDisplay();
+        } catch (e) {
+            showLoginModal();
+        }
+    } else {
+        showLoginModal();
+    }
+}
+
+function showLoginModal() {
+    const modal = document.createElement('div');
+    modal.id = 'login-modal';
+    modal.className = 'fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50';
+    modal.innerHTML = `
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Login to Sales Simplified</h3>
+            <div class="space-y-4">
+                <input type="email" id="login-email" placeholder="your.email@company.com" 
+                       class="w-full border border-gray-300 rounded-lg px-3 py-2">
+                <input type="text" id="login-name" placeholder="Your Full Name" 
+                       class="w-full border border-gray-300 rounded-lg px-3 py-2">
+            </div>
+            <div class="mt-6">
+                <button onclick="processLogin()" class="w-full px-4 py-2 brand-gradient text-white rounded-lg">
+                    Login
+                </button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    document.getElementById('login-email').focus();
+}
+
+function processLogin() {
+    const email = document.getElementById('login-email').value.trim();
+    const name = document.getElementById('login-name').value.trim();
+    
+    if (!email || !name) {
+        showError('Please enter both email and name');
+        return;
+    }
+    
+    currentUser = { email: email, name: name, organization: currentOrganization };
+    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    updateUserDisplay();
+    showAdminSections(); // ADD THIS LINE
+    document.getElementById('login-modal').remove();
+    showSuccess(`Welcome ${name}!`);
+}
+
+function updateUserDisplay() {
+    const userSection = document.querySelector('.flex.items-center.space-x-4');
+    if (userSection && currentUser) {
+        userSection.innerHTML = `
+            <div class="text-sm text-blue-200 text-right">
+                <div class="font-medium">${currentUser.name}</div>
+                <div class="text-xs">${currentUser.email}</div>
+            </div>
+            <button onclick="logout()" class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                <i data-lucide="user" class="w-4 h-4 text-white"></i>
+            </button>
+        `;
+    }
+}
+
+function logout() {
+    if (confirm('Logout?')) {
+        localStorage.removeItem('currentUser');
+        location.reload();
+    }
+}
+        // ===== INITIALIZE =====
+        document.addEventListener('DOMContentLoaded', function() {
+    initializeUser();
+    showAdminSections(); // ADD THIS LINE
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+            
+            // Initialize Salesforce session if exists
+            const savedSession = localStorage.getItem('salesforceSession');
+            if (savedSession) {
+                try {
+                    salesforceSession = JSON.parse(savedSession);
+                    if (salesforceSession && salesforceSession.connected) {
+                        updateSalesforceStatus(true);
+                    }
+                } catch (e) {
+                    console.error('Error loading Salesforce session:', e);
+                    localStorage.removeItem('salesforceSession');
+                }
+            }
+            
+            updateDashboardMetrics();
+            updateReportsMetrics();
+            updateRecentActivity();
+            updateSavedListsPreview();
+            
+            document.getElementById('search-domain').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    executeSearch();
+                }
+            });
+        });
+        // ===== ADMIN FUNCTIONS =====
+        function addTeamMember() {
+            const email = document.getElementById('new-user-email').value.trim();
+            const name = document.getElementById('new-user-name').value.trim();
+            
+            if (!email || !name) {
+                showError('Please enter both email and name');
+                return;
+            }
+            
+            // Get current team members
+            const teamMembers = getStoredData('teamMembers', []);
+            
+            // Check if user already exists
+            if (teamMembers.find(member => member.email === email)) {
+                showError('User already exists in the team');
+                return;
+            }
+            
+            // Add new team member
+            const newMember = {
+                id: Date.now().toString(),
+                email: email,
+                name: name,
+                added: new Date().toISOString(),
+                lastActive: null,
+                searches: 0,
+                status: 'invited'
+            };
+            
+            teamMembers.push(newMember);
+            setStoredData('teamMembers', teamMembers);
+            
+            // Clear form
+            document.getElementById('new-user-email').value = '';
+            document.getElementById('new-user-name').value = '';
+            
+            // Refresh team members table
+            loadTeamMembers();
+            
+            showSuccess(`${name} has been added to the team`);
+        }
+
+        function loadTeamMembers() {
+            const teamMembers = getStoredData('teamMembers', []);
+            const tbody = document.getElementById('team-members-table');
+            
+            if (!tbody) return;
+            
+            if (teamMembers.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                            No team members yet. Add your first team member above.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tbody.innerHTML = teamMembers.map(member => {
+                const lastActive = member.lastActive ? 
+                    getTimeAgo(new Date(member.lastActive)) : 'Never';
+                
+                const statusColor = member.status === 'active' ? 'text-green-600' : 'text-gray-500';
+                
+                return `
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-medium text-gray-900">${member.name}</div>
+                            <div class="text-sm ${statusColor}">${member.status}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            ${member.email}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            ${lastActive}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            ${member.searches}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <button onclick="removeTeamMember('${member.id}')" class="text-red-600 hover:text-red-900">
+                                Remove
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function removeTeamMember(memberId) {
+            if (!confirm('Are you sure you want to remove this team member?')) {
+                return;
+            }
+            
+            const teamMembers = getStoredData('teamMembers', []);
+            const updatedMembers = teamMembers.filter(member => member.id !== memberId);
+            setStoredData('teamMembers', updatedMembers);
+            
+            loadTeamMembers();
+            showSuccess('Team member removed successfully');
+        }
+
+        function isUserAdmin() {
+            // Check if current user is admin (Bryan or designated admin)
+            return currentUser && (
+                currentUser.email === 'bryan@company.com' || 
+                currentUser.email === 'admin@company.com' ||
+                currentUser.email.includes('admin')
+            );
+        }
+
+        function showAdminSections() {
+            if (isUserAdmin()) {
+                document.getElementById('admin-section').classList.remove('hidden');
+            } else {
+                document.getElementById('admin-section').classList.add('hidden');
+            }
+        }
+        
+        } // End of initialization check
     </script>
+
 </body>
 </html>

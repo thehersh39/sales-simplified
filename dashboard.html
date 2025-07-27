@@ -440,7 +440,7 @@
 
                 <div id="search-results" class="hidden">
                     <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
-                        <div class="flex items-center justify-between">
+                        <div class="flex items-center justify-between mb-4">
                             <div class="flex items-center space-x-4">
                                 <h3 class="text-lg font-semibold text-gray-900">Search Results</h3>
                                 <span id="results-count" class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">0 contacts</span>
@@ -457,6 +457,45 @@
                                 </button>
                                 <button onclick="exportContacts()" id="export-selected-btn" class="px-4 py-2 brand-gradient text-white rounded-lg text-sm font-medium hover:opacity-90 disabled:opacity-50" disabled>
                                     Export Selected
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Enhanced Sorting and Filtering Controls -->
+                        <div class="flex items-center justify-between border-t pt-4">
+                            <div class="flex items-center space-x-4">
+                                <div class="flex items-center space-x-2">
+                                    <label class="text-sm font-medium text-gray-700">Sort by:</label>
+                                    <select id="sort-field" onchange="sortContacts()" class="px-3 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500">
+                                        <option value="confidence">Confidence Score</option>
+                                        <option value="name">Name</option>
+                                        <option value="title">Title/Position</option>
+                                        <option value="seniority">Seniority Level</option>
+                                        <option value="department">Department</option>
+                                        <option value="source">Data Source</option>
+                                    </select>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <label class="text-sm font-medium text-gray-700">Order:</label>
+                                    <select id="sort-order" onchange="sortContacts()" class="px-3 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500">
+                                        <option value="desc">High to Low</option>
+                                        <option value="asc">Low to High</option>
+                                    </select>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <label class="text-sm font-medium text-gray-700">Filter:</label>
+                                    <select id="title-filter" onchange="filterContacts()" class="px-3 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500">
+                                        <option value="">All Titles</option>
+                                        <option value="executive">Executives (C-Level, VP)</option>
+                                        <option value="director">Directors</option>
+                                        <option value="manager">Managers</option>
+                                        <option value="other">Other Roles</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <button onclick="toggleViewMode()" id="view-toggle-btn" class="px-3 py-1 border border-gray-300 rounded text-sm font-medium hover:bg-gray-50">
+                                    <span id="view-toggle-text">List View</span>
                                 </button>
                             </div>
                         </div>
@@ -953,9 +992,13 @@
         }
         
         async function searchContactsReal(domain) {
+            // Clear previous results to prevent caching
+            currentContacts = [];
+            selectedContacts.clear();
+            
             const response = await apiCall('/contact-search', {
                 method: 'POST',
-                body: JSON.stringify({ domain, limit: 10 })
+                body: JSON.stringify({ domain, limit: 100 })  // Increased to 100 for maximum contacts
             });
             return response ? { contacts: response.contacts, company: response.company, success: true } : { contacts: [], success: false };
         }
@@ -1786,7 +1829,7 @@
 async function searchApollo(domain, limit) {
     const requestBody = {
         page: 1,
-        per_page: Math.min(limit, 25),
+        per_page: Math.min(limit, 100),
         q_organization_domains_list: [domain],  // Fixed: Use correct parameter name as array
         person_titles: ["VP", "Director", "Manager", "Head", "Chief", "President"],
         organization_locations: ["United States"],
@@ -2796,6 +2839,206 @@ function logout() {
             }
         }
         
+        // ===== ENHANCED SORTING AND FILTERING FUNCTIONS =====
+        function sortContacts() {
+            if (!currentContacts || currentContacts.length === 0) return;
+            
+            const sortField = document.getElementById('sort-field').value;
+            const sortOrder = document.getElementById('sort-order').value;
+            
+            const sortedContacts = [...currentContacts].sort((a, b) => {
+                let aValue, bValue;
+                
+                switch (sortField) {
+                    case 'confidence':
+                        aValue = a.confidence || 0;
+                        bValue = b.confidence || 0;
+                        break;
+                    case 'name':
+                        aValue = (a.name || `${a.first_name} ${a.last_name}`).toLowerCase();
+                        bValue = (b.name || `${b.first_name} ${b.last_name}`).toLowerCase();
+                        break;
+                    case 'title':
+                        aValue = (a.title || a.position || '').toLowerCase();
+                        bValue = (b.title || b.position || '').toLowerCase();
+                        break;
+                    case 'seniority':
+                        const seniorityOrder = { 'executive': 4, 'director': 3, 'manager': 2, 'other': 1 };
+                        aValue = seniorityOrder[a.seniority] || 1;
+                        bValue = seniorityOrder[b.seniority] || 1;
+                        break;
+                    case 'department':
+                        aValue = (a.department || '').toLowerCase();
+                        bValue = (b.department || '').toLowerCase();
+                        break;
+                    case 'source':
+                        aValue = (a.source || '').toLowerCase();
+                        bValue = (b.source || '').toLowerCase();
+                        break;
+                    default:
+                        aValue = a.confidence || 0;
+                        bValue = b.confidence || 0;
+                }
+                
+                if (typeof aValue === 'string' && typeof bValue === 'string') {
+                    return sortOrder === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+                } else {
+                    return sortOrder === 'asc' ? aValue - bValue : bValue - aValue;
+                }
+            });
+            
+            // Update the display with sorted contacts
+            currentContacts = sortedContacts;
+            if (currentViewMode === 'grid') {
+                displayContactsGrid(currentContacts);
+            } else {
+                displayContactsList(currentContacts);
+            }
+        }
+
+        function filterContacts() {
+            if (!currentContacts || currentContacts.length === 0) return;
+            
+            const titleFilter = document.getElementById('title-filter').value;
+            
+            let filteredContacts = currentContacts;
+            
+            if (titleFilter) {
+                filteredContacts = currentContacts.filter(contact => {
+                    const title = (contact.title || contact.position || '').toLowerCase();
+                    
+                    switch (titleFilter) {
+                        case 'executive':
+                            return title.includes('ceo') || title.includes('cto') || title.includes('cfo') || 
+                                   title.includes('president') || title.includes('vp') || title.includes('vice president');
+                        case 'director':
+                            return title.includes('director');
+                        case 'manager':
+                            return title.includes('manager') || title.includes('mgr');
+                        case 'other':
+                            return !title.includes('ceo') && !title.includes('cto') && !title.includes('cfo') && 
+                                   !title.includes('president') && !title.includes('vp') && !title.includes('vice president') &&
+                                   !title.includes('director') && !title.includes('manager') && !title.includes('mgr');
+                        default:
+                            return true;
+                    }
+                });
+            }
+            
+            if (currentViewMode === 'grid') {
+                displayContactsGrid(filteredContacts);
+            } else {
+                displayContactsList(filteredContacts);
+            }
+            
+            // Update results count
+            const countElement = document.getElementById('results-count');
+            if (countElement) {
+                countElement.textContent = `${filteredContacts.length} contacts found`;
+            }
+        }
+
+        function displayContactsGrid(contacts) {
+            const grid = document.getElementById('contacts-grid');
+            
+            grid.innerHTML = contacts.map((contact, index) => `
+                <div class="contact-card p-6 border rounded-lg bg-white shadow-sm">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-3">
+                            <input type="checkbox" 
+                                   class="contact-checkbox" 
+                                   data-index="${index}"
+                                   onchange="toggleContactSelection(${index})"
+                                   id="contact-${index}">
+                            <div>
+                                <h4 class="font-semibold text-gray-900">${contact.first_name} ${contact.last_name}</h4>
+                                <p class="text-sm text-gray-600">${contact.position || contact.title || 'Professional'}</p>
+                            </div>
+                        </div>
+                        <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">
+                            ${contact.confidence || 100}% Verified
+                        </span>
+                    </div>
+                    <div class="space-y-2 mb-4">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-sm font-medium text-gray-600">Email:</span>
+                            <span class="text-sm text-blue-600">${contact.email}</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-sm font-medium text-gray-600">Source:</span>
+                            <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">${contact.source || 'Database'}</span>
+                        </div>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button onclick="addSingleContactToList(currentContacts[${index}])" 
+                                class="flex-1 px-3 py-2 border border-purple-300 text-purple-700 rounded text-sm hover:bg-purple-50">
+                            Add to List
+                        </button>
+                        <button onclick="addSingleContactToSalesforce(currentContacts[${index}])" 
+                                class="flex-1 px-3 py-2 salesforce-button text-white rounded text-sm hover:opacity-90">
+                            Salesforce
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function displayContactsList(contacts) {
+            const tbody = document.getElementById('contacts-table-body');
+            tbody.innerHTML = '';
+            
+            contacts.forEach((contact, index) => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50';
+                
+                const scoreColor = contact.confidence >= 80 ? 'text-green-600' : 
+                                 contact.confidence >= 60 ? 'text-yellow-600' : 'text-red-600';
+                
+                row.innerHTML = `
+                    <td class="px-4 py-4 whitespace-nowrap">
+                        <input type="checkbox" 
+                               class="contact-checkbox rounded border-gray-300" 
+                               data-index="${index}"
+                               onchange="toggleContactSelection(${index})"
+                               id="contact-list-${index}">
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div>
+                            <div class="text-sm font-medium text-gray-900">${contact.first_name} ${contact.last_name}</div>
+                            <div class="text-sm text-gray-500">${contact.company || 'Company'}</div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-900">${contact.title || contact.position || 'Professional'}</div>
+                        <div class="text-sm text-gray-500">${contact.department || ''}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="text-sm text-blue-600">${contact.email}</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm font-semibold ${scoreColor}">${contact.confidence || 100}%</div>
+                        <div class="text-xs text-gray-500">Verified</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        ${contact.company || 'Company'}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">${contact.source || 'Database'}</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center space-x-2">
+                            <button onclick="addSingleContactToSalesforce(currentContacts[${index}])" 
+                                    class="px-2 py-1 salesforce-button text-white rounded text-xs hover:opacity-90 flex items-center space-x-1">
+                                <span>SF</span>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+
         } // End of initialization check
     </script>
 

@@ -899,12 +899,16 @@
     </div>
 
     <script>
-                // ===== ENHANCED HUNTER.IO INTEGRATION =====
-        const API_BASE = '/api';
-        let currentViewMode = 'grid';
-        let selectedContacts = new Set();
-        let currentContacts = [];
-        let contactViewMode = 'grid';
+        // Prevent duplicate script execution
+        if (typeof window.salesSimplifiedInitialized === 'undefined') {
+            window.salesSimplifiedInitialized = true;
+            
+            // ===== ENHANCED HUNTER.IO INTEGRATION =====
+            const API_BASE = '/api';
+            let currentViewMode = 'grid';
+            let selectedContacts = new Set();
+            let currentContacts = [];
+            let contactViewMode = 'grid';
         
         async function apiCall(endpoint, options = {}) {
             try {
@@ -1245,29 +1249,17 @@
         }
 
         function showCompanyInfo(domain) {
-            const companyInfo = companyDatabase[domain] || {
-                name: domain.charAt(0).toUpperCase() + domain.slice(1).replace('.com', ''),
-                industry: 'Technology',
-                size: 'Unknown',
-                location: 'Unknown',
-                founded: 'Unknown',
-                description: `Professional company in the ${domain.split('.')[0]} industry.`
-            };
-
-            document.getElementById('company-name').textContent = companyInfo.name;
-            document.getElementById('company-description').textContent = companyInfo.description;
-            document.getElementById('company-industry').textContent = companyInfo.industry;
-            document.getElementById('company-size').textContent = companyInfo.size;
-            document.getElementById('company-location').textContent = companyInfo.location;
-            document.getElementById('company-founded').textContent = companyInfo.founded;
-            
-            document.getElementById('company-info-card').classList.remove('hidden');
+            // Company info section removed for cleaner UI
+            // This function is kept for compatibility but does nothing
+            console.log('Company info display skipped for:', domain);
         }
 
         // ===== ENHANCED SEARCH FUNCTIONS =====
 
-           async function executeSearch() {
+        async function executeSearch() {
+            console.log('executeSearch called');
             const domain = document.getElementById('search-domain').value.trim();
+            console.log('Domain entered:', domain);
             if (!domain) { 
                 showError('Please enter a company domain');
                 return; 
@@ -2744,6 +2736,8 @@ function logout() {
                 document.getElementById('admin-section').classList.add('hidden');
             }
         }
+        
+        } // End of initialization check
     </script>
 
 </body>

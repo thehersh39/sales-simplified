@@ -1785,15 +1785,13 @@
 
 async function searchApollo(domain, limit) {
     const requestBody = {
-        api_key: APOLLO_API_KEY,
-        q_organization_domains: domain,
         page: 1,
-        per_page: Math.min(limit, 100),
+        per_page: Math.min(limit, 25),
+        q_organization_domains_list: [domain],  // Fixed: Use correct parameter name as array
         person_titles: ["VP", "Director", "Manager", "Head", "Chief", "President"],
         organization_locations: ["United States"],
-        person_locations: ["United States"],
-        reveal_personal_emails: true,
-        reveal_phone_number: true
+        person_locations: ["United States"]
+        // Removed: api_key (now goes in header), reveal_personal_emails and reveal_phone_number (not valid for search endpoint)
     };
 
     try {

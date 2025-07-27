@@ -312,10 +312,10 @@
                     </div>
                     <div class="flex items-center space-x-3">
                         <div class="flex bg-gray-100 rounded-lg p-1">
-                            <button onclick="setContactView('grid')" id="grid-view-btn" class="px-3 py-1 rounded bg-white text-gray-900 text-sm font-medium shadow-sm">
+                            <button onclick="toggleViewMode()" id="grid-view-btn" class="px-3 py-1 rounded bg-white text-gray-900 text-sm font-medium shadow-sm">
                                 <i data-lucide="grid-3x3" class="w-4 h-4"></i>
                             </button>
-                            <button onclick="setContactView('list')" id="list-view-btn" class="px-3 py-1 rounded text-gray-600 text-sm font-medium">
+                            <button onclick="toggleViewMode()" id="list-view-btn" class="px-3 py-1 rounded text-gray-600 text-sm font-medium">
                                 <i data-lucide="list" class="w-4 h-4"></i>
                             </button>
                         </div>
@@ -407,36 +407,7 @@
                     </div>
                 </div>
 
-                <!-- Company Information Card -->
-                <div id="company-info-card" class="hidden company-info-card rounded-lg p-6 mb-6">
-                    <div class="flex items-start space-x-4">
-                        <div class="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center">
-                            <i data-lucide="building" class="w-8 h-8 text-blue-600"></i>
-                        </div>
-                        <div class="flex-1">
-                            <h3 class="text-lg font-semibold text-gray-900" id="company-name">Company Name</h3>
-                            <p class="text-sm text-gray-600 mb-2" id="company-description">Company description and details</p>
-                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                                <div>
-                                    <span class="text-gray-500">Industry:</span>
-                                    <span class="ml-1 font-medium" id="company-industry">Technology</span>
-                                </div>
-                                <div>
-                                    <span class="text-gray-500">Size:</span>
-                                    <span class="ml-1 font-medium" id="company-size">1000+ employees</span>
-                                </div>
-                                <div>
-                                    <span class="text-gray-500">Location:</span>
-                                    <span class="ml-1 font-medium" id="company-location">San Francisco, CA</span>
-                                </div>
-                                <div>
-                                    <span class="text-gray-500">Founded:</span>
-                                    <span class="ml-1 font-medium" id="company-founded">1999</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <!-- Company Information Card - Removed for cleaner UI -->
 
                 <div id="search-results" class="hidden">
                     <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
@@ -963,11 +934,7 @@
             
             const grid = document.getElementById('contacts-grid');
             
-            if (company) {
-                document.getElementById('company-info-card').classList.remove('hidden');
-                document.getElementById('company-name').textContent = company.name;
-                document.getElementById('company-industry').textContent = company.industry;
-            }
+            // Company info section removed for cleaner UI
             
             // Update contact count display
             const countElement = document.getElementById('results-count');
@@ -1091,21 +1058,21 @@
             const listBtn = document.getElementById('list-view-btn');
             
             if (contactViewMode === 'grid') {
-                gridBtn?.classList.add('bg-blue-100', 'text-blue-600');
+                gridBtn?.classList.add('bg-white', 'text-gray-900', 'shadow-sm');
                 gridBtn?.classList.remove('text-gray-600');
-                listBtn?.classList.remove('bg-blue-100', 'text-blue-600');
+                listBtn?.classList.remove('bg-white', 'text-gray-900', 'shadow-sm');
                 listBtn?.classList.add('text-gray-600');
                 
                 document.getElementById('contacts-grid').classList.remove('hidden');
-                document.getElementById('contacts-table').classList.add('hidden');
+                document.getElementById('contacts-list').classList.add('hidden');
             } else {
-                listBtn?.classList.add('bg-blue-100', 'text-blue-600');
+                listBtn?.classList.add('bg-white', 'text-gray-900', 'shadow-sm');
                 listBtn?.classList.remove('text-gray-600');
-                gridBtn?.classList.remove('bg-blue-100', 'text-blue-600');
+                gridBtn?.classList.remove('bg-white', 'text-gray-900', 'shadow-sm');
                 gridBtn?.classList.add('text-gray-600');
                 
                 document.getElementById('contacts-grid').classList.add('hidden');
-                document.getElementById('contacts-table').classList.remove('hidden');
+                document.getElementById('contacts-list').classList.remove('hidden');
                 
                 // Re-populate table view if contacts exist
                 if (currentContacts.length > 0) {
@@ -1128,7 +1095,7 @@
                                id="contact-table-${index}">
                     </td>
                     <td class="px-6 py-4">
-                        <div class="font-medium text-gray-900">${contact.first_name} ${contact.last_name}</div>
+                        <div class="font-medium text-gray-900">${contact.first_name || ''} ${contact.last_name || ''}</div>
                         <div class="text-sm text-gray-500">${contact.position || 'Professional'}</div>
                     </td>
                     <td class="px-6 py-4">
@@ -2367,18 +2334,26 @@ async function searchApollo(domain, limit) {
         }
 
         function viewListFromDashboard(listId) {
-            showSection('contact-lists');
+            const lists = getStoredData('contactLists', []);
+            const list = lists.find(l => l.id === listId);
             
-            setTimeout(() => {
-                const listElement = document.querySelector(`[onclick*="${listId}"]`);
-                if (listElement) {
-                    listElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    listElement.style.backgroundColor = '#dbeafe';
-                    setTimeout(() => {
-                        listElement.style.backgroundColor = '';
-                    }, 2000);
-                }
-            }, 100);
+            if (list) {
+                // Load the contacts into the current view
+                currentContacts = list.contacts;
+                selectedContacts.clear();
+                
+                // Switch to contact finder section
+                showSection('contact-finder');
+                
+                // Display the contacts with preserved data
+                setTimeout(() => {
+                    displayRealContactResults(list.contacts, null);
+                    
+                    // Update search domain to show list name
+                    document.getElementById('search-domain').value = `Saved List: ${list.name}`;
+                    document.getElementById('results-count').textContent = `${list.contacts.length} contacts`;
+                }, 100);
+            }
         }
 
         function viewList(listId) {

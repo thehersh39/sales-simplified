@@ -977,7 +977,7 @@
             // ===== ENHANCED HUNTER.IO INTEGRATION =====
             const API_BASE = '/api';
             let currentViewMode = 'grid';
-            let selectedContacts = new Set();
+            window.selectedContacts = new Set();
             let currentContacts = [];
             let contactViewMode = 'grid';
         
@@ -997,7 +997,7 @@
         async function searchContactsReal(domain) {
             // Clear previous results to prevent caching
             currentContacts = [];
-            selectedContacts.clear();
+            window.window.selectedContacts.clear();
             
             const response = await apiCall('/contact-search', {
                 method: 'POST',
@@ -1009,7 +1009,7 @@
         function displayRealContactResults(contacts, company) {
             // Update global variables for selection system
             currentContacts = contacts;
-            selectedContacts.clear();
+            window.selectedContacts.clear();
             
             const grid = document.getElementById('contacts-grid');
             
@@ -1070,18 +1070,18 @@
         }
         
         function toggleContactSelection(index) {
-            if (selectedContacts.has(index)) {
-                selectedContacts.delete(index);
+            if (window.selectedContacts.has(index)) {
+                window.selectedContacts.delete(index);
             } else {
-                selectedContacts.add(index);
+                window.selectedContacts.add(index);
             }
             updateSelectionControls();
         }
 
         function selectAllContacts() {
-            selectedContacts.clear();
+            window.selectedContacts.clear();
             for (let i = 0; i < currentContacts.length; i++) {
-                selectedContacts.add(i);
+                window.selectedContacts.add(i);
             }
             // Update all checkboxes
             document.querySelectorAll('.contact-checkbox').forEach((checkbox, index) => {
@@ -1091,7 +1091,7 @@
         }
 
         function deselectAllContacts() {
-            selectedContacts.clear();
+            window.selectedContacts.clear();
             document.querySelectorAll('.contact-checkbox').forEach(checkbox => {
                 checkbox.checked = false;
             });
@@ -1099,7 +1099,7 @@
         }
 
         function updateSelectionControls() {
-            const selectedCount = selectedContacts.size;
+            const selectedCount = window.selectedContacts.size;
             const totalCount = currentContacts.length;
             
             // Update selection count display
@@ -1382,7 +1382,7 @@
                 if (contacts && contacts.length > 0) {
                     await displayCompanyInfo(cleanDomain);
                     currentContacts = contacts;
-                    selectedContacts.clear();
+                    window.window.selectedContacts.clear();
                     showResults();
                     displayContacts(contacts);
                     incrementMetric('totalSearches');
@@ -1415,7 +1415,11 @@
                 
                 // 1. Get Hunter.io results via backend API
                 try {
-                    const hunterResponse = await fetch(`/api/contact-search?domain=${domain}&limit=${limit}`);
+                    const hunterResponse = await fetch(`/api/contact-finder/search`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ domain, limit })
+                    });
                     if (hunterResponse.ok) {
                         const hunterData = await hunterResponse.json();
                         const hunterContacts = hunterData.contacts || [];
@@ -1619,7 +1623,7 @@
             const card = document.createElement('div');
             card.className = 'contact-card p-6 card-hover';
             
-            const isSelected = selectedContacts.has(index);
+            const isSelected = window.selectedContacts.has(index);
             const verificationBadge = contact.verified 
                 ? '<span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">✓ Verified</span>'
                 : contact.deliverable 
@@ -1703,7 +1707,7 @@
             const row = document.createElement('tr');
             row.className = 'table-row';
             
-            const isSelected = selectedContacts.has(index);
+            const isSelected = window.selectedContacts.has(index);
             const verificationBadge = contact.verified 
                 ? '<span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">Verified</span>'
                 : contact.deliverable 
@@ -1855,12 +1859,12 @@
                 return;
             }
 
-            if (selectedContacts.size === 0) {
+            if (window.selectedContacts.size === 0) {
                 showError('Please select contacts to add to Salesforce');
                 return;
             }
 
-            const contactsToAdd = Array.from(selectedContacts).map(index => currentContacts[index]);
+            const contactsToAdd = Array.from(window.selectedContacts).map(index => currentContacts[index]);
             
             try {
                 for (const contact of contactsToAdd) {
@@ -1870,7 +1874,7 @@
                 showSuccess(`Successfully added ${contactsToAdd.length} contacts to Salesforce!`);
                 addToRecentActivity('salesforce', `Added ${contactsToAdd.length} enhanced contacts to Salesforce CRM`);
                 
-                selectedContacts.clear();
+                window.selectedContacts.clear();
                 document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
                 updateSelectionUI();
 
@@ -2405,35 +2409,35 @@ async function searchApollo(domain, limit) {
 
         // ===== CONTACT MANAGEMENT FUNCTIONS =====
         function toggleContactSelection(index) {
-            if (selectedContacts.has(index)) {
-                selectedContacts.delete(index);
+            if (window.selectedContacts.has(index)) {
+                window.selectedContacts.delete(index);
             } else {
-                selectedContacts.add(index);
+                window.selectedContacts.add(index);
             }
             updateActionButtons();
         }
 
         function selectAllContacts() {
-            const allSelected = selectedContacts.size === currentContacts.length;
+            const allSelected = window.selectedContacts.size === currentContacts.length;
             
             if (allSelected) {
-                selectedContacts.clear();
+                window.selectedContacts.clear();
                 document.getElementById('select-all-btn').textContent = 'Select All';
             } else {
-                selectedContacts.clear();
+                window.selectedContacts.clear();
                 for (let i = 0; i < currentContacts.length; i++) {
-                    selectedContacts.add(i);
+                    window.selectedContacts.add(i);
                 }
                 document.getElementById('select-all-btn').textContent = 'Deselect All';
             }
             
             document.querySelectorAll('#contacts-grid input[type="checkbox"], #contacts-table-body input[type="checkbox"]').forEach((checkbox, index) => {
-                checkbox.checked = selectedContacts.has(index);
+                checkbox.checked = window.selectedContacts.has(index);
             });
             
             const headerCheckbox = document.getElementById('select-all-list');
             if (headerCheckbox) {
-                headerCheckbox.checked = selectedContacts.size === currentContacts.length;
+                headerCheckbox.checked = window.selectedContacts.size === currentContacts.length;
             }
             
             updateSelectionUI();
@@ -2444,13 +2448,13 @@ async function searchApollo(domain, limit) {
             const isChecked = headerCheckbox.checked;
             
             if (isChecked) {
-                selectedContacts.clear();
+                window.selectedContacts.clear();
                 for (let i = 0; i < currentContacts.length; i++) {
-                    selectedContacts.add(i);
+                    window.selectedContacts.add(i);
                 }
                 document.getElementById('select-all-btn').textContent = 'Deselect All';
             } else {
-                selectedContacts.clear();
+                window.selectedContacts.clear();
                 document.getElementById('select-all-btn').textContent = 'Select All';
             }
             
@@ -2462,7 +2466,7 @@ async function searchApollo(domain, limit) {
         }
 
         function updateSelectionUI() {
-            const hasSelection = selectedContacts.size > 0;
+            const hasSelection = window.selectedContacts.size > 0;
             
             document.getElementById('add-to-list-btn').disabled = !hasSelection;
             document.getElementById('add-to-salesforce-btn').disabled = !hasSelection;
@@ -2470,18 +2474,18 @@ async function searchApollo(domain, limit) {
             
             const selectAllBtn = document.getElementById('select-all-btn');
             if (selectAllBtn) {
-                selectAllBtn.textContent = selectedContacts.size === currentContacts.length ? 'Deselect All' : 'Select All';
+                selectAllBtn.textContent = window.selectedContacts.size === currentContacts.length ? 'Deselect All' : 'Select All';
             }
             
             const headerCheckbox = document.getElementById('select-all-list');
             if (headerCheckbox) {
-                headerCheckbox.checked = selectedContacts.size === currentContacts.length;
-                headerCheckbox.indeterminate = selectedContacts.size > 0 && selectedContacts.size < currentContacts.length;
+                headerCheckbox.checked = window.selectedContacts.size === currentContacts.length;
+                headerCheckbox.indeterminate = window.selectedContacts.size > 0 && window.selectedContacts.size < currentContacts.length;
             }
         }
 
         function addToList() {
-            if (selectedContacts.size === 0) {
+            if (window.selectedContacts.size === 0) {
                 showError('Please select contacts to add to a list');
                 return;
             }
@@ -2502,13 +2506,13 @@ async function searchApollo(domain, limit) {
                 return;
             }
             
-            const selectedContactsArray = Array.from(selectedContacts).map(index => currentContacts[index]);
+            const selectedContactsArray = Array.from(window.selectedContacts).map(index => currentContacts[index]);
             
             const lists = getStoredData('contactLists', []);
             const newList = {
                 id: Date.now().toString(),
                 name: listName,
-                contacts: selectedContactsArray,
+                contacts: Array.from(window.selectedContacts).map(index => currentContacts[index]),
                 created: new Date().toISOString()
             };
             
@@ -2516,18 +2520,19 @@ async function searchApollo(domain, limit) {
             setStoredData('contactLists', lists);
             
             incrementMetric('listsCreated');
-            addToRecentActivity('list', `Created "${listName}" list with ${selectedContactsArray.length} enhanced contacts`);
+            const selectedArray = Array.from(window.selectedContacts).map(index => currentContacts[index]);
+            addToRecentActivity('list', `Created "${listName}" list with ${selectedArray.length} enhanced contacts`);
             
             updateSavedListsPreview();
             
             document.getElementById('save-list-modal').classList.add('hidden');
             document.getElementById('list-name-input').value = '';
             
-            selectedContacts.clear();
+            window.selectedContacts.clear();
             document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
             updateSelectionUI();
             
-            showSuccess(`List "${listName}" saved successfully with ${selectedContactsArray.length} contacts!`);
+            showSuccess(`List "${listName}" saved successfully with ${selectedArray.length} contacts!`);
         }
 
         function viewListFromDashboard(listId) {
@@ -2550,7 +2555,7 @@ async function searchApollo(domain, limit) {
             const list = lists.find(l => l.id === listId);
             if (list) {
                 currentContacts = list.contacts;
-                selectedContacts.clear();
+                window.selectedContacts.clear();
                 
                 showSection('contact-finder');
                 
@@ -2575,9 +2580,9 @@ async function searchApollo(domain, limit) {
             }
 
             currentContacts = list.contacts;
-            selectedContacts.clear();
+            window.selectedContacts.clear();
             for (let i = 0; i < list.contacts.length; i++) {
-                selectedContacts.add(i);
+                window.selectedContacts.add(i);
             }
             
             companyData = { organization: list.name };
@@ -2620,8 +2625,8 @@ async function searchApollo(domain, limit) {
         }
 
         function exportContacts() {
-            const contactsToExport = selectedContacts.size > 0 
-                ? Array.from(selectedContacts).map(index => currentContacts[index])
+            const contactsToExport = window.selectedContacts.size > 0 
+                ? Array.from(window.selectedContacts).map(index => currentContacts[index])
                 : currentContacts;
             
             if (contactsToExport.length === 0) {
@@ -2695,9 +2700,9 @@ async function searchApollo(domain, limit) {
 
         function exportLastSearch() {
             if (currentContacts.length > 0) {
-                selectedContacts.clear();
+                window.selectedContacts.clear();
                 for (let i = 0; i < currentContacts.length; i++) {
-                    selectedContacts.add(i);
+                    window.selectedContacts.add(i);
                 }
                 exportContacts();
             } else {

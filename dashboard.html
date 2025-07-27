@@ -1373,17 +1373,22 @@
             
             const button = document.getElementById('main-search-btn');
             const originalText = button.innerHTML;
-            button.innerHTML = '<div class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent inline-block mr-2"></div>Real Hunter.io Search...';
+            button.innerHTML = '<div class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent inline-block mr-2"></div>Hunter.io + Apollo Dual Search...';
             button.disabled = true;
             
             try {
-                const result = await searchContactsReal(cleanDomain);
-                if (result.success && result.contacts.length > 0) {
-                    displayRealContactResults(result.contacts, result.company);
+                // Use comprehensive search with both Hunter.io and Apollo
+                const contacts = await getAllContacts(cleanDomain, 100);
+                if (contacts && contacts.length > 0) {
+                    await displayCompanyInfo(cleanDomain);
+                    currentContacts = contacts;
+                    selectedContacts.clear();
+                    showResults();
+                    displayContacts(contacts);
                     incrementMetric('totalSearches');
-                    incrementMetric('contactsFound', result.contacts.length);
-                    incrementMetric('verifiedEmails', result.contacts.length);
-                    addToRecentActivity('search', `Found ${result.contacts.length} verified contacts at ${cleanDomain}`);
+                    incrementMetric('contactsFound', contacts.length);
+                    incrementMetric('verifiedEmails', contacts.length);
+                    addToRecentActivity('search', `Found ${contacts.length} verified contacts at ${cleanDomain}`);
                 } else {
                     throw new Error(`No verified contacts found for ${cleanDomain}`);
                 }
@@ -1398,6 +1403,94 @@
         }
         function updateSearchStatus(message) {
             document.getElementById('search-status').textContent = message;
+        }
+
+        // Comprehensive contact search function combining all sources
+        async function getAllContacts(domain, limit = 100) {
+            console.log(`🔍 Starting comprehensive search for ${domain} with limit ${limit}`);
+            
+            try {
+                let allContacts = [];
+                let sourceCounts = {};
+                
+                // 1. Get Hunter.io results via backend API
+                try {
+                    const hunterResponse = await fetch(`/api/contact-search?domain=${domain}&limit=${limit}`);
+                    if (hunterResponse.ok) {
+                        const hunterData = await hunterResponse.json();
+                        const hunterContacts = hunterData.contacts || [];
+                        console.log(`✅ Hunter.io found: ${hunterContacts.length} contacts`);
+                        
+                        // Format Hunter contacts for consistency
+                        hunterContacts.forEach(contact => {
+                            allContacts.push({
+                                id: `hunter_${Math.random()}`,
+                                first_name: contact.first_name,
+                                last_name: contact.last_name,
+                                name: `${contact.first_name || ''} ${contact.last_name || ''}`.trim(),
+                                title: contact.position || contact.title,
+                                position: contact.position || contact.title,
+                                email: contact.email,
+                                phone: contact.phone,
+                                linkedin: contact.linkedin,
+                                company: contact.company,
+                                source: '🎯 Hunter.io',
+                                verified: true,
+                                confidence: contact.confidence || 100,
+                                department: categorizeByTitle(contact.position || contact.title),
+                                seniority: categorizeSeniority(contact.position || contact.title)
+                            });
+                        });
+                        sourceCounts['Hunter.io'] = hunterContacts.length;
+                    }
+                } catch (hunterError) {
+                    console.warn('Hunter.io search failed:', hunterError);
+                }
+                
+                // 2. Get Apollo results
+                try {
+                    const apolloContacts = await searchApollo(domain, limit);
+                    console.log(`✅ Apollo found: ${apolloContacts.length} contacts`);
+                    
+                    apolloContacts.forEach(contact => {
+                        // Skip if email already exists from Hunter
+                        const exists = allContacts.some(c => c.email === contact.email);
+                        if (!exists) {
+                            allContacts.push({
+                                id: `apollo_${Math.random()}`,
+                                first_name: contact.first_name,
+                                last_name: contact.last_name, 
+                                name: `${contact.first_name || ''} ${contact.last_name || ''}`.trim(),
+                                title: contact.title,
+                                position: contact.title,
+                                email: contact.email,
+                                phone: contact.phone,
+                                linkedin: contact.linkedin_url,
+                                company: contact.company,
+                                source: '🚀 Apollo.io',
+                                verified: true,
+                                confidence: 95,
+                                department: categorizeByTitle(contact.title),
+                                seniority: categorizeSeniority(contact.title)
+                            });
+                        }
+                    });
+                    sourceCounts['Apollo.io'] = apolloContacts.length;
+                } catch (apolloError) {
+                    console.warn('Apollo search failed:', apolloError);
+                }
+                
+                console.log(`📊 Total contacts found: ${allContacts.length}`);
+                console.log(`📊 Sources: ${JSON.stringify(sourceCounts)}`);
+                
+                // Sort by confidence
+                allContacts.sort((a, b) => b.confidence - a.confidence);
+                
+                return allContacts;
+            } catch (error) {
+                console.error('getAllContacts error:', error);
+                throw error;
+            }
         }
 
         // Enhanced data fusion with contact scoring

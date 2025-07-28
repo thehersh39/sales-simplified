@@ -986,29 +986,7 @@
             // Global variables
             let companyData = null;
 
-            // Navigation functions
-            function showSection(sectionName) {
-                // Hide all sections
-                document.querySelectorAll('.section-content').forEach(section => {
-                    section.classList.add('hidden');
-                });
-                
-                // Show selected section
-                const section = document.getElementById(`${sectionName}-section`);
-                if (section) {
-                    section.classList.remove('hidden');
-                }
-                
-                // Update navigation active state
-                document.querySelectorAll('.nav-item').forEach(item => {
-                    item.classList.remove('active');
-                });
-                event?.target?.closest?.('.nav-item')?.classList.add('active');
-            }
-
-            function goToContactFinder() {
-                showSection('contact-finder');
-            }
+            // Navigation functions (moved to global scope)
 
             function createNewList() {
                 // Implement list creation
@@ -1594,8 +1572,6 @@
                         }
                     });
                     sourceCounts['Web Scraping'] = webContacts.length;
-                } catch (webError) {
-                    console.warn('Web scraping failed:', webError);
                 }
 
                 // 3. Return Hunter.io results only (no fallback needed when API works)
@@ -3229,6 +3205,30 @@ function logout() {
         
         // Close the script initialization block properly
         } // End of if (!window.salesSimplifiedInitialized) block
+        
+        // ===== GLOBAL FUNCTIONS (ACCESSIBLE TO HTML) =====
+        function showSection(sectionName) {
+            // Hide all sections
+            document.querySelectorAll('.section-content').forEach(section => {
+                section.classList.add('hidden');
+            });
+            
+            // Show selected section
+            const section = document.getElementById(`${sectionName}-section`);
+            if (section) {
+                section.classList.remove('hidden');
+            }
+            
+            // Update navigation active state
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event?.target?.closest?.('.nav-item')?.classList.add('active');
+        }
+
+        function goToContactFinder() {
+            showSection('contact-finder');
+        }
         
         // ===== ENHANCED SORTING AND FILTERING FUNCTIONS =====
         function sortContacts() {

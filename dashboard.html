@@ -1390,7 +1390,7 @@
                     incrementMetric('verifiedEmails', contacts.length);
                     addToRecentActivity('search', `Found ${contacts.length} verified contacts at ${cleanDomain}`);
                 } else {
-                    throw new Error(`No verified contacts found for ${cleanDomain}`);
+                    showError(`No verified contacts found for ${cleanDomain}. Please check the domain or try a different company.`);
                 }
             } catch (error) {
                 console.error('Search Error:', error);
@@ -1424,6 +1424,7 @@
                         const hunterData = await hunterResponse.json();
                         const hunterContacts = hunterData.contacts || [];
                         console.log(`✅ Hunter.io found: ${hunterContacts.length} contacts`);
+                        console.log('Hunter.io sample contact:', hunterContacts[0]);
                         
                         // Format Hunter contacts for consistency
                         hunterContacts.forEach(contact => {
@@ -1451,38 +1452,8 @@
                     console.warn('Hunter.io search failed:', hunterError);
                 }
                 
-                // 2. Get Apollo results
-                try {
-                    const apolloContacts = await searchApollo(domain, limit);
-                    console.log(`✅ Apollo found: ${apolloContacts.length} contacts`);
-                    
-                    apolloContacts.forEach(contact => {
-                        // Skip if email already exists from Hunter
-                        const exists = allContacts.some(c => c.email === contact.email);
-                        if (!exists) {
-                            allContacts.push({
-                                id: `apollo_${Math.random()}`,
-                                first_name: contact.first_name,
-                                last_name: contact.last_name, 
-                                name: `${contact.first_name || ''} ${contact.last_name || ''}`.trim(),
-                                title: contact.title,
-                                position: contact.title,
-                                email: contact.email,
-                                phone: contact.phone,
-                                linkedin: contact.linkedin_url,
-                                company: contact.company,
-                                source: '🚀 Apollo.io',
-                                verified: true,
-                                confidence: 95,
-                                department: categorizeByTitle(contact.title),
-                                seniority: categorizeSeniority(contact.title)
-                            });
-                        }
-                    });
-                    sourceCounts['Apollo.io'] = apolloContacts.length;
-                } catch (apolloError) {
-                    console.warn('Apollo search failed:', apolloError);
-                }
+                // 2. Apollo temporarily disabled due to proxy endpoint unavailable
+                console.log('📝 Apollo.io search skipped - proxy endpoint not available in current environment');
                 
                 console.log(`📊 Total contacts found: ${allContacts.length}`);
                 console.log(`📊 Sources: ${JSON.stringify(sourceCounts)}`);

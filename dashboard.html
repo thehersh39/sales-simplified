@@ -970,18 +970,21 @@
     </div>
 
     <script>
-        // Prevent duplicate script execution and ensure clean variable initialization
+        // ===== GLOBAL VARIABLES =====
+        const API_BASE = '/api';
+        let currentViewMode = 'grid';
+        let currentContacts = [];
+        let contactViewMode = 'grid';
+        let companyData = null;
+        
+        // Initialize contact selection tracking globally
+        if (!window.selectedContacts) {
+            window.selectedContacts = new Set();
+        }
+        
+        // Prevent duplicate script execution
         if (typeof window.salesSimplifiedInitialized === 'undefined') {
             window.salesSimplifiedInitialized = true;
-            
-            // ===== ENHANCED HUNTER.IO INTEGRATION =====
-            const API_BASE = '/api';
-            let currentViewMode = 'grid';
-            
-            // Initialize contact selection tracking (only once)
-            window.selectedContacts = new Set();
-            let currentContacts = [];
-            let contactViewMode = 'grid';
 
             // Global variables
             let companyData = null;
@@ -3437,8 +3440,6 @@ function logout() {
                 
                 tbody.appendChild(row);
             });
-        }
-
         } // End of initialization check
     </script>
 

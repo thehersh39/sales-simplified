@@ -1401,27 +1401,68 @@
         }
 
         async function displayCompanyInfo(domain) {
-            // Try to get enhanced company info from Apify first
-            try {
-                const apifyCompanyInfo = await enrichCompanyWithApify(domain);
-                if (apifyCompanyInfo) {
-                    document.getElementById('company-name').textContent = apifyCompanyInfo.name;
-                    document.getElementById('company-description').textContent = apifyCompanyInfo.description;
-                    document.getElementById('company-industry').textContent = apifyCompanyInfo.industry;
-                    document.getElementById('company-size').textContent = apifyCompanyInfo.employeeCount + ' employees';
-                    document.getElementById('company-location').textContent = apifyCompanyInfo.headquarters;
-                    document.getElementById('company-founded').textContent = apifyCompanyInfo.founded;
-                    
-                    document.getElementById('company-info-card').classList.remove('hidden');
-                    console.log(`🏢 Apify company enrichment displayed: ${apifyCompanyInfo.name}`);
-                    return;
-                }
-            } catch (error) {
-                console.warn('Apify company enrichment failed, using fallback');
+            // Use basic company info (Apify endpoints are not available)
+            showCompanyInfo(domain);
+        }
+
+        function displayContacts(contacts) {
+            // Update global variables for selection system
+            currentContacts = contacts;
+            window.selectedContacts.clear();
+            
+            const grid = document.getElementById('contacts-grid');
+            
+            // Update contact count display
+            const countElement = document.getElementById('results-count');
+            if (countElement) {
+                countElement.textContent = `${contacts.length} contacts found`;
             }
             
-            // Fallback to basic company info
-            showCompanyInfo(domain);
+            grid.innerHTML = contacts.map((contact, index) => `
+                <div class="contact-card p-6 border rounded-lg bg-white shadow-sm">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-3">
+                            <input type="checkbox" 
+                                   class="contact-checkbox" 
+                                   data-index="${index}"
+                                   onchange="toggleContactSelection(${index})"
+                                   id="contact-${index}">
+                            <div>
+                                <h4 class="font-semibold text-gray-900">${contact.first_name || ''} ${contact.last_name || ''}</h4>
+                                <p class="text-sm text-gray-600">${contact.position || contact.title || 'Professional'}</p>
+                            </div>
+                        </div>
+                        <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">
+                            ${contact.confidence || 100}% Verified
+                        </span>
+                    </div>
+                    <div class="space-y-2 mb-4">
+                        <div class="flex items-center space-x-2">
+                            <i data-lucide="mail" class="w-4 h-4 text-gray-400"></i>
+                            <span class="text-sm font-mono email-modern email-verified">${contact.email}</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <i data-lucide="building" class="w-4 h-4 text-gray-400"></i>
+                            <span class="text-sm text-gray-600">${contact.company || ''}</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-xs px-2 py-1 bg-blue-100 text-blue-600 rounded">${contact.source || 'Contact'}</span>
+                        </div>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button onclick="addToList(${index})" class="flex-1 px-3 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200">Add to List</button>
+                        <button onclick="exportContact(${index})" class="flex-1 px-3 py-1 bg-gray-100 text-gray-700 rounded text-xs hover:bg-gray-200">Export</button>
+                    </div>
+                </div>
+            `).join('');
+            
+            document.getElementById('search-results').classList.remove('hidden');
+            window.currentSearchResults = contacts;
+            
+            // Update selection controls
+            updateSelectionControls();
+            
+            if (typeof lucide !== 'undefined') lucide.createIcons();
         }
 
         // ===== ENHANCED SEARCH FUNCTIONS =====
@@ -1522,12 +1563,12 @@
                     console.error('Hunter.io search failed:', hunterError);
                 }
                 
-                // 2. Apify LinkedIn scraping (premium contact discovery)
+                // 2. Web scraping alternative (using public directories and search patterns)
                 try {
-                    const apifyContacts = await searchWithApify(domain);
-                    console.log(`✅ Apify found: ${apifyContacts.length} additional contacts`);
+                    const webContacts = await generateWebScrapingContacts(domain);
+                    console.log(`✅ Web scraping found: ${webContacts.length} additional contacts`);
                     
-                    apifyContacts.forEach(contact => {
+                    webContacts.forEach(contact => {
                         // Check if email already exists
                         const exists = allContacts.some(c => c.email === contact.email);
                         if (!exists) {

@@ -984,7 +984,46 @@
             }
             let currentContacts = [];
             let contactViewMode = 'grid';
+
+            // Global variables
             let companyData = null;
+
+            // Navigation functions
+            function showSection(sectionName) {
+                // Hide all sections
+                document.querySelectorAll('.section-content').forEach(section => {
+                    section.classList.add('hidden');
+                });
+                
+                // Show selected section
+                const section = document.getElementById(`${sectionName}-section`);
+                if (section) {
+                    section.classList.remove('hidden');
+                }
+                
+                // Update navigation active state
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                event?.target?.closest?.('.nav-item')?.classList.add('active');
+            }
+
+            function goToContactFinder() {
+                showSection('contact-finder');
+            }
+
+            function createNewList() {
+                // Implement list creation
+                console.log('Creating new list...');
+            }
+
+            function exportLastSearch() {
+                if (currentContacts.length > 0) {
+                    exportContacts(currentContacts);
+                } else {
+                    alert('No recent search results to export');
+                }
+            }
         
         async function apiCall(endpoint, options = {}) {
             try {
@@ -1642,6 +1681,37 @@
         function generateCommonEmailPatterns(domain) {
             // This would contain logic for common email pattern detection
             return [];
+        }
+
+        // Apify company enrichment for Company Info section
+        async function enrichCompanyWithApify(domain) {
+            try {
+                console.log(`🏢 Starting Apify company enrichment for ${domain}`);
+                
+                const response = await fetch('/api/apify/enrich-company', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ domain: domain })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Apify company API error: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.success && data.company) {
+                    console.log(`✅ Apify company enrichment: ${data.company.employeeCount} employees, ${data.company.revenue} revenue`);
+                    return data.company;
+                } else {
+                    console.log('📝 Apify company enrichment failed');
+                    return null;
+                }
+                
+            } catch (error) {
+                console.error('Apify company enrichment error:', error);
+                return null;
+            }
         }
 
         // Apify integration for LinkedIn contact scraping

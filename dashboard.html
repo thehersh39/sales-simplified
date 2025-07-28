@@ -3233,6 +3233,28 @@ function logout() {
             showSection('contact-finder');
         }
         
+        // ===== WEB SCRAPING FALLBACK FUNCTION =====
+        function generateWebScrapingContacts(domain) {
+            // Fallback contact generation based on domain patterns
+            const companyName = domain.replace('.com', '').replace('.io', '').replace('.net', '');
+            const capitalizedName = companyName.charAt(0).toUpperCase() + companyName.slice(1);
+            
+            return [
+                {
+                    first_name: "Contact",
+                    last_name: "Center",
+                    name: "Contact Center",
+                    title: "General Inquiries",
+                    email: `info@${domain}`,
+                    phone: "",
+                    linkedin: "",
+                    company: capitalizedName,
+                    verified: false,
+                    confidence: 75
+                }
+            ];
+        }
+        
         // ===== ENHANCED SORTING AND FILTERING FUNCTIONS =====
         function sortContacts() {
             if (!currentContacts || currentContacts.length === 0) return;

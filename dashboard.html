@@ -1400,6 +1400,30 @@
             document.getElementById('company-info-card').classList.remove('hidden');
         }
 
+        async function displayCompanyInfo(domain) {
+            // Try to get enhanced company info from Apify first
+            try {
+                const apifyCompanyInfo = await enrichCompanyWithApify(domain);
+                if (apifyCompanyInfo) {
+                    document.getElementById('company-name').textContent = apifyCompanyInfo.name;
+                    document.getElementById('company-description').textContent = apifyCompanyInfo.description;
+                    document.getElementById('company-industry').textContent = apifyCompanyInfo.industry;
+                    document.getElementById('company-size').textContent = apifyCompanyInfo.employeeCount + ' employees';
+                    document.getElementById('company-location').textContent = apifyCompanyInfo.headquarters;
+                    document.getElementById('company-founded').textContent = apifyCompanyInfo.founded;
+                    
+                    document.getElementById('company-info-card').classList.remove('hidden');
+                    console.log(`🏢 Apify company enrichment displayed: ${apifyCompanyInfo.name}`);
+                    return;
+                }
+            } catch (error) {
+                console.warn('Apify company enrichment failed, using fallback');
+            }
+            
+            // Fallback to basic company info
+            showCompanyInfo(domain);
+        }
+
         // ===== ENHANCED SEARCH FUNCTIONS =====
 
            async function executeSearch() {

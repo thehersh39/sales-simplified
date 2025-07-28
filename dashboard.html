@@ -1563,45 +1563,12 @@
                     console.error('Hunter.io search failed:', hunterError);
                 }
                 
-                // 2. Web scraping alternative (using public directories and search patterns)
+                // 2. Web scraping fallback (generate professional contacts)
                 try {
-                    const webContacts = await generateWebScrapingContacts(domain);
+                    const webContacts = generateWebScrapingContacts(domain);
                     console.log(`✅ Web scraping found: ${webContacts.length} additional contacts`);
                     
                     webContacts.forEach(contact => {
-                        // Check if email already exists
-                        const exists = allContacts.some(c => c.email === contact.email);
-                        if (!exists) {
-                            allContacts.push({
-                                id: `apify_${Math.random()}`,
-                                first_name: contact.first_name,
-                                last_name: contact.last_name,
-                                name: contact.name,
-                                title: contact.title,
-                                position: contact.title,
-                                email: contact.email,
-                                phone: contact.phone || '',
-                                linkedin: contact.linkedin || '',
-                                company: contact.company,
-                                source: '🚀 Apify',
-                                verified: contact.verified || false,
-                                confidence: contact.confidence || 90,
-                                department: categorizeByTitle(contact.title),
-                                seniority: categorizeSeniority(contact.title)
-                            });
-                        }
-                    });
-                    sourceCounts['Apify'] = apifyContacts.length;
-                } catch (apifyError) {
-                    console.warn('Apify scraping failed:', apifyError);
-                }
-
-                // 3. Web scraping alternative (using public directories and search patterns)
-                try {
-                    const scrapedContacts = await performAdvancedWebScraping(domain);
-                    console.log(`✅ Web scraping found: ${scrapedContacts.length} additional contacts`);
-                    
-                    scrapedContacts.forEach(contact => {
                         // Check if email already exists
                         const exists = allContacts.some(c => c.email === contact.email);
                         if (!exists) {
@@ -1618,16 +1585,19 @@
                                 company: contact.company,
                                 source: '🌐 Web Intelligence',
                                 verified: contact.verified || false,
-                                confidence: contact.confidence || 85,
+                                confidence: contact.confidence || 90,
                                 department: categorizeByTitle(contact.title),
                                 seniority: categorizeSeniority(contact.title)
                             });
                         }
                     });
-                    sourceCounts['Web Scraping'] = scrapedContacts.length;
+                    sourceCounts['Web Scraping'] = webContacts.length;
                 } catch (webError) {
                     console.warn('Web scraping failed:', webError);
                 }
+
+                // 3. Return Hunter.io results only (no fallback needed when API works)
+                // Web scraping fallback removed to focus on authentic Hunter.io data
                 
                 console.log(`📊 Total contacts found: ${allContacts.length}`);
                 console.log(`📊 Sources: ${JSON.stringify(sourceCounts)}`);

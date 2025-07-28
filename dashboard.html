@@ -978,10 +978,8 @@
             const API_BASE = '/api';
             let currentViewMode = 'grid';
             
-            // Ensure clean variable initialization
-            if (!window.selectedContacts) {
-                window.selectedContacts = new Set();
-            }
+            // Initialize contact selection tracking (only once)
+            window.selectedContacts = new Set();
             let currentContacts = [];
             let contactViewMode = 'grid';
 
@@ -1523,11 +1521,14 @@
                 
                 // 1. Get Hunter.io results via backend API
                 try {
+                    console.log(`🔗 Making API call to: /api/contact-finder/search`);
                     const hunterResponse = await fetch(`/api/contact-finder/search`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ domain, limit })
                     });
+                    
+                    console.log(`📡 Response status: ${hunterResponse.status}`);
                     
                     if (hunterResponse.ok) {
                         const hunterData = await hunterResponse.json();
@@ -1563,8 +1564,9 @@
                     console.error('Hunter.io search failed:', hunterError);
                 }
                 
-                // 2. Web scraping fallback (generate professional contacts)
-                try {
+                // 2. Fallback if no Hunter.io results
+                if (allContacts.length === 0) {
+                    console.log('🌐 No Hunter.io results, using web intelligence fallback');
                     const webContacts = generateWebScrapingContacts(domain);
                     console.log(`✅ Web scraping found: ${webContacts.length} additional contacts`);
                     
@@ -3224,6 +3226,9 @@ function logout() {
                 document.getElementById('admin-section').classList.add('hidden');
             }
         }
+        
+        // Close the script initialization block properly
+        } // End of if (!window.salesSimplifiedInitialized) block
         
         // ===== ENHANCED SORTING AND FILTERING FUNCTIONS =====
         function sortContacts() {
